@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Configuración para que en iPhone se abra a pantalla completa como App Nativa -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ShifterPro">
+    <link rel="apple-touch-icon" href="icono.jpg">
+    <link rel="icon" type="image/png" href="icono.jpg">
+    <title>ShifterPro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app">
+        <!-- CABECERA SUPERIOR -->
+        <header class="header">
+            <div class="header__top">
+                <div class="header__brand">
+                    <span class="header__logo">📅</span>
+                    <h1 class="header__title">Shifter<span style="color: var(--accent);">Pro</span></h1>
+                </div>
+                <div class="header__actions">
+                    <button id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">🌙</button>
+                    <button id="btnExportBackup" class="icon-btn" title="Guardar Copia de Seguridad (.json)">💾</button>
+                    <button id="btnImportBackup" class="icon-btn" title="Restaurar Copia de Seguridad (.json)">📂</button>
+                    <input type="file" id="inputImportBackup" accept=".json" style="display: none;">
+                    <button id="btnExportICS" class="icon-btn" title="Exportar alarmas al calendario del móvil (.ics)">🔔</button>
+                    <button id="btnClearMonth" class="icon-btn icon-btn--danger" title="Vaciar mes actual">🗑️</button>
+                </div>
+            </div>
+
+            <!-- Banner inteligente del turno y alarma de mañana -->
+            <div id="tomorrowBanner" class="tomorrow-banner">
+                <span>🌙 Mañana sin turno ni alarma programada</span>
+            </div>
+
+            <!-- Pestañas de navegación principal -->
+            <nav class="tabs">
+                <button class="tabs__btn tabs__btn--active" data-tab="calendarView">CALENDARIO</button>
+                <button class="tabs__btn" data-tab="statsView">CONTROL GANANCIAS</button>
+                <button class="tabs__btn" data-tab="shiftsView">🎨 MIS TURNOS</button>
+            </nav>
+        </header>
+
+        <!-- BARRA DE MES -->
+        <div class="month-bar">
+            <button id="btnPrevMonth" class="month-bar__arrow">&lt;</button>
+            <h2 id="currentMonthLabel" class="month-bar__title">NOVIEMBRE 2026</h2>
+            <button id="btnNextMonth" class="month-bar__arrow">&gt;</button>
+        </div>
+
+        <!-- ==================== VISTA 1: CALENDARIO ==================== -->
+        <main id="calendarView" class="view view--active">
+            <div class="calendar">
+                <div class="calendar__weekdays">
+                    <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
+                </div>
+                <div id="calendarGrid" class="calendar__grid"></div>
+            </div>
+            <p class="helper-hint">💡 Toca cualquier casilla del calendario para configurar tu jornada, color, nota o alarma.</p>
+        </main>
+
+        <!-- ==================== VISTA 2: CONTROL GANANCIAS ==================== -->
+        <section id="statsView" class="view">
+            <div class="panel-card">
+                <h3 class="panel-card__title">💰 Calculadora de Horas y Ganancias</h3>
+                
+                <!-- FUNCIÓN 6: Cabecera de Seguridad con PIN -->
+                <div class="pin-security-bar">
+                    <span id="pinStatusText">🔓 Pestaña sin PIN de bloqueo</span>
+                    <div class="pin-security-bar__btns">
+                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">🔒 Configurar PIN</button>
+                        <button type="button" id="btnLockNow" class="btn btn--sm btn--danger" style="display: none;">Bloquear</button>
+                    </div>
+                </div>
+
+                <!-- FUNCIÓN 5: Meta de Dinero Mensual y Comparativa con Mes Anterior -->
+                <div class="goal-card">
+                    <div class="goal-card__top">
+                        <div>
+                            <span class="goal-card__label">🎯 Meta mensual (€):</span>
+                            <input type="number" id="monthlyGoalInput" class="goal-card__input" step="50" min="0" value="1200">
+                        </div>
+                        <div class="goal-card__badge-box">
+                            <span id="goalPercentBadge" class="goal-percent-badge">0%</span>
+                            <small id="goalRemainingText" class="goal-card__remaining">Faltan 1200.00 €</small>
+                        </div>
+                    </div>
+
+                    <div class="goal-progress">
+                        <div id="goalProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
+                    </div>
+
+                    <div id="prevMonthComparison" class="goal-card__compare">
+                        📊 Comparativa mes anterior: Calculando...
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-pill">
+                        <span class="stat-pill__label">Días trabajados</span>
+                        <strong id="statDaysWorked" class="stat-pill__value">0</strong>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="stat-pill__label">Horas normales</span>
+                        <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
+                    </div>
+                    <div class="stat-pill stat-pill--extra">
+                        <span class="stat-pill__label">Horas EXTRA</span>
+                        <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
+                    </div>
+                </div>
+
+                <div class="calc-box">
+                    <div class="calc-box__row">
+                        <div class="calc-box__field">
+                            <label for="calcTotalHoursInput">Horas totales trabajadas:</label>
+                            <input type="number" id="calcTotalHoursInput" step="0.5" min="0" value="0">
+                        </div>
+                        <div class="calc-box__field">
+                            <label for="hourlyRateInput">Precio por hora (€/h):</label>
+                            <input type="number" id="hourlyRateInput" step="0.5" min="0" value="10">
+                        </div>
+                    </div>
+
+                    <div class="calc-box__field" style="margin-top: 10px;">
+                        <label for="extraRateInput">Precio hora EXTRA (€/h - opcional):</label>
+                        <input type="number" id="extraRateInput" step="0.5" min="0" value="12">
+                    </div>
+
+                    <div class="earned-banner">
+                        <div>
+                            <span class="earned-banner__label">TOTAL ESTIMADO A COBRAR</span>
+                            <small id="earnedFormulaText" class="earned-banner__sub">0h × 10€/h</small>
+                        </div>
+                        <strong id="statTotalMoney" class="earned-banner__total">0.00 €</strong>
+                    </div>
+                </div>
+
+                <h4 class="panel-card__subtitle">Desglose de jornadas de este mes</h4>
+                <ul id="workedDaysList" class="worked-list"></ul>
+            </div>
+        </section>
+
+        <!-- ==================== VISTA 3: MIS TURNOS Y COLORES ==================== -->
+        <section id="shiftsView" class="view">
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <div>
+                        <h3 class="panel-card__title">🎨 Configura tus Turnos y Colores</h3>
+                        <p class="panel-card__desc">Edita los colores, horarios y letras de cada turno o crea uno nuevo.</p>
+                    </div>
+                    <button id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo Turno</button>
+                </div>
+
+                <div id="shiftsConfigList" class="shifts-list"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== MODAL 1: DETALLE DE JORNADA (AL PULSAR UN DÍA) ==================== -->
+    <div id="dayModal" class="modal">
+        <div class="modal__dialog">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">DETALLE DE JORNADA</span>
+                    <h3 id="modalFullDateTitle" class="modal__title">Miércoles, 18 de Noviembre</h3>
+                </div>
+                <button id="btnCloseDayModal" class="modal__close">&times;</button>
+            </div>
+
+            <form id="dayForm" class="modal__body">
+                <!-- 1. Turno asignado -->
+                <div class="section-block">
+                    <label class="section-block__label">Turno asignado</label>
+                    <div id="modalShiftSelector" class="shift-cards-grid"></div>
+                </div>
+
+                <!-- 1.B Color personalizado para este día (Paleta + Todos los colores posibles) -->
+                <div class="custom-color-box">
+                    <div class="custom-color-box__top">
+                        <label class="checkbox-row">
+                            <input type="checkbox" id="dayUseCustomColor">
+                            <span>🎨 Usar un color especial solo para este día</span>
+                        </label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="dayCustomBgColor" value="#ffe082" class="color-picker-mini" title="Elegir cualquier color">
+                            <span id="dayColorHexLabel" class="color-hex-tag">#FFE082</span>
+                        </div>
+                    </div>
+                    <!-- Paleta rápida de colores para el día -->
+                    <div id="dayQuickPalette" class="day-quick-palette"></div>
+                </div>
+
+                <!-- 2. Horas trabajadas hoy y Horas Extra (Con botones - y +) -->
+                <div class="dual-counters">
+                    <div class="counter-card">
+                        <span class="counter-card__title">Horas trabajadas hoy</span>
+                        <small class="counter-card__sub">Ej: 8h, 6.5h, 7h...</small>
+                        <div class="stepper">
+                            <button type="button" class="stepper__btn" data-step-target="dayHours" data-step="-0.5">&minus;</button>
+                            <input type="number" id="dayHours" class="stepper__input" step="0.5" min="0" max="24" value="0">
+                            <button type="button" class="stepper__btn" data-step-target="dayHours" data-step="0.5">+</button>
+                        </div>
+                    </div>
+
+                    <div class="counter-card counter-card--extra">
+                        <span class="counter-card__title">Horas Extra</span>
+                        <small class="counter-card__sub">Etiqueta "EXTRA"</small>
+                        <div class="stepper">
+                            <button type="button" class="stepper__btn" data-step-target="dayExtraHours" data-step="-0.5">&minus;</button>
+                            <input type="number" id="dayExtraHours" class="stepper__input" step="0.5" min="0" max="24" value="0">
+                            <button type="button" class="stepper__btn" data-step-target="dayExtraHours" data-step="0.5">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2.B NUEVO (Foto 3): Seleccionar lo que ganas por hora en este día y ver total del día -->
+                <div class="day-rates-box">
+                    <div class="dual-counters" style="margin-bottom: 8px;">
+                        <div class="counter-card">
+                            <span class="counter-card__title">💶 Precio Hora (€/h)</span>
+                            <small class="counter-card__sub">Lo que cobras hoy</small>
+                            <div class="stepper">
+                                <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="-0.5">&minus;</button>
+                                <input type="number" id="dayHourlyRate" class="stepper__input" step="0.5" min="0" value="10">
+                                <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="0.5">+</button>
+                            </div>
+                        </div>
+
+                        <div class="counter-card counter-card--extra">
+                            <span class="counter-card__title">💶 Precio Hora Extra</span>
+                            <small class="counter-card__sub">€/h extra hoy</small>
+                            <div class="stepper">
+                                <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="-0.5">&minus;</button>
+                                <input type="number" id="dayExtraRate" class="stepper__input" step="0.5" min="0" value="12">
+                                <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="0.5">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="day-earned-preview">
+                        <span>💰 Ganancia de este día:</span>
+                        <strong id="modalDayEarnedValue">0.00 €</strong>
+                    </div>
+                </div>
+
+                <!-- 3. Poner Alarma / Despertador -->
+                <div class="alarm-card">
+                    <label class="alarm-card__check">
+                        <input type="checkbox" id="dayAlarmEnabled">
+                        <div class="alarm-card__info">
+                            <span class="alarm-card__title">⏰ Poner Alarma / Despertador</span>
+                            <small id="alarmShiftHint" class="alarm-card__desc">Elige a qué hora quieres el despertador:</small>
+                        </div>
+                    </label>
+                    <div class="alarm-card__times">
+                        <div class="mini-time">
+                            <span>Entrada:</span>
+                            <input type="time" id="dayStartTime" value="08:00">
+                        </div>
+                        <div class="mini-time">
+                            <span>Alarma:</span>
+                            <input type="time" id="dayAlarmTime" value="06:00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Texto o nota en la casilla + Tamaño -->
+                <div class="note-card">
+                    <div class="note-card__top">
+                        <label for="dayCustomText" class="section-block__label" style="margin:0;">Texto o nota en la casilla</label>
+                        <span id="fontSizeBadge" class="size-badge">13 px</span>
+                    </div>
+
+                    <input type="text" id="dayCustomText" class="text-input" placeholder="Escribe aquí tu texto (ej. Guardia, Libre, Cita...)">
+
+                    <div class="size-controls">
+                        <span class="size-controls__label">Tamaño del texto en el calendario:</span>
+                        <div class="size-presets">
+                            <button type="button" class="preset-btn" data-size="10">Peq</button>
+                            <button type="button" class="preset-btn preset-btn--active" data-size="13">Med</button>
+                            <button type="button" class="preset-btn" data-size="16">Grande</button>
+                            <button type="button" class="preset-btn" data-size="20">Gigante</button>
+                        </div>
+                    </div>
+
+                    <input type="range" id="dayFontSize" class="range-slider" min="8" max="24" value="13">
+
+                    <label class="checkbox-row" style="margin-top: 8px;">
+                        <input type="checkbox" id="dayPrioritizeText" checked>
+                        <span>Ver mi texto grande en el centro (achicar letra M, A, N)</span>
+                    </label>
+
+                    <!-- Selector de Sticker / Icono -->
+                    <div class="sticker-bar">
+                        <span class="sticker-bar__label">Icono / Sticker:</span>
+                        <div id="stickerList" class="sticker-list"></div>
+                    </div>
+
+                    <!-- Vista Previa en vivo -->
+                    <div class="live-preview-box">
+                        <span class="live-preview-box__label">VISTA PREVIA DE LA CASILLA:</span>
+                        <div id="cellPreview" class="day-cell day-cell--preview"></div>
+                    </div>
+                </div>
+
+                <!-- FUNCIÓN 1: Copiar este día a otros días de la misma semana -->
+                <div class="repeat-week-box">
+                    <span class="repeat-week-box__title">⚡ Copiar también a otros días de esta semana:</span>
+                    <small class="repeat-week-box__sub">Marca los días de esta misma semana donde quieras clonar este turno/nota:</small>
+                    <div id="repeatWeekDaysContainer" class="repeat-week-days">
+                        <button type="button" class="weekday-check-btn" data-dow="1">L</button>
+                        <button type="button" class="weekday-check-btn" data-dow="2">M</button>
+                        <button type="button" class="weekday-check-btn" data-dow="3">X</button>
+                        <button type="button" class="weekday-check-btn" data-dow="4">J</button>
+                        <button type="button" class="weekday-check-btn" data-dow="5">V</button>
+                        <button type="button" class="weekday-check-btn" data-dow="6">S</button>
+                        <button type="button" class="weekday-check-btn" data-dow="0">D</button>
+                    </div>
+                </div>
+
+                <!-- Acciones del Modal -->
+                <div class="modal__footer">
+                    <button type="button" id="btnClearDay" class="btn btn--danger">🗑️ Vaciar Día</button>
+                    <button type="submit" class="btn btn--primary">💾 Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: CREAR / EDITAR UN TURNO Y SU COLOR ==================== -->
+    <div id="shiftConfigModal" class="modal">
+        <div class="modal__dialog">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">PERSONALIZAR TURNO</span>
+                    <h3 id="shiftModalTitle" class="modal__title">Editar Turno</h3>
+                </div>
+                <button id="btnCloseShiftModal" class="modal__close">&times;</button>
+            </div>
+
+            <form id="shiftConfigForm" class="modal__body">
+                <div class="calc-box__row">
+                    <div class="calc-box__field">
+                        <label for="cfgShiftName">Nombre del turno:</label>
+                        <input type="text" id="cfgShiftName" required placeholder="Ej: Mañana">
+                    </div>
+                    <div class="calc-box__field">
+                        <label for="cfgShiftShort">Letra / Abreviatura (máx 3):</label>
+                        <input type="text" id="cfgShiftShort" maxlength="3" required placeholder="Ej: M">
+                    </div>
+                </div>
+
+                <div class="section-block" style="margin-top: 12px;">
+                    <label class="section-block__label">Elige el color del turno:</label>
+                    <div id="colorPaletteGrid" class="palette-grid"></div>
+                    <div class="custom-color-bar" style="margin-top: 8px;">
+                        <span>O elige cualquier color exacto:</span>
+                        <input type="color" id="cfgShiftColor" value="#fff3b0" class="color-picker-mini">
+                    </div>
+                </div>
+
+                <div class="calc-box__row" style="margin-top: 12px;">
+                    <div class="calc-box__field">
+                        <label for="cfgShiftHours">Horas por defecto:</label>
+                        <input type="number" id="cfgShiftHours" step="0.5" min="0" max="24" value="8">
+                    </div>
+                    <div class="calc-box__field">
+                        <label for="cfgShiftStart">Hora de entrada:</label>
+                        <input type="time" id="cfgShiftStart" value="08:00">
+                    </div>
+                </div>
+
+                <div class="calc-box__field" style="margin-top: 10px;">
+                    <label for="cfgShiftAlarm">Hora de alarma sugerida para este turno:</label>
+                    <input type="time" id="cfgShiftAlarm" value="06:00">
+                </div>
+
+                <div class="modal__footer" style="margin-top: 16px;">
+                    <button type="button" id="btnDeleteShiftType" class="btn btn--danger">Eliminar Turno</button>
+                    <button type="submit" class="btn btn--primary">Guardar Turno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
