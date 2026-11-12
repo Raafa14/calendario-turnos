@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'shifterpro_v4_data';
+const STORAGE_KEY = 'shifterpro_v5_data';
+const LEGACY_STORAGE_KEY = 'shifterpro_v4_data';
 
 const DEFAULT_SHIFTS = {
     NONE: { id: 'NONE', name: 'Ninguno',    short: '-', color: '#ffffff', textColor: '#1e293b', defaultHours: 0, startTime: '08:00', alarmTime: '06:00' },
@@ -8,6 +9,14 @@ const DEFAULT_SHIFTS = {
     L:    { id: 'L',    name: 'Libre',      short: 'L', color: '#bbf7d0', textColor: '#14532d', defaultHours: 0, startTime: '00:00', alarmTime: '09:00' },
     V:    { id: 'V',    name: 'Vacaciones', short: 'V', color: '#ddd6fe', textColor: '#4c1d95', defaultHours: 0, startTime: '00:00', alarmTime: '09:00' }
 };
+
+const DEFAULT_EXERCISES = [
+    { id: 'EX_1', name: 'Press Banca', weight: 60 },
+    { id: 'EX_2', name: 'Sentadilla', weight: 80 },
+    { id: 'EX_3', name: 'Peso Muerto', weight: 90 },
+    { id: 'EX_4', name: 'Press Militar', weight: 40 },
+    { id: 'EX_5', name: 'Jalón al Pecho', weight: 55 }
+];
 
 const COLOR_PALETTE = [
     '#fef08a', '#fde047', '#fed7aa', '#fdba74',
@@ -36,12 +45,20 @@ const state = {
     piggyGoal: 600,
     piggySaved: 0,
     fixedExpenses: [],
+    // Estado Gimnasio
+    gymWeeklyGoal: 4,
+    exercises: JSON.parse(JSON.stringify(DEFAULT_EXERCISES)),
+    weightLogs: [],
+    // Estado Modales
     editingDateKey: null,
     modalSelectedShift: 'NONE',
     modalSelectedSticker: '',
     repeatSelectedDows: [],
     editingShiftId: null
 };
+
+let timerInterval = null;
+let timerSecondsLeft = 90;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
@@ -55,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. PERSISTENCIA Y TEMA
 function loadState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (raw) {
         try {
             const p = JSON.parse(raw);
@@ -72,6 +89,9 @@ function loadState() {
             state.piggyGoal = p.piggyGoal ?? 600;
             state.piggySaved = p.piggySaved ?? 0;
             state.fixedExpenses = p.fixedExpenses || [];
+            state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
+            state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+            state.weightLogs = p.weightLogs || [];
         } catch (err) {
             console.error('Error cargando datos:', err);
         }
@@ -83,6 +103,7 @@ function loadState() {
     document.getElementById('monthlyGoalInput').value = state.monthlyGoal;
     document.getElementById('piggyTitleInput').value = state.piggyTitle;
     document.getElementById('piggyGoalInput').value = state.piggyGoal;
+    document.getElementById('gymWeeklyGoalInput').value = state.gymWeeklyGoal;
     updatePinUI();
 }
 
@@ -100,13 +121,18 @@ function saveState() {
         piggyTitle: state.piggyTitle,
         piggyGoal: state.piggyGoal,
         piggySaved: state.piggySaved,
-        fixedExpenses: state.fixedExpenses
+        fixedExpenses: state.fixedExpenses,
+        gymWeeklyGoal: state.gymWeeklyGoal,
+        exercises: state.exercises,
+        weightLogs: state.weightLogs
     }));
 }
 
 function applyTheme() {
     document.documentElement.setAttribute('data-theme', state.theme);
-    document.getElementById('btnThemeToggle').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+    const isDark = state.theme === 'dark';
+    document.getElementById('iconMoon').style.display = isDark ? 'none' : 'block';
+    document.getElementById('iconSun').style.display = isDark ? 'block' : 'none';
 }
 
 function getContrastText(hexColor) {
@@ -128,10 +154,11 @@ function renderAll() {
     renderCalendar();
     renderTomorrowBanner();
     renderStats();
-    renderShiftsConfigList();
+    renderGymView();
     renderWallet();
     renderPiggyBank();
     renderFixedExpenses();
+    renderShiftsConfigList();
 }
 
 function renderCalendar() {
@@ -166,7 +193,6 @@ function renderCalendar() {
     }
 }
 
-// PINTA LA CASILLA CON EL ICONO PEQUEÑO ARRIBA A LA IZQUIERDA Y EL TEXTO LIMPIO EN EL CENTRO
 function paintCell(cellEl, dayNumber, info) {
     cellEl.innerHTML = '';
     const shift = (info && state.shifts[info.shiftId]) ? state.shifts[info.shiftId] : state.shifts.NONE;
@@ -184,7 +210,7 @@ function paintCell(cellEl, dayNumber, info) {
     cellEl.style.backgroundColor = bgColor;
     cellEl.style.color = txtColor;
 
-    // 1. FILA SUPERIOR: Icono arriba a la izquierda + alarma, y número a la derecha
+    // 1. FILA SUPERIOR: Sticker arriba a la izquierda + alarma, y número a la derecha
     const top = document.createElement('div');
     top.className = 'day-cell__top';
 
@@ -201,7 +227,7 @@ function paintCell(cellEl, dayNumber, info) {
     if (info && info.alarmEnabled && info.alarmTime) {
         const alarmBadge = document.createElement('span');
         alarmBadge.className = 'day-cell__alarm';
-        alarmBadge.textContent = `⏰${info.alarmTime}`;
+        alarmBadge.textContent = info.alarmTime;
         topLeft.appendChild(alarmBadge);
     }
 
@@ -212,7 +238,7 @@ function paintCell(cellEl, dayNumber, info) {
     top.appendChild(dayNumSpan);
     cellEl.appendChild(top);
 
-    // 2. CENTRO: Solo texto o letra del turno (sin icono debajo)
+    // 2. CENTRO: Texto personalizado o letra del turno
     const middle = document.createElement('div');
     middle.className = 'day-cell__middle';
 
@@ -234,7 +260,7 @@ function paintCell(cellEl, dayNumber, info) {
     }
     cellEl.appendChild(middle);
 
-    // 3. FILA INFERIOR: EXTRA / Mini letra / Bote / Horas
+    // 3. FILA INFERIOR: EXTRA / Gym / Mini letra / Horas
     const bottom = document.createElement('div');
     bottom.className = 'day-cell__bottom';
 
@@ -243,16 +269,16 @@ function paintCell(cellEl, dayNumber, info) {
         extraTag.className = 'extra-pill';
         extraTag.textContent = 'EXTRA';
         bottom.appendChild(extraTag);
+    } else if (info && info.workoutGroup) {
+        const gymTag = document.createElement('span');
+        gymTag.className = 'gym-pill';
+        gymTag.textContent = info.workoutGroup;
+        bottom.appendChild(gymTag);
     } else if (hasText && prioritize && hasShiftLetter) {
         const miniShift = document.createElement('span');
         miniShift.className = 'mini-shift-tag';
         miniShift.textContent = shift.short;
         bottom.appendChild(miniShift);
-    } else if (info && Number(info.tips) > 0) {
-        const tipIcon = document.createElement('span');
-        tipIcon.style.fontSize = '0.56rem';
-        tipIcon.textContent = '🪙';
-        bottom.appendChild(tipIcon);
     }
 
     const totalH = (info ? (Number(info.hours) || 0) + (Number(info.extraHours) || 0) : 0);
@@ -261,6 +287,11 @@ function paintCell(cellEl, dayNumber, info) {
         hSpan.className = 'hours-tag';
         hSpan.textContent = `${totalH}h`;
         bottom.appendChild(hSpan);
+    } else if (info && info.creatineTaken) {
+        const crSpan = document.createElement('span');
+        crSpan.className = 'hours-tag';
+        crSpan.textContent = 'CR';
+        bottom.appendChild(crSpan);
     }
 
     cellEl.appendChild(bottom);
@@ -293,12 +324,28 @@ function renderShiftCardsInModal() {
             document.getElementById('dayStartTime').value = shift.startTime || '08:00';
             document.getElementById('dayAlarmTime').value = shift.alarmTime || '06:00';
             updateAlarmHintText();
+            updateGymSuggestionHint();
             renderShiftCardsInModal();
             updateLivePreview();
         });
 
         container.appendChild(btn);
     });
+}
+
+function updateGymSuggestionHint() {
+    const start = document.getElementById('dayStartTime').value || '08:00';
+    const hour = parseInt(start.split(':')[0], 10);
+    const hintEl = document.getElementById('gymTimeSuggestionHint');
+    if (state.modalSelectedShift === 'NONE' || state.modalSelectedShift === 'L' || state.modalSelectedShift === 'V') {
+        hintEl.textContent = 'Día libre: ideal 11:00 o 18:00';
+    } else if (hour < 12) {
+        hintEl.textContent = 'Turno mañana: ideal 17:30';
+    } else if (hour >= 12 && hour < 19) {
+        hintEl.textContent = 'Turno tarde: ideal 10:00';
+    } else {
+        hintEl.textContent = 'Turno noche: ideal 18:00';
+    }
 }
 
 function updateAlarmHintText() {
@@ -317,7 +364,7 @@ function initStickerSelector() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'sticker-btn';
-        btn.textContent = icon === '' ? '🚫' : icon;
+        btn.textContent = icon === '' ? '—' : icon;
         btn.addEventListener('click', () => {
             state.modalSelectedSticker = icon;
             highlightSelectedSticker();
@@ -357,6 +404,8 @@ function openDayModal(dateKey, dayNumber) {
         shiftId: 'NONE',
         useCustomColor: false,
         customBgColor: '#ffe082',
+        workoutGroup: '',
+        creatineTaken: false,
         hours: 0,
         extraHours: 0,
         hourlyRate: state.hourlyRate,
@@ -384,6 +433,9 @@ function openDayModal(dateKey, dayNumber) {
     document.getElementById('dayCustomBgColor').value = bgHex;
     document.getElementById('dayColorHexLabel').textContent = bgHex.toUpperCase();
 
+    document.getElementById('dayWorkoutGroup').value = saved.workoutGroup || '';
+    document.getElementById('dayCreatineTaken').checked = Boolean(saved.creatineTaken);
+
     document.getElementById('dayHours').value = saved.hours ?? 0;
     document.getElementById('dayExtraHours').value = saved.extraHours ?? 0;
     document.getElementById('dayHourlyRate').value = saved.hourlyRate ?? state.hourlyRate;
@@ -404,6 +456,7 @@ function openDayModal(dateKey, dayNumber) {
     renderShiftCardsInModal();
     highlightSelectedSticker();
     updateAlarmHintText();
+    updateGymSuggestionHint();
     updateLivePreview();
     initRepeatWeekButtons(dateObj.getDay());
 
@@ -420,6 +473,8 @@ function collectDayModalData() {
         shiftId: state.modalSelectedShift,
         useCustomColor: document.getElementById('dayUseCustomColor').checked,
         customBgColor: document.getElementById('dayCustomBgColor').value,
+        workoutGroup: document.getElementById('dayWorkoutGroup').value,
+        creatineTaken: document.getElementById('dayCreatineTaken').checked,
         hours: parseFloat(document.getElementById('dayHours').value) || 0,
         extraHours: parseFloat(document.getElementById('dayExtraHours').value) || 0,
         hourlyRate: parseFloat(document.getElementById('dayHourlyRate').value) || 0,
@@ -454,7 +509,7 @@ function syncPresetButtons(size) {
     });
 }
 
-// 4. GANANCIAS Y NÓMINA REAL (BRUTO / NETO / BOTE)
+// 4. GANANCIAS Y NÓMINA REAL
 function renderTomorrowBanner() {
     const tmr = new Date();
     tmr.setDate(tmr.getDate() + 1);
@@ -462,12 +517,13 @@ function renderTomorrowBanner() {
     const info = state.daysData[key];
     const banner = document.getElementById('tomorrowBanner');
 
-    if (info && (info.shiftId !== 'NONE' || info.alarmEnabled)) {
+    if (info && (info.shiftId !== 'NONE' || info.alarmEnabled || info.workoutGroup)) {
         const shiftName = state.shifts[info.shiftId] ? state.shifts[info.shiftId].name : 'Jornada';
-        const alarmTxt = info.alarmEnabled ? ` · 🔔 Alarma ${info.alarmTime}` : '';
-        banner.innerHTML = `📅 <strong>Mañana (${shiftName}):</strong> Entrada ${info.startTime}${alarmTxt}`;
+        const alarmTxt = info.alarmEnabled ? ` · Alarma ${info.alarmTime}` : '';
+        const gymTxt = info.workoutGroup ? ` · Gym: ${info.workoutGroup}` : '';
+        banner.innerHTML = `<strong>Mañana (${shiftName}):</strong> Entrada ${info.startTime}${alarmTxt}${gymTxt}`;
     } else {
-        banner.innerHTML = `<span>🌙 Mañana sin turno ni alarma programada</span>`;
+        banner.innerHTML = `<span>Mañana sin turno ni alarma programada</span>`;
     }
 }
 
@@ -525,7 +581,7 @@ function renderStats() {
             li.className = 'worked-list__item';
             li.innerHTML = `
                 <span>Día ${dayNum} · <strong>${sName}</strong> ${d.customText ? '(' + d.customText + ')' : ''}</span>
-                <strong>${h + ex}h → ${dayPay.toFixed(2)} € ${tips > 0 ? '+ 🪙' + tips.toFixed(2) + '€' : ''}</strong>
+                <strong>${h + ex}h → ${dayPay.toFixed(2)} € ${tips > 0 ? '+ ' + tips.toFixed(2) + '€' : ''}</strong>
             `;
             listEl.appendChild(li);
         }
@@ -580,7 +636,7 @@ function updateGoalAndComparison(currentEarned) {
 
     document.getElementById('goalPercentBadge').textContent = `${pct}%`;
     document.getElementById('goalRemainingText').textContent = remaining === 0 && goal > 0
-        ? '🎉 ¡Meta superada!'
+        ? 'Meta superada'
         : `Faltan ${remaining.toFixed(2)} €`;
     document.getElementById('goalProgressBar').style.width = `${pct}%`;
 
@@ -593,15 +649,181 @@ function updateGoalAndComparison(currentEarned) {
     const compareEl = document.getElementById('prevMonthComparison');
 
     if (prevTotal === 0) {
-        compareEl.textContent = '📊 Mes anterior: 0.00 € registrados';
+        compareEl.textContent = 'Mes anterior: 0.00 € registrados';
     } else {
         const sign = diff >= 0 ? '+' : '';
-        const emoji = diff >= 0 ? '📈' : '📉';
-        compareEl.innerHTML = `${emoji} Mes anterior: <strong>${prevTotal.toFixed(2)} €</strong> (${sign}${diff.toFixed(2)} €)`;
+        compareEl.innerHTML = `Mes anterior: <strong>${prevTotal.toFixed(2)} €</strong> (${sign}${diff.toFixed(2)} €)`;
     }
 }
 
-// 5. MI CAJA, HUCHA DE AHORRO Y GASTOS FIJOS
+// 5. VISTA GYM: CONSTANCIA, TEMPORIZADOR, PESO Y PRs
+function renderGymView() {
+    // 1. Calcular entrenos de la semana actual (Lunes a Domingo)
+    const now = new Date();
+    const dow = now.getDay();
+    const diffToMonday = (dow === 0) ? -6 : 1 - dow;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+
+    let weekWorkouts = 0;
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+        const key = formatDateKey(d.getFullYear(), d.getMonth(), d.getDate());
+        if (state.daysData[key] && state.daysData[key].workoutGroup) weekWorkouts++;
+    }
+
+    // 2. Calcular entrenos y días de creatina en el mes seleccionado
+    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    let monthWorkouts = 0;
+    let monthCreatine = 0;
+
+    Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(k => {
+        if (state.daysData[k].workoutGroup) monthWorkouts++;
+        if (state.daysData[k].creatineTaken) monthCreatine++;
+    });
+
+    // 3. Calcular gasto en Gym / Suplementos en Mi Caja
+    let gymSpend = 0;
+    state.walletMovements.forEach(m => {
+        if (m.type === 'OUT' && m.category === 'Gym / Suplementos') {
+            gymSpend += Number(m.amount) || 0;
+        }
+    });
+
+    const weeklyGoal = Number(state.gymWeeklyGoal) || 4;
+    const pct = Math.min(100, Math.round((weekWorkouts / weeklyGoal) * 100));
+
+    document.getElementById('gymWeekCountText').textContent = `${weekWorkouts} / ${weeklyGoal} esta semana`;
+    document.getElementById('gymMonthCountText').textContent = `${monthWorkouts} entrenos este mes`;
+    document.getElementById('gymWeekProgressBar').style.width = `${pct}%`;
+    document.getElementById('gymCreatineMonthText').textContent = `${monthCreatine} días`;
+    document.getElementById('gymFitnessSpendText').textContent = `${gymSpend.toFixed(2)} €`;
+
+    renderWeightLogs();
+    renderExercisesList();
+}
+
+function startRestTimer(seconds) {
+    clearInterval(timerInterval);
+    timerSecondsLeft = seconds;
+    document.getElementById('timerStatusBadge').textContent = 'En marcha';
+    updateTimerDisplay();
+
+    timerInterval = setInterval(() => {
+        timerSecondsLeft--;
+        updateTimerDisplay();
+        if (timerSecondsLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('timerStatusBadge').textContent = 'Tiempo cumplido';
+            playBeepSound();
+        }
+    }, 1000);
+}
+
+function stopRestTimer() {
+    clearInterval(timerInterval);
+    document.getElementById('timerStatusBadge').textContent = 'Pausado';
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(Math.max(0, timerSecondsLeft) / 60);
+    const secs = Math.max(0, timerSecondsLeft) % 60;
+    document.getElementById('timerDisplay').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function playBeepSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.45);
+    } catch (e) {
+        console.log('Audio no disponible');
+    }
+}
+
+function renderWeightLogs() {
+    const listEl = document.getElementById('weightHistoryList');
+    const diffEl = document.getElementById('weightDiffStat');
+    listEl.innerHTML = '';
+
+    if (state.weightLogs.length === 0) {
+        diffEl.textContent = 'Sin registros';
+        listEl.innerHTML = '<li class="worked-list__item">Registra tu peso para ver tu evolución.</li>';
+        return;
+    }
+
+    const latest = state.weightLogs[0].weight;
+    const initial = state.weightLogs[state.weightLogs.length - 1].weight;
+    const diff = latest - initial;
+    const sign = diff > 0 ? '+' : '';
+    diffEl.textContent = state.weightLogs.length > 1
+        ? `Actual: ${latest} kg (${sign}${diff.toFixed(1)} kg)`
+        : `Actual: ${latest} kg`;
+
+    state.weightLogs.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'worked-list__item';
+        li.innerHTML = `
+            <span>${item.date}</span>
+            <div>
+                <strong>${item.weight} kg</strong>
+                <button type="button" class="movement-delete-btn">&times;</button>
+            </div>
+        `;
+        li.querySelector('button').addEventListener('click', () => {
+            state.weightLogs = state.weightLogs.filter(w => w.id !== item.id);
+            saveState();
+            renderWeightLogs();
+        });
+        listEl.appendChild(li);
+    });
+}
+
+function renderExercisesList() {
+    const container = document.getElementById('exercisesList');
+    container.innerHTML = '';
+
+    state.exercises.forEach(ex => {
+        const row = document.createElement('div');
+        row.className = 'exercise-row';
+        row.innerHTML = `
+            <span class="exercise-row__name">${ex.name}</span>
+            <div class="exercise-row__controls">
+                <button type="button" class="stepper__btn" data-delta="-2.5">&minus;</button>
+                <span class="exercise-row__weight">${ex.weight} kg</span>
+                <button type="button" class="stepper__btn" data-delta="2.5">+</button>
+                <button type="button" class="movement-delete-btn" title="Eliminar">&times;</button>
+            </div>
+        `;
+
+        const btns = row.querySelectorAll('.stepper__btn');
+        btns[0].addEventListener('click', () => {
+            ex.weight = Math.max(0, Number(ex.weight) - 2.5);
+            saveState();
+            renderExercisesList();
+        });
+        btns[1].addEventListener('click', () => {
+            ex.weight = Number(ex.weight) + 2.5;
+            saveState();
+            renderExercisesList();
+        });
+        row.querySelector('.movement-delete-btn').addEventListener('click', () => {
+            state.exercises = state.exercises.filter(item => item.id !== ex.id);
+            saveState();
+            renderExercisesList();
+        });
+
+        container.appendChild(row);
+    });
+}
+
+// 6. MI CAJA, HUCHA Y GASTOS FIJOS
 function getWalletBalance() {
     let totalIn = 0;
     let totalOut = 0;
@@ -612,17 +834,20 @@ function getWalletBalance() {
     return { totalIn, totalOut, balance: totalIn - totalOut };
 }
 
-function addWalletMovement(type, customAmount = null, customConcept = null) {
+function addWalletMovement(type, customAmount = null, customConcept = null, customCategory = null) {
     const amountInput = document.getElementById('walletAmountInput');
     const conceptInput = document.getElementById('walletConceptInput');
+    const categorySelect = document.getElementById('walletCategorySelect');
+
     const amount = customAmount !== null ? customAmount : parseFloat(amountInput.value);
+    const category = customCategory || categorySelect.value || 'General';
 
     if (!amount || amount <= 0) {
         alert('Introduce una cantidad mayor que 0 €.');
         return;
     }
 
-    const defaultConcept = type === 'IN' ? 'Ingreso en Caja' : 'Retirada / Gasto';
+    const defaultConcept = type === 'IN' ? 'Ingreso en Caja' : `Gasto (${category})`;
     const concept = customConcept || conceptInput.value.trim() || defaultConcept;
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
@@ -632,6 +857,7 @@ function addWalletMovement(type, customAmount = null, customConcept = null) {
         type,
         amount: Number(amount.toFixed(2)),
         concept,
+        category,
         date: dateStr
     });
 
@@ -641,6 +867,7 @@ function addWalletMovement(type, customAmount = null, customConcept = null) {
     }
     saveState();
     renderWallet();
+    renderGymView();
 }
 
 function renderWallet() {
@@ -653,10 +880,11 @@ function renderWallet() {
         const li = document.createElement('li');
         li.className = 'worked-list__item';
         const isIn = item.type === 'IN';
+        const catBadge = item.category && item.category !== 'General' ? ` · ${item.category}` : '';
         li.innerHTML = `
             <div>
                 <strong>${item.concept}</strong>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">${item.date}</div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">${item.date}${catBadge}</div>
             </div>
             <div style="display:flex; align-items:center;">
                 <span class="${isIn ? 'movement-amount--in' : 'movement-amount--out'}">${isIn ? '+' : '-'}${Number(item.amount).toFixed(2)} €</span>
@@ -667,6 +895,7 @@ function renderWallet() {
             state.walletMovements = state.walletMovements.filter(m => m.id !== item.id);
             saveState();
             renderWallet();
+            renderGymView();
         });
         listEl.appendChild(li);
     });
@@ -720,7 +949,7 @@ function renderFixedExpenses() {
     document.getElementById('fixedExpensesTotalLabel').textContent = `${total.toFixed(2)} €/mes`;
 }
 
-// 6. GESTIÓN DE TURNOS Y COLORES
+// 7. GESTIÓN DE TURNOS Y COLORES
 function renderShiftsConfigList() {
     const container = document.getElementById('shiftsConfigList');
     container.innerHTML = '';
@@ -737,7 +966,7 @@ function renderShiftsConfigList() {
                     <div style="font-size:0.72rem; color:var(--text-secondary);">${shift.defaultHours}h · Entrada ${shift.startTime} · Alarma ${shift.alarmTime}</div>
                 </div>
             </div>
-            <button type="button" class="btn btn--sm btn--outline">✏️ Editar</button>
+            <button type="button" class="btn btn--sm btn--outline">Editar</button>
         `;
         row.querySelector('button').addEventListener('click', () => openShiftConfigModal(shift.id));
         container.appendChild(row);
@@ -774,7 +1003,7 @@ function openShiftConfigModal(shiftId = null) {
     document.getElementById('shiftConfigModal').classList.add('modal--open');
 }
 
-// 7. REPETIR SEMANA, PIN Y EVENTOS
+// 8. REPETIR SEMANA, PIN Y EVENTOS
 function initRepeatWeekButtons(currentDow) {
     state.repeatSelectedDows = [];
     document.querySelectorAll('.weekday-check-btn').forEach(btn => {
@@ -805,21 +1034,21 @@ function updatePinUI() {
     const btnConfig = document.getElementById('btnConfigPin');
     const btnLock = document.getElementById('btnLockNow');
     if (state.statsPin) {
-        statusText.textContent = '🔐 Protegido con PIN';
-        btnConfig.textContent = '⚙️ PIN';
+        statusText.textContent = 'Protegido con PIN';
+        btnConfig.textContent = 'PIN';
         btnLock.style.display = state.statsUnlocked ? 'inline-block' : 'none';
     } else {
-        statusText.textContent = '🔓 Sin PIN';
-        btnConfig.textContent = '🔒 Activar PIN';
+        statusText.textContent = 'Sin PIN';
+        btnConfig.textContent = 'Activar PIN';
         btnLock.style.display = 'none';
     }
 }
 
 function switchTab(targetTabId) {
     if ((targetTabId === 'statsView' || targetTabId === 'walletView') && state.statsPin && !state.statsUnlocked) {
-        const entered = prompt('🔒 Introduce tu PIN de 4 dígitos:');
+        const entered = prompt('Introduce tu PIN de 4 dígitos:');
         if (entered !== state.statsPin) {
-            if (entered !== null) alert('❌ PIN incorrecto.');
+            if (entered !== null) alert('PIN incorrecto.');
             return;
         }
         state.statsUnlocked = true;
@@ -835,7 +1064,7 @@ function switchTab(targetTabId) {
 }
 
 function bindEvents() {
-    // NAVEGACIÓN INFERIOR (Compatible al 100% con iPhone Safari)
+    // Navegación inferior
     document.querySelectorAll('.bottom-nav__item').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
@@ -847,7 +1076,7 @@ function bindEvents() {
         saveState();
     });
 
-    // Navegación de meses
+    // Meses
     document.getElementById('btnPrevMonth').addEventListener('click', () => {
         state.currentMonth--;
         if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
@@ -860,7 +1089,6 @@ function bindEvents() {
         renderAll();
     });
 
-    // Vaciar mes
     document.getElementById('btnClearMonth').addEventListener('click', () => {
         if (!confirm('¿Vaciar todos los días de este mes?')) return;
         const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
@@ -869,7 +1097,7 @@ function bindEvents() {
         renderAll();
     });
 
-    // Backup JSON y Exportar ICS
+    // Backup JSON e ICS
     document.getElementById('btnExportBackup').addEventListener('click', () => {
         const blob = new Blob([localStorage.getItem(STORAGE_KEY) || '{}'], { type: 'application/json' });
         const a = document.createElement('a');
@@ -886,13 +1114,13 @@ function bindEvents() {
         reader.onload = (ev) => {
             try {
                 const parsed = JSON.parse(ev.target.result);
-                if (!parsed.daysData) return alert('❌ Archivo no válido.');
+                if (!parsed.daysData) return alert('Archivo no válido.');
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
                 loadState();
                 applyTheme();
                 renderAll();
-                alert('✅ Copia restaurada.');
-            } catch { alert('❌ Error leyendo archivo.'); }
+                alert('Copia restaurada.');
+            } catch { alert('Error leyendo archivo.'); }
         };
         reader.readAsText(file);
         e.target.value = '';
@@ -915,18 +1143,17 @@ function bindEvents() {
         a.click();
     });
 
-    // Botones - y + de los steppers
-    document.querySelectorAll('.stepper__btn').forEach(btn => {
+    // Steppers (- / +)
+    document.querySelectorAll('.stepper__btn[data-step-target]').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = document.getElementById(btn.dataset.stepTarget);
             const step = parseFloat(btn.dataset.step);
-            const val = Math.max(0, (parseFloat(input.value) || 0) + step);
-            input.value = val;
+            input.value = Math.max(0, (parseFloat(input.value) || 0) + step);
             updateLivePreview();
         });
     });
 
-    // Color especial del día
+    // Color especial
     document.getElementById('dayUseCustomColor').addEventListener('change', updateLivePreview);
     document.getElementById('dayCustomBgColor').addEventListener('input', (e) => {
         document.getElementById('dayUseCustomColor').checked = true;
@@ -934,7 +1161,7 @@ function bindEvents() {
         updateLivePreview();
     });
 
-    // Presets y slider de tamaño de letra
+    // Tamaño de texto
     document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const s = btn.dataset.size;
@@ -952,14 +1179,15 @@ function bindEvents() {
         updateLivePreview();
     });
 
-    ['dayHours', 'dayExtraHours', 'dayHourlyRate', 'dayExtraRate', 'dayTips', 'dayAlarmEnabled', 'dayStartTime', 'dayAlarmTime', 'dayCustomText', 'dayPrioritizeText'].forEach(id => {
+    ['dayWorkoutGroup', 'dayCreatineTaken', 'dayHours', 'dayExtraHours', 'dayHourlyRate', 'dayExtraRate', 'dayTips', 'dayAlarmEnabled', 'dayStartTime', 'dayAlarmTime', 'dayCustomText', 'dayPrioritizeText'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             updateAlarmHintText();
+            updateGymSuggestionHint();
             updateLivePreview();
         });
     });
 
-    // Botones repetir semana
+    // Repetir semana
     document.querySelectorAll('.weekday-check-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.classList.contains('weekday-check-btn--current')) return;
@@ -975,8 +1203,30 @@ function bindEvents() {
         });
     });
 
-    // Modal Día: Cerrar, Vaciar, Guardar
+    // Guardar y Vaciar Día
+    function handleSaveDay(e) {
+        if (e) e.preventDefault();
+        if (!state.editingDateKey) return;
+        const data = collectDayModalData();
+        const isEmpty = data.shiftId === 'NONE' && !data.useCustomColor && !data.workoutGroup &&
+                        !data.creatineTaken && data.hours === 0 && data.extraHours === 0 &&
+                        data.tips === 0 && !data.alarmEnabled && !data.customText && !data.sticker;
+
+        if (isEmpty) {
+            delete state.daysData[state.editingDateKey];
+        } else {
+            state.daysData[state.editingDateKey] = data;
+            applyRepeatToSelectedWeekDays(state.editingDateKey, data);
+        }
+
+        saveState();
+        renderAll();
+        closeDayModal();
+    }
+
     document.getElementById('btnCloseDayModal').addEventListener('click', closeDayModal);
+    document.getElementById('dayForm').addEventListener('submit', handleSaveDay);
+    document.getElementById('btnSaveDay').addEventListener('click', handleSaveDay);
     document.getElementById('btnClearDay').addEventListener('click', () => {
         if (state.editingDateKey) {
             delete state.daysData[state.editingDateKey];
@@ -986,36 +1236,7 @@ function bindEvents() {
         }
     });
 
-    function handleSaveDay(e) {
-        if (e) e.preventDefault();
-        if (!state.editingDateKey) return;
-
-        const data = collectDayModalData();
-        const isEmpty = data.shiftId === 'NONE' && !data.useCustomColor && data.hours === 0 &&
-                        data.extraHours === 0 && data.tips === 0 && !data.alarmEnabled &&
-                        !data.customText && !data.sticker;
-
-        if (isEmpty) {
-            delete state.daysData[state.editingDateKey];
-        } else {
-            state.daysData[state.editingDateKey] = data;
-            if (typeof applyRepeatToSelectedWeekDays === 'function') {
-                applyRepeatToSelectedWeekDays(state.editingDateKey, data);
-            }
-        }
-
-        saveState();
-        renderAll();
-        closeDayModal();
-    }
-
-    const dayFormEl = document.getElementById('dayForm');
-    if (dayFormEl) dayFormEl.addEventListener('submit', handleSaveDay);
-
-    const btnSaveDayEl = document.getElementById('btnSaveDay');
-    if (btnSaveDayEl) btnSaveDayEl.addEventListener('click', handleSaveDay);
-
-    // Calculadora de Ganancias y Retenciones
+    // Ganancias y Meta
     ['calcTotalHoursInput', 'hourlyRateInput', 'extraRateInput', 'retentionPercentInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => recalculateEarnings());
     });
@@ -1030,7 +1251,7 @@ function bindEvents() {
     document.getElementById('btnConfigPin').addEventListener('click', () => {
         if (state.statsPin) {
             const cur = prompt('PIN actual:');
-            if (cur !== state.statsPin) return alert('❌ PIN incorrecto.');
+            if (cur !== state.statsPin) return alert('PIN incorrecto.');
             const next = prompt('Nuevo PIN de 4 dígitos (vacío para quitar):');
             if (next === null) return;
             state.statsPin = next.trim() || null;
@@ -1051,7 +1272,44 @@ function bindEvents() {
         switchTab('calendarView');
     });
 
-    // Eventos de Mi Caja, Hucha y Gastos Fijos
+    // Eventos Gym
+    document.getElementById('gymWeeklyGoalInput').addEventListener('input', (e) => {
+        state.gymWeeklyGoal = parseInt(e.target.value, 10) || 4;
+        saveState();
+        renderGymView();
+    });
+
+    document.querySelectorAll('.timer-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => startRestTimer(parseInt(btn.dataset.seconds, 10)));
+    });
+    document.getElementById('btnTimerStop').addEventListener('click', stopRestTimer);
+
+    document.getElementById('btnLogWeight').addEventListener('click', () => {
+        const input = document.getElementById('bodyWeightInput');
+        const w = parseFloat(input.value);
+        if (!w || w <= 0) return alert('Introduce tu peso en kg.');
+        const now = new Date();
+        const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+        state.weightLogs.unshift({ id: 'KG_' + Date.now(), weight: w, date: dateStr });
+        input.value = '';
+        saveState();
+        renderWeightLogs();
+    });
+
+    document.getElementById('btnAddExercise').addEventListener('click', () => {
+        const nameEl = document.getElementById('newExerciseName');
+        const weightEl = document.getElementById('newExerciseWeight');
+        const name = nameEl.value.trim();
+        const weight = parseFloat(weightEl.value) || 0;
+        if (!name) return alert('Escribe el nombre del ejercicio.');
+        state.exercises.push({ id: 'EX_' + Date.now(), name, weight });
+        nameEl.value = '';
+        weightEl.value = '';
+        saveState();
+        renderExercisesList();
+    });
+
+    // Eventos Mi Caja, Hucha y Gastos Fijos
     document.getElementById('btnWalletAdd').addEventListener('click', () => addWalletMovement('IN'));
     document.getElementById('btnWalletWithdraw').addEventListener('click', () => addWalletMovement('OUT'));
 
@@ -1059,7 +1317,7 @@ function bindEvents() {
         const summary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
         if (summary.realTotal <= 0) return alert('No hay ganancias acumuladas este mes.');
         const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        addWalletMovement('IN', summary.realTotal, `Nómina + Bote (${months[state.currentMonth]})`);
+        addWalletMovement('IN', summary.realTotal, `Nómina + Bote (${months[state.currentMonth]})`, 'General');
     });
 
     document.getElementById('btnClearWallet').addEventListener('click', () => {
@@ -1067,6 +1325,7 @@ function bindEvents() {
         state.walletMovements = [];
         saveState();
         renderWallet();
+        renderGymView();
     });
 
     document.getElementById('piggyTitleInput').addEventListener('input', (e) => {
@@ -1085,7 +1344,7 @@ function bindEvents() {
         const amt = parseFloat(input.value);
         if (!amt || amt <= 0) return alert('Introduce una cantidad para meter en la hucha.');
         state.piggySaved += amt;
-        addWalletMovement('OUT', amt, `🐷 Apartado a Hucha: ${state.piggyTitle}`);
+        addWalletMovement('OUT', amt, `Apartado a Hucha: ${state.piggyTitle}`, 'General');
         input.value = '';
         saveState();
         renderPiggyBank();
@@ -1094,9 +1353,9 @@ function bindEvents() {
     document.getElementById('btnPiggyWithdraw').addEventListener('click', () => {
         const input = document.getElementById('piggyTransferInput');
         const amt = parseFloat(input.value);
-        if (!amt || amt <= 0 || amt > state.piggySaved) return alert('Cantidad no válida o mayor que lo ahorrado.');
+        if (!amt || amt <= 0 || amt > state.piggySaved) return alert('Cantidad no válida.');
         state.piggySaved -= amt;
-        addWalletMovement('IN', amt, `🐷 Retirado de Hucha: ${state.piggyTitle}`);
+        addWalletMovement('IN', amt, `Retirado de Hucha: ${state.piggyTitle}`, 'General');
         input.value = '';
         saveState();
         renderPiggyBank();
@@ -1107,7 +1366,7 @@ function bindEvents() {
         const amtEl = document.getElementById('fixedExpenseAmount');
         const name = nameEl.value.trim();
         const amount = parseFloat(amtEl.value);
-        if (!name || !amount || amount <= 0) return alert('Escribe un nombre y una cantidad válida.');
+        if (!name || !amount || amount <= 0) return alert('Escribe un nombre y cantidad.');
         state.fixedExpenses.push({ id: 'F_' + Date.now(), name, amount });
         nameEl.value = '';
         amtEl.value = '';
@@ -1116,14 +1375,15 @@ function bindEvents() {
     });
 
     document.getElementById('btnApplyFixedExpenses').addEventListener('click', () => {
-        if (state.fixedExpenses.length === 0) return alert('Añade primero algún gasto fijo arriba.');
+        if (state.fixedExpenses.length === 0) return alert('Añade primero algún gasto fijo.');
         if (!confirm('¿Descontar todos los gastos fijos de tu saldo ahora?')) return;
         state.fixedExpenses.forEach(exp => {
-            addWalletMovement('OUT', exp.amount, `📌 Gasto fijo: ${exp.name}`);
+            const cat = exp.name.toLowerCase().includes('gym') ? 'Gym / Suplementos' : 'General';
+            addWalletMovement('OUT', exp.amount, `Gasto fijo: ${exp.name}`, cat);
         });
     });
 
-    // Modal Configurar Turnos
+    // Configurar Turnos
     document.getElementById('btnNewShift').addEventListener('click', () => openShiftConfigModal(null));
     document.getElementById('btnCloseShiftModal').addEventListener('click', () => {
         document.getElementById('shiftConfigModal').classList.remove('modal--open');
