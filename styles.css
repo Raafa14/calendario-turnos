@@ -1088,3 +1088,33 @@ select option {
 .bottom-nav__item--active .bottom-nav__icon-box {
     transform: none !important;
 }
+
+/* ADAPTACIÓN A BORDES REDONDEADOS Y ÁREA SEGURA DEL IPHONE (SAFE AREAS) */
+html, body {
+    background-color: var(--header-bg);
+}
+
+@media (min-width: 500px) {
+    html, body {
+        background-color: var(--bg-outer);
+    }
+}
+
+.app {
+    padding-bottom: calc(94px + env(safe-area-inset-bottom)) !important;
+}
+
+.header {
+    padding-top: calc(14px + env(safe-area-inset-top)) !important;
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+}
+
+.bottom-nav {
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    padding-top: 8px !important;
+    padding-left: max(14px, env(safe-area-inset-left)) !important;
+    padding-right: max(14px, env(safe-area-inset-right)) !important;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+}
