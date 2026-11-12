@@ -184,7 +184,7 @@ function paintCell(cellEl, dayNumber, info) {
     cellEl.style.backgroundColor = bgColor;
     cellEl.style.color = txtColor;
 
-    // 1. FILA SUPERIOR: Sticker pequeño arriba a la izquierda + alarma, y número a la derecha
+    // 1. FILA SUPERIOR: Icono arriba a la izquierda + alarma, y número a la derecha
     const top = document.createElement('div');
     top.className = 'day-cell__top';
 
@@ -212,7 +212,7 @@ function paintCell(cellEl, dayNumber, info) {
     top.appendChild(dayNumSpan);
     cellEl.appendChild(top);
 
-    // 2. CENTRO EXCLUSIVO PARA EL TEXTO O LA LETRA DEL TURNO (Sin stickers que lo empujen)
+    // 2. CENTRO: Solo texto o letra del turno (sin icono debajo)
     const middle = document.createElement('div');
     middle.className = 'day-cell__middle';
 
