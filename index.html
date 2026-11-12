@@ -365,6 +365,40 @@
                     </button>
                 </div>
 
+                <!-- Deudas Pendientes (Debo / Me deben) -->
+                <div class="sub-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">Deudas Pendientes</span>
+                        <strong id="debtsTotalLabel" style="font-size: 0.82rem; color: var(--danger);">Debo: 0.00 €</strong>
+                    </div>
+
+                    <div class="debt-tabs">
+                        <button type="button" id="debtTabOwe" class="debt-tab-btn debt-tab-btn--active">Debo dinero</button>
+                        <button type="button" id="debtTabOwed" class="debt-tab-btn">Me deben</button>
+                    </div>
+
+                    <div class="calc-box__row" style="margin-top: 8px;">
+                        <div class="calc-box__field">
+                            <input type="text" id="debtPersonInput" placeholder="Persona (Ej: Carlos)">
+                        </div>
+                        <div class="calc-box__field">
+                            <input type="text" id="debtConceptInput" placeholder="Concepto (Ej: Cena)">
+                        </div>
+                    </div>
+
+                    <div class="piggy-controls">
+                        <input type="number" id="debtAmountInput" step="0.5" min="0" placeholder="Cantidad €">
+                        <button type="button" id="btnAddDebt" class="btn btn--sm btn--primary">+ Apuntar</button>
+                    </div>
+
+                    <ul id="debtsList" class="worked-list" style="max-height: 150px; margin-top: 8px;"></ul>
+
+                    <div class="debt-free-bar">
+                        <span>Saldo real libre tras deudas:</span>
+                        <strong id="debtFreeBalanceValue">0.00 €</strong>
+                    </div>
+                </div>
+
                 <div class="wallet-history-header">
                     <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
                     <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
