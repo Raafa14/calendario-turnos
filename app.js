@@ -47,6 +47,7 @@ const state = {
     fixedExpenses: [],
     debts: [],
     debtTab: 'OWE',
+    createdIphoneAlarms: [],
     gymWeeklyGoal: 4,
     exercises: JSON.parse(JSON.stringify(DEFAULT_EXERCISES)),
     weightLogs: [],
@@ -105,6 +106,7 @@ function loadState() {
             state.piggySaved = p.piggySaved ?? 0;
             state.fixedExpenses = p.fixedExpenses || [];
             state.debts = p.debts || [];
+            state.createdIphoneAlarms = p.createdIphoneAlarms || [];
             state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
             state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
             state.weightLogs = p.weightLogs || [];
@@ -140,6 +142,7 @@ function saveState() {
         piggySaved: state.piggySaved,
         fixedExpenses: state.fixedExpenses,
         debts: state.debts,
+        createdIphoneAlarms: state.createdIphoneAlarms,
         gymWeeklyGoal: state.gymWeeklyGoal,
         exercises: state.exercises,
         weightLogs: state.weightLogs,
@@ -537,50 +540,29 @@ function syncPresetButtons(size) {
     });
 }
 
-// 4. EXPORTAR ALARMA INDIVIDUAL AL IPHONE (.ICS CON VALARM)
+// 4. CREAR ALARMA EN LA APP RELOJ DEL IPHONE SIN DUPLICADOS (VÍA ATAJOS)
 function triggerIphoneAlarmPrompt(dateKey, data) {
     if (!data.alarmEnabled || !data.alarmTime) return;
+
+    // Si ya existe una alarma creada a esta misma hora, evita repetirla
+    if (state.createdIphoneAlarms.includes(data.alarmTime)) {
+        return;
+    }
+
     const [y, m, d] = dateKey.split('-');
     const shiftName = state.shifts[data.shiftId] && state.shifts[data.shiftId].id !== 'NONE'
         ? state.shifts[data.shiftId].name
         : 'Turno';
 
-    const ok = confirm(`⏰ Has activado una alarma a las ${data.alarmTime} para el ${d}/${m}/${y} (${shiftName}).\n\n¿Quieres añadir este aviso al calendario de tu iPhone ahora?`);
+    const ok = confirm(`⏰ Has activado una alarma a las ${data.alarmTime} (${shiftName} - ${d}/${m}/${y}).\n\n¿Quieres añadirla a la app Reloj de tu iPhone? (Solo se creará una vez para esta hora)`);
     if (!ok) return;
 
-    const cleanDate = `${y}${m}${d}`;
-    const [ah, am] = data.alarmTime.split(':');
-    const dtStart = `${cleanDate}T${ah}${am}00`;
-    const endHour = String((parseInt(ah, 10) + 1) % 24).padStart(2, '0');
-    const dtEnd = `${cleanDate}T${endHour}${am}00`;
-    const notePart = data.customText ? ` - ${data.customText}` : '';
+    state.createdIphoneAlarms.push(data.alarmTime);
+    saveState();
 
-    const ics = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//ShifterPro//Alarma iOS//ES',
-        'BEGIN:VEVENT',
-        `UID:shifterpro-alarm-${dateKey}-${Date.now()}@shifterpro.app`,
-        `SUMMARY:⏰ Alarma ${shiftName}${notePart} (Entrada ${data.startTime})`,
-        `DESCRIPTION:Despertador programado desde ShifterPro para tu jornada (${shiftName}).`,
-        `DTSTART:${dtStart}`,
-        `DTEND:${dtEnd}`,
-        'BEGIN:VALARM',
-        'TRIGGER:-PT0M',
-        'ACTION:DISPLAY',
-        `DESCRIPTION:⏰ Alarma ${shiftName} (${data.alarmTime})`,
-        'END:VALARM',
-        'END:VEVENT',
-        'END:VCALENDAR'
-    ].join('\r\n');
-
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `alarma_${dateKey}.ics`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const shortcutName = encodeURIComponent('Alarma ShifterPro');
+    const alarmTimeParam = encodeURIComponent(data.alarmTime);
+    window.location.href = `shortcuts://run-shortcut?name=${shortcutName}&input=text&text=${alarmTimeParam}`;
 }
 
 // 5. GANANCIAS Y NÓMINA REAL
@@ -1381,6 +1363,7 @@ function bindEvents() {
         if (!confirm('¿Vaciar todos los días de este mes?')) return;
         const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
         Object.keys(state.daysData).forEach(k => { if (k.startsWith(prefix)) delete state.daysData[k]; });
+        state.createdIphoneAlarms = [];
         saveState();
         renderAll();
     });
@@ -1489,7 +1472,7 @@ function bindEvents() {
         });
     });
 
-    // Guardar Día + Aviso de Alarma en iPhone
+    // Guardar Día + Aviso de Alarma en Reloj iPhone (sin duplicar hora)
     function handleSaveDay(e) {
         if (e) e.preventDefault();
         if (!state.editingDateKey) return;
