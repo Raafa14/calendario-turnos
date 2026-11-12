@@ -1055,3 +1055,23 @@ select option {
 .btn--primary { background: var(--accent); color: #fff; flex: 1; }
 .btn--danger { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
 .btn--outline { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0 !important;
+    padding: 8px 18px calc(10px + env(safe-area-inset-bottom)) !important;
+}
+
+.bottom-nav__item {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    padding: 3px 4px !important;
+}
