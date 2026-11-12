@@ -1031,3 +1031,61 @@ input, textarea {
 .btn--primary { background: var(--accent); color: #fff; flex: 1; }
 .btn--danger { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
 .btn--outline { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+
+/* ESTILOS DE HUCHA DE AHORRO Y GASTOS FIJOS (MI CAJA) */
+.sub-box {
+    margin-top: 16px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.sub-box__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.sub-box__title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.sub-box .calc-box__field input {
+    background: var(--bg-card);
+}
+
+.piggy-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    margin: 10px 0 6px;
+}
+
+.piggy-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.piggy-controls input {
+    flex: 1;
+    min-width: 0; /* Evita que se desborde en pantallas de iPhone */
+    padding: 9px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.piggy-controls .btn {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+}
