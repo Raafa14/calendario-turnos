@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Configuración para que en iPhone se abra a pantalla completa como App Nativa -->
+    <title>ShifterPro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShifterPro">
     <link rel="apple-touch-icon" href="icono.jpg">
     <link rel="icon" type="image/jpeg" href="icono.jpg">
     <link rel="manifest" href="manifest.json">
-    <title>ShifterPro</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,27 +23,25 @@
                     <h1 class="header__title">Shifter<span style="color: var(--accent);">Pro</span></h1>
                 </div>
                 <div class="header__actions">
-                    <button id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">🌙</button>
-                    <button id="btnExportBackup" class="icon-btn" title="Guardar Copia de Seguridad (.json)">💾</button>
-                    <button id="btnImportBackup" class="icon-btn" title="Restaurar Copia de Seguridad (.json)">📂</button>
+                    <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">🌙</button>
+                    <button type="button" id="btnExportBackup" class="icon-btn" title="Guardar Copia de Seguridad (.json)">💾</button>
+                    <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar Copia de Seguridad (.json)">📂</button>
                     <input type="file" id="inputImportBackup" accept=".json" style="display: none;">
-                    <button id="btnExportICS" class="icon-btn" title="Exportar alarmas al calendario del móvil (.ics)">🔔</button>
-                    <button id="btnClearMonth" class="icon-btn icon-btn--danger" title="Vaciar mes actual">🗑️</button>
+                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar alarmas (.ics)">🔔</button>
+                    <button type="button" id="btnClearMonth" class="icon-btn" title="Vaciar mes actual">🗑️</button>
                 </div>
             </div>
 
-            <!-- Banner inteligente del turno y alarma de mañana -->
             <div id="tomorrowBanner" class="tomorrow-banner">
                 <span>🌙 Mañana sin turno ni alarma programada</span>
             </div>
-
         </header>
 
-        <!-- BARRA DE MES -->
+        <!-- BARRA DE NAVEGACIÓN DE MES -->
         <div class="month-bar">
-            <button id="btnPrevMonth" class="month-bar__arrow">&lt;</button>
+            <button type="button" id="btnPrevMonth" class="month-bar__arrow">&lt;</button>
             <h2 id="currentMonthLabel" class="month-bar__title">NOVIEMBRE 2026</h2>
-            <button id="btnNextMonth" class="month-bar__arrow">&gt;</button>
+            <button type="button" id="btnNextMonth" class="month-bar__arrow">&gt;</button>
         </div>
 
         <!-- ==================== VISTA 1: CALENDARIO ==================== -->
@@ -55,24 +52,24 @@
                 </div>
                 <div id="calendarGrid" class="calendar__grid"></div>
             </div>
-            <p class="helper-hint">💡 Toca cualquier casilla del calendario para configurar tu jornada, color, nota o alarma.</p>
+            <p class="helper-hint">💡 Toca cualquier casilla para configurar turno, nota, bote o alarma.</p>
         </main>
 
-        <!-- ==================== VISTA 2: CONTROL GANANCIAS ==================== -->
+        <!-- ==================== VISTA 2: GANANCIAS Y NÓMINA REAL ==================== -->
         <section id="statsView" class="view">
             <div class="panel-card">
-                <h3 class="panel-card__title">💰 Calculadora de Horas y Ganancias</h3>
-                
-                <!-- FUNCIÓN 6: Cabecera de Seguridad con PIN -->
+                <h3 class="panel-card__title">💰 Ganancias y Nómina Real</h3>
+
+                <!-- Bloqueo con PIN -->
                 <div class="pin-security-bar">
                     <span id="pinStatusText">🔓 Pestaña sin PIN de bloqueo</span>
                     <div class="pin-security-bar__btns">
-                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">🔒 Configurar PIN</button>
+                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">🔒 Activar PIN</button>
                         <button type="button" id="btnLockNow" class="btn btn--sm btn--danger" style="display: none;">Bloquear</button>
                     </div>
                 </div>
 
-                <!-- FUNCIÓN 5: Meta de Dinero Mensual y Comparativa con Mes Anterior -->
+                <!-- Meta Mensual y Comparativa -->
                 <div class="goal-card">
                     <div class="goal-card__top">
                         <div>
@@ -84,89 +81,98 @@
                             <small id="goalRemainingText" class="goal-card__remaining">Faltan 1200.00 €</small>
                         </div>
                     </div>
-
                     <div class="goal-progress">
                         <div id="goalProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
                     </div>
-
                     <div id="prevMonthComparison" class="goal-card__compare">
                         📊 Comparativa mes anterior: Calculando...
                     </div>
                 </div>
 
+                <!-- Resumen de días y horas -->
                 <div class="stats-grid">
                     <div class="stat-pill">
-                        <span class="stat-pill__label">Días trabajados</span>
+                        <span class="stat-pill__label">Días trab.</span>
                         <strong id="statDaysWorked" class="stat-pill__value">0</strong>
                     </div>
                     <div class="stat-pill">
-                        <span class="stat-pill__label">Horas normales</span>
+                        <span class="stat-pill__label">Horas norm.</span>
                         <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
                     </div>
-                    <div class="stat-pill stat-pill--extra">
+                    <div class="stat-pill">
                         <span class="stat-pill__label">Horas EXTRA</span>
                         <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
                     </div>
                 </div>
 
+                <!-- Calculadora Bruto / Neto / Bote -->
                 <div class="calc-box">
                     <div class="calc-box__row">
                         <div class="calc-box__field">
-                            <label for="calcTotalHoursInput">Horas totales trabajadas:</label>
+                            <label for="calcTotalHoursInput">Horas normales mes:</label>
                             <input type="number" id="calcTotalHoursInput" step="0.5" min="0" value="0">
                         </div>
                         <div class="calc-box__field">
-                            <label for="hourlyRateInput">Precio por hora (€/h):</label>
+                            <label for="hourlyRateInput">Precio hora (€/h):</label>
                             <input type="number" id="hourlyRateInput" step="0.5" min="0" value="10">
                         </div>
                     </div>
 
-                    <div class="calc-box__field" style="margin-top: 10px;">
-                        <label for="extraRateInput">Precio hora EXTRA (€/h - opcional):</label>
-                        <input type="number" id="extraRateInput" step="0.5" min="0" value="12">
+                    <div class="calc-box__row" style="margin-top: 8px;">
+                        <div class="calc-box__field">
+                            <label for="extraRateInput">Precio hora EXTRA (€/h):</label>
+                            <input type="number" id="extraRateInput" step="0.5" min="0" value="12">
+                        </div>
+                        <div class="calc-box__field">
+                            <label for="retentionPercentInput">Retención IRPF / SS (%):</label>
+                            <input type="number" id="retentionPercentInput" step="0.5" min="0" max="60" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Desglose Nómina Bruta, Neta y Bote en mano -->
+                    <div class="payroll-breakdown">
+                        <div class="payroll-row">
+                            <span>Sueldo Bruto (Turnos):</span>
+                            <strong id="statGrossMoney">0.00 €</strong>
+                        </div>
+                        <div class="payroll-row">
+                            <span>Sueldo Neto (Limpio al banco):</span>
+                            <strong id="statNetMoney" style="color: var(--accent);">0.00 €</strong>
+                        </div>
+                        <div class="payroll-row">
+                            <span>🪙 Bote / Propinas (en mano):</span>
+                            <strong id="statMonthTips" style="color: #f59e0b;">0.00 €</strong>
+                        </div>
                     </div>
 
                     <div class="earned-banner">
                         <div>
-                            <span class="earned-banner__label">TOTAL ESTIMADO A COBRAR</span>
+                            <span class="earned-banner__label">TOTAL REAL (NETO + BOTE)</span>
                             <small id="earnedFormulaText" class="earned-banner__sub">0h × 10€/h</small>
                         </div>
                         <strong id="statTotalMoney" class="earned-banner__total">0.00 €</strong>
                     </div>
                 </div>
 
-                <h4 class="panel-card__subtitle">Desglose de jornadas de este mes</h4>
+                <h4 class="panel-card__subtitle">Desglose de jornadas del mes</h4>
                 <ul id="workedDaysList" class="worked-list"></ul>
             </div>
         </section>
 
-        <!-- ==================== VISTA 3: MIS TURNOS Y COLORES ==================== -->
-        <section id="shiftsView" class="view">
-            <div class="panel-card">
-                <div class="panel-card__header">
-                    <div>
-                        <h3 class="panel-card__title">🎨 Configura tus Turnos y Colores</h3>
-                        <p class="panel-card__desc">Edita los colores, horarios y letras de cada turno o crea uno nuevo.</p>
-                    </div>
-                    <button id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo Turno</button>
-                </div>
-
-                <div id="shiftsConfigList" class="shifts-list"></div>
-            </div>
-        </section>
-        <!-- ==================== VISTA 4: MI CAJA / BILLETERA (INGRESOS Y GASTOS) ==================== -->
+        <!-- ==================== VISTA 3: MI CAJA, HUCHA Y GASTOS FIJOS ==================== -->
         <section id="walletView" class="view">
             <div class="panel-card">
+                <!-- Tarjeta de Saldo Disponible -->
                 <div class="wallet-balance-card">
-                    <span class="wallet-balance-card__label">SALDO ACTUAL DISPONIBLE</span>
+                    <span class="wallet-balance-card__label">SALDO DISPONIBLE EN CAJA</span>
                     <strong id="walletCurrentBalance" class="wallet-balance-card__amount">0.00 €</strong>
                     <div class="wallet-balance-card__row">
                         <span class="wallet-pill wallet-pill--in">📈 Ingresado: <b id="walletTotalIn">0.00 €</b></span>
-                        <span class="wallet-pill wallet-pill--out">📉 Retirado: <b id="walletTotalOut">0.00 €</b></span>
+                        <span class="wallet-pill wallet-pill--out">📉 Gastado: <b id="walletTotalOut">0.00 €</b></span>
                     </div>
                 </div>
 
-                <!-- Formulario rápido para Añadir o Retirar dinero -->
+                <!-- Añadir o Retirar Dinero -->
                 <div class="wallet-form">
                     <div class="calc-box__row">
                         <div class="calc-box__field">
@@ -174,8 +180,8 @@
                             <input type="number" id="walletAmountInput" step="0.5" min="0" placeholder="Ej: 50">
                         </div>
                         <div class="calc-box__field">
-                            <label for="walletConceptInput">Concepto / Nota:</label>
-                            <input type="text" id="walletConceptInput" placeholder="Ej: Bote, Gasolina, Cena...">
+                            <label for="walletConceptInput">Concepto:</label>
+                            <input type="text" id="walletConceptInput" placeholder="Ej: Cena, Gasolina...">
                         </div>
                     </div>
 
@@ -185,10 +191,58 @@
                     </div>
 
                     <button type="button" id="btnSyncMonthToWallet" class="btn btn--outline wallet-sync-btn">
-                        🔄 Sumar lo ganado en turnos este mes a mi Caja
+                        🔄 Ingresar sueldo neto + bote de este mes a Mi Caja
                     </button>
                 </div>
 
+                <!-- HUCHA DE AHORRO CON OBJETIVO VISUAL -->
+                <div class="sub-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">🐷 Hucha de Ahorro</span>
+                        <span id="piggyPercentBadge" class="goal-percent-badge">0%</span>
+                    </div>
+                    <div class="calc-box__row" style="margin-bottom: 8px;">
+                        <div class="calc-box__field">
+                            <label for="piggyTitleInput">Nombre de la meta:</label>
+                            <input type="text" id="piggyTitleInput" value="Ahorro / Viaje">
+                        </div>
+                        <div class="calc-box__field">
+                            <label for="piggyGoalInput">Objetivo (€):</label>
+                            <input type="number" id="piggyGoalInput" step="50" min="0" value="600">
+                        </div>
+                    </div>
+                    <div class="piggy-status-row">
+                        <span>Ahorrado en hucha:</span>
+                        <strong id="piggySavedAmount">0.00 €</strong>
+                    </div>
+                    <div class="goal-progress">
+                        <div id="piggyProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="piggy-controls">
+                        <input type="number" id="piggyTransferInput" step="5" min="0" placeholder="Cantidad €">
+                        <button type="button" id="btnPiggyDeposit" class="btn btn--sm btn--primary">Meter</button>
+                        <button type="button" id="btnPiggyWithdraw" class="btn btn--sm btn--outline">Sacar</button>
+                    </div>
+                </div>
+
+                <!-- GASTOS FIJOS / SUSCRIPCIONES MENSUALES -->
+                <div class="sub-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">📌 Gastos Fijos Mensuales</span>
+                        <strong id="fixedExpensesTotalLabel" style="font-size: 0.82rem; color: var(--danger);">0.00 €/mes</strong>
+                    </div>
+                    <div class="piggy-controls" style="margin-bottom: 8px;">
+                        <input type="text" id="fixedExpenseName" placeholder="Ej: Gimnasio, Móvil...">
+                        <input type="number" id="fixedExpenseAmount" step="1" min="0" placeholder="€" style="max-width: 80px;">
+                        <button type="button" id="btnAddFixedExpense" class="btn btn--sm btn--primary">+</button>
+                    </div>
+                    <ul id="fixedExpensesList" class="worked-list" style="max-height: 130px; margin-bottom: 8px;"></ul>
+                    <button type="button" id="btnApplyFixedExpenses" class="btn btn--danger" style="width: 100%; font-size: 0.78rem;">
+                        💸 Descontar todos los gastos fijos ahora
+                    </button>
+                </div>
+
+                <!-- Historial de Movimientos -->
                 <div class="wallet-history-header">
                     <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
                     <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
@@ -197,37 +251,50 @@
             </div>
         </section>
 
-        <!-- ==================== BARRA DE PESTAÑAS INFERIOR (ESTILO iOS MINIMALISTA) ==================== -->
+        <!-- ==================== VISTA 4: MIS TURNOS Y COLORES ==================== -->
+        <section id="shiftsView" class="view">
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <div>
+                        <h3 class="panel-card__title">🎨 Configura tus Turnos</h3>
+                        <p class="panel-card__desc">Edita colores, horarios y letras o crea turnos nuevos.</p>
+                    </div>
+                    <button type="button" id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo Turno</button>
+                </div>
+                <div id="shiftsConfigList" class="shifts-list"></div>
+            </div>
+        </section>
+
+        <!-- ==================== BARRA DE PESTAÑAS INFERIOR ==================== -->
         <nav class="bottom-nav">
-            <button class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
+            <button type="button" class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
                 <span class="bottom-nav__icon">📅</span>
                 <span class="bottom-nav__label">Calendario</span>
             </button>
-            <button class="bottom-nav__item" data-tab="statsView">
+            <button type="button" class="bottom-nav__item" data-tab="statsView">
                 <span class="bottom-nav__icon">📊</span>
                 <span class="bottom-nav__label">Ganancias</span>
             </button>
-            <button class="bottom-nav__item" data-tab="walletView">
+            <button type="button" class="bottom-nav__item" data-tab="walletView">
                 <span class="bottom-nav__icon">💳</span>
                 <span class="bottom-nav__label">Mi Caja</span>
             </button>
-            <button class="bottom-nav__item" data-tab="shiftsView">
+            <button type="button" class="bottom-nav__item" data-tab="shiftsView">
                 <span class="bottom-nav__icon">🎨</span>
                 <span class="bottom-nav__label">Turnos</span>
             </button>
         </nav>
-        
     </div>
 
-    <!-- ==================== MODAL 1: DETALLE DE JORNADA (AL PULSAR UN DÍA) ==================== -->
+    <!-- ==================== MODAL 1: DETALLE DE JORNADA ==================== -->
     <div id="dayModal" class="modal">
         <div class="modal__dialog">
             <div class="modal__header">
                 <div>
                     <span class="modal__eyebrow">DETALLE DE JORNADA</span>
-                    <h3 id="modalFullDateTitle" class="modal__title">Miércoles, 18 de Noviembre</h3>
+                    <h3 id="modalFullDateTitle" class="modal__title">Jueves, 12 de Noviembre</h3>
                 </div>
-                <button id="btnCloseDayModal" class="modal__close">&times;</button>
+                <button type="button" id="btnCloseDayModal" class="modal__close">&times;</button>
             </div>
 
             <form id="dayForm" class="modal__body">
@@ -237,27 +304,26 @@
                     <div id="modalShiftSelector" class="shift-cards-grid"></div>
                 </div>
 
-                <!-- 1.B Color personalizado para este día (Paleta + Todos los colores posibles) -->
+                <!-- Color libre para este día -->
                 <div class="custom-color-box">
                     <div class="custom-color-box__top">
                         <label class="checkbox-row">
                             <input type="checkbox" id="dayUseCustomColor">
-                            <span>🎨 Usar un color especial solo para este día</span>
+                            <span>🎨 Color especial solo para este día</span>
                         </label>
                         <div class="color-picker-wrapper">
-                            <input type="color" id="dayCustomBgColor" value="#ffe082" class="color-picker-mini" title="Elegir cualquier color">
+                            <input type="color" id="dayCustomBgColor" value="#ffe082" class="color-picker-mini">
                             <span id="dayColorHexLabel" class="color-hex-tag">#FFE082</span>
                         </div>
                     </div>
-                    <!-- Paleta rápida de colores para el día -->
                     <div id="dayQuickPalette" class="day-quick-palette"></div>
                 </div>
 
-                <!-- 2. Horas trabajadas hoy y Horas Extra (Con botones - y +) -->
+                <!-- 2. Horas trabajadas y Horas Extra -->
                 <div class="dual-counters">
                     <div class="counter-card">
-                        <span class="counter-card__title">Horas trabajadas hoy</span>
-                        <small class="counter-card__sub">Ej: 8h, 6.5h, 7h...</small>
+                        <span class="counter-card__title">Horas trabajadas</span>
+                        <small class="counter-card__sub">Ej: 8h, 6.5h...</small>
                         <div class="stepper">
                             <button type="button" class="stepper__btn" data-step-target="dayHours" data-step="-0.5">&minus;</button>
                             <input type="number" id="dayHours" class="stepper__input" step="0.5" min="0" max="24" value="0">
@@ -276,12 +342,12 @@
                     </div>
                 </div>
 
-                <!-- 2.B NUEVO (Foto 3): Seleccionar lo que ganas por hora en este día y ver total del día -->
+                <!-- 3. Precio por hora y Bote / Propinas del día -->
                 <div class="day-rates-box">
                     <div class="dual-counters" style="margin-bottom: 8px;">
                         <div class="counter-card">
                             <span class="counter-card__title">💶 Precio Hora (€/h)</span>
-                            <small class="counter-card__sub">Lo que cobras hoy</small>
+                            <small class="counter-card__sub">Tarifa normal hoy</small>
                             <div class="stepper">
                                 <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="-0.5">&minus;</button>
                                 <input type="number" id="dayHourlyRate" class="stepper__input" step="0.5" min="0" value="10">
@@ -290,8 +356,8 @@
                         </div>
 
                         <div class="counter-card counter-card--extra">
-                            <span class="counter-card__title">💶 Precio Hora Extra</span>
-                            <small class="counter-card__sub">€/h extra hoy</small>
+                            <span class="counter-card__title">💶 Precio Extra (€/h)</span>
+                            <small class="counter-card__sub">Tarifa extra hoy</small>
                             <div class="stepper">
                                 <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="-0.5">&minus;</button>
                                 <input type="number" id="dayExtraRate" class="stepper__input" step="0.5" min="0" value="12">
@@ -299,13 +365,29 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Bote / Propinas en mano del día -->
+                    <div class="counter-card" style="margin-bottom: 8px; border-color: #f59e0b;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span class="counter-card__title">🪙 Bote / Propinas hoy (€)</span>
+                                <small class="counter-card__sub" style="margin:0;">Dinero extra en mano</small>
+                            </div>
+                            <div class="stepper" style="width: 145px;">
+                                <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="-1">&minus;</button>
+                                <input type="number" id="dayTips" class="stepper__input" step="0.5" min="0" value="0">
+                                <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="1">+</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="day-earned-preview">
-                        <span>💰 Ganancia de este día:</span>
+                        <span>💰 Ganancia total hoy:</span>
                         <strong id="modalDayEarnedValue">0.00 €</strong>
                     </div>
                 </div>
 
-                <!-- 3. Poner Alarma / Despertador -->
+                <!-- 4. Alarma / Despertador -->
                 <div class="alarm-card">
                     <label class="alarm-card__check">
                         <input type="checkbox" id="dayAlarmEnabled">
@@ -326,50 +408,47 @@
                     </div>
                 </div>
 
-                <!-- 4. Texto o nota en la casilla + Tamaño -->
+                <!-- 5. Texto / Nota y Sticker arriba a la izquierda -->
                 <div class="note-card">
                     <div class="note-card__top">
                         <label for="dayCustomText" class="section-block__label" style="margin:0;">Texto o nota en la casilla</label>
                         <span id="fontSizeBadge" class="size-badge">13 px</span>
                     </div>
 
-                    <input type="text" id="dayCustomText" class="text-input" placeholder="Escribe aquí tu texto (ej. Guardia, Libre, Cita...)">
+                    <input type="text" id="dayCustomText" class="text-input" placeholder="Escribe aquí tu texto (ej. Examen Ruben, Libre...)">
 
                     <div class="size-controls">
-                        <span class="size-controls__label">Tamaño del texto en el calendario:</span>
+                        <span class="size-controls__label">Tamaño del texto:</span>
                         <div class="size-presets">
                             <button type="button" class="preset-btn" data-size="10">Peq</button>
                             <button type="button" class="preset-btn preset-btn--active" data-size="13">Med</button>
-                            <button type="button" class="preset-btn" data-size="16">Grande</button>
-                            <button type="button" class="preset-btn" data-size="20">Gigante</button>
+                            <button type="button" class="preset-btn" data-size="15">Grande</button>
+                            <button type="button" class="preset-btn" data-size="18">Gigante</button>
                         </div>
                     </div>
 
-                    <input type="range" id="dayFontSize" class="range-slider" min="8" max="24" value="13">
+                    <input type="range" id="dayFontSize" class="range-slider" min="8" max="20" value="13">
 
                     <label class="checkbox-row" style="margin-top: 8px;">
                         <input type="checkbox" id="dayPrioritizeText" checked>
                         <span>Ver mi texto grande en el centro (achicar letra M, A, N)</span>
                     </label>
 
-                    <!-- Selector de Sticker / Icono -->
                     <div class="sticker-bar">
-                        <span class="sticker-bar__label">Icono / Sticker:</span>
+                        <span class="sticker-bar__label">Icono arriba a la izquierda:</span>
                         <div id="stickerList" class="sticker-list"></div>
                     </div>
 
-                    <!-- Vista Previa en vivo -->
                     <div class="live-preview-box">
                         <span class="live-preview-box__label">VISTA PREVIA DE LA CASILLA:</span>
                         <div id="cellPreview" class="day-cell day-cell--preview"></div>
                     </div>
                 </div>
 
-                <!-- FUNCIÓN 1: Copiar este día a otros días de la misma semana -->
+                <!-- Copiar a otros días de la semana -->
                 <div class="repeat-week-box">
                     <span class="repeat-week-box__title">⚡ Copiar también a otros días de esta semana:</span>
-                    <small class="repeat-week-box__sub">Marca los días de esta misma semana donde quieras clonar este turno/nota:</small>
-                    <div id="repeatWeekDaysContainer" class="repeat-week-days">
+                    <div id="repeatWeekDaysContainer" class="repeat-week-days" style="margin-top: 8px;">
                         <button type="button" class="weekday-check-btn" data-dow="1">L</button>
                         <button type="button" class="weekday-check-btn" data-dow="2">M</button>
                         <button type="button" class="weekday-check-btn" data-dow="3">X</button>
@@ -380,16 +459,15 @@
                     </div>
                 </div>
 
-                <!-- Acciones del Modal -->
                 <div class="modal__footer">
-                    <button type="button" id="btnClearDay" class="btn btn--danger">🗑️ Vaciar Día</button>
+                    <button type="button" id="btnClearDay" class="btn btn--danger">🗑️ Vaciar</button>
                     <button type="submit" class="btn btn--primary">💾 Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ==================== MODAL 2: CREAR / EDITAR UN TURNO Y SU COLOR ==================== -->
+    <!-- ==================== MODAL 2: CREAR / EDITAR TURNO ==================== -->
     <div id="shiftConfigModal" class="modal">
         <div class="modal__dialog">
             <div class="modal__header">
@@ -397,7 +475,7 @@
                     <span class="modal__eyebrow">PERSONALIZAR TURNO</span>
                     <h3 id="shiftModalTitle" class="modal__title">Editar Turno</h3>
                 </div>
-                <button id="btnCloseShiftModal" class="modal__close">&times;</button>
+                <button type="button" id="btnCloseShiftModal" class="modal__close">&times;</button>
             </div>
 
             <form id="shiftConfigForm" class="modal__body">
@@ -407,16 +485,16 @@
                         <input type="text" id="cfgShiftName" required placeholder="Ej: Mañana">
                     </div>
                     <div class="calc-box__field">
-                        <label for="cfgShiftShort">Letra / Abreviatura (máx 3):</label>
+                        <label for="cfgShiftShort">Letra (máx 3):</label>
                         <input type="text" id="cfgShiftShort" maxlength="3" required placeholder="Ej: M">
                     </div>
                 </div>
 
                 <div class="section-block" style="margin-top: 12px;">
-                    <label class="section-block__label">Elige el color del turno:</label>
+                    <label class="section-block__label">Color del turno:</label>
                     <div id="colorPaletteGrid" class="palette-grid"></div>
                     <div class="custom-color-bar" style="margin-top: 8px;">
-                        <span>O elige cualquier color exacto:</span>
+                        <span>O color libre:</span>
                         <input type="color" id="cfgShiftColor" value="#fff3b0" class="color-picker-mini">
                     </div>
                 </div>
@@ -427,18 +505,18 @@
                         <input type="number" id="cfgShiftHours" step="0.5" min="0" max="24" value="8">
                     </div>
                     <div class="calc-box__field">
-                        <label for="cfgShiftStart">Hora de entrada:</label>
+                        <label for="cfgShiftStart">Hora entrada:</label>
                         <input type="time" id="cfgShiftStart" value="08:00">
                     </div>
                 </div>
 
                 <div class="calc-box__field" style="margin-top: 10px;">
-                    <label for="cfgShiftAlarm">Hora de alarma sugerida para este turno:</label>
+                    <label for="cfgShiftAlarm">Alarma sugerida:</label>
                     <input type="time" id="cfgShiftAlarm" value="06:00">
                 </div>
 
                 <div class="modal__footer" style="margin-top: 16px;">
-                    <button type="button" id="btnDeleteShiftType" class="btn btn--danger">Eliminar Turno</button>
+                    <button type="button" id="btnDeleteShiftType" class="btn btn--danger">Eliminar</button>
                     <button type="submit" class="btn btn--primary">Guardar Turno</button>
                 </div>
             </form>
