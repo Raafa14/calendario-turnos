@@ -38,12 +38,6 @@
                 <span>🌙 Mañana sin turno ni alarma programada</span>
             </div>
 
-            <!-- Pestañas de navegación principal -->
-            <nav class="tabs">
-                <button class="tabs__btn tabs__btn--active" data-tab="calendarView">CALENDARIO</button>
-                <button class="tabs__btn" data-tab="statsView">CONTROL GANANCIAS</button>
-                <button class="tabs__btn" data-tab="shiftsView">🎨 MIS TURNOS</button>
-            </nav>
         </header>
 
         <!-- BARRA DE MES -->
@@ -160,6 +154,69 @@
                 <div id="shiftsConfigList" class="shifts-list"></div>
             </div>
         </section>
+        <!-- ==================== VISTA 4: MI CAJA / BILLETERA (INGRESOS Y GASTOS) ==================== -->
+        <section id="walletView" class="view">
+            <div class="panel-card">
+                <div class="wallet-balance-card">
+                    <span class="wallet-balance-card__label">SALDO ACTUAL DISPONIBLE</span>
+                    <strong id="walletCurrentBalance" class="wallet-balance-card__amount">0.00 €</strong>
+                    <div class="wallet-balance-card__row">
+                        <span class="wallet-pill wallet-pill--in">📈 Ingresado: <b id="walletTotalIn">0.00 €</b></span>
+                        <span class="wallet-pill wallet-pill--out">📉 Retirado: <b id="walletTotalOut">0.00 €</b></span>
+                    </div>
+                </div>
+
+                <!-- Formulario rápido para Añadir o Retirar dinero -->
+                <div class="wallet-form">
+                    <div class="calc-box__row">
+                        <div class="calc-box__field">
+                            <label for="walletAmountInput">Cantidad (€):</label>
+                            <input type="number" id="walletAmountInput" step="0.5" min="0" placeholder="Ej: 50">
+                        </div>
+                        <div class="calc-box__field">
+                            <label for="walletConceptInput">Concepto / Nota:</label>
+                            <input type="text" id="walletConceptInput" placeholder="Ej: Bote, Gasolina, Cena...">
+                        </div>
+                    </div>
+
+                    <div class="wallet-actions">
+                        <button type="button" id="btnWalletAdd" class="btn btn--wallet-in">➕ Añadir Dinero</button>
+                        <button type="button" id="btnWalletWithdraw" class="btn btn--wallet-out">➖ Retirar / Gasto</button>
+                    </div>
+
+                    <button type="button" id="btnSyncMonthToWallet" class="btn btn--outline wallet-sync-btn">
+                        🔄 Sumar lo ganado en turnos este mes a mi Caja
+                    </button>
+                </div>
+
+                <div class="wallet-history-header">
+                    <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
+                    <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
+                </div>
+                <ul id="walletMovementsList" class="worked-list"></ul>
+            </div>
+        </section>
+
+        <!-- ==================== BARRA DE PESTAÑAS INFERIOR (ESTILO iOS MINIMALISTA) ==================== -->
+        <nav class="bottom-nav">
+            <button class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
+                <span class="bottom-nav__icon">📅</span>
+                <span class="bottom-nav__label">Calendario</span>
+            </button>
+            <button class="bottom-nav__item" data-tab="statsView">
+                <span class="bottom-nav__icon">📊</span>
+                <span class="bottom-nav__label">Ganancias</span>
+            </button>
+            <button class="bottom-nav__item" data-tab="walletView">
+                <span class="bottom-nav__icon">💳</span>
+                <span class="bottom-nav__label">Mi Caja</span>
+            </button>
+            <button class="bottom-nav__item" data-tab="shiftsView">
+                <span class="bottom-nav__icon">🎨</span>
+                <span class="bottom-nav__label">Turnos</span>
+            </button>
+        </nav>
+        
     </div>
 
     <!-- ==================== MODAL 1: DETALLE DE JORNADA (AL PULSAR UN DÍA) ==================== -->
