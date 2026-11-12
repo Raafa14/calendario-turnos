@@ -10,38 +10,100 @@
     <link rel="apple-touch-icon" href="icono.jpg">
     <link rel="icon" type="image/jpeg" href="icono.jpg">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
 
     <div class="app">
-        <!-- CABECERA SUPERIOR -->
+        <!-- CABECERA SUPERIOR CON ICONOS MINIMALISTAS PLANOS -->
         <header class="header">
             <div class="header__top">
                 <div class="header__brand">
-                    <span class="header__logo">📅</span>
+                    <div class="brand-squircle">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="3"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
                     <h1 class="header__title">Shifter<span style="color: var(--accent);">Pro</span></h1>
                 </div>
+
                 <div class="header__actions">
-                    <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">🌙</button>
-                    <button type="button" id="btnExportBackup" class="icon-btn" title="Guardar Copia de Seguridad (.json)">💾</button>
-                    <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar Copia de Seguridad (.json)">📂</button>
+                    <!-- Modo Claro / Oscuro -->
+                    <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">
+                        <svg id="iconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <svg id="iconSun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Guardar Copia de Seguridad -->
+                    <button type="button" id="btnExportBackup" class="icon-btn" title="Guardar Copia (.json)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+
+                    <!-- Restaurar Copia -->
+                    <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar Copia (.json)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </button>
                     <input type="file" id="inputImportBackup" accept=".json" style="display: none;">
-                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar alarmas (.ics)">🔔</button>
-                    <button type="button" id="btnClearMonth" class="icon-btn" title="Vaciar mes actual">🗑️</button>
+
+                    <!-- Exportar Alarmas ICS -->
+                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar alarmas (.ics)">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Vaciar Mes -->
+                    <button type="button" id="btnClearMonth" class="icon-btn" title="Vaciar mes actual">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
             <div id="tomorrowBanner" class="tomorrow-banner">
-                <span>🌙 Mañana sin turno ni alarma programada</span>
+                <span>Mañana sin turno ni alarma programada</span>
             </div>
         </header>
 
         <!-- BARRA DE NAVEGACIÓN DE MES -->
         <div class="month-bar">
-            <button type="button" id="btnPrevMonth" class="month-bar__arrow">&lt;</button>
+            <button type="button" id="btnPrevMonth" class="month-bar__arrow" aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
             <h2 id="currentMonthLabel" class="month-bar__title">NOVIEMBRE 2026</h2>
-            <button type="button" id="btnNextMonth" class="month-bar__arrow">&gt;</button>
+            <button type="button" id="btnNextMonth" class="month-bar__arrow" aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
         </div>
 
         <!-- ==================== VISTA 1: CALENDARIO ==================== -->
@@ -52,28 +114,26 @@
                 </div>
                 <div id="calendarGrid" class="calendar__grid"></div>
             </div>
-            <p class="helper-hint">💡 Toca cualquier casilla para configurar turno, nota, bote o alarma.</p>
+            <p class="helper-hint">Toca cualquier casilla para configurar turno, entreno, nota o alarma.</p>
         </main>
 
         <!-- ==================== VISTA 2: GANANCIAS Y NÓMINA REAL ==================== -->
         <section id="statsView" class="view">
             <div class="panel-card">
-                <h3 class="panel-card__title">💰 Ganancias y Nómina Real</h3>
+                <h3 class="panel-card__title">Ganancias y Nómina Real</h3>
 
-                <!-- Bloqueo con PIN -->
                 <div class="pin-security-bar">
-                    <span id="pinStatusText">🔓 Pestaña sin PIN de bloqueo</span>
+                    <span id="pinStatusText">Pestaña sin PIN de bloqueo</span>
                     <div class="pin-security-bar__btns">
-                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">🔒 Activar PIN</button>
+                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">Configurar PIN</button>
                         <button type="button" id="btnLockNow" class="btn btn--sm btn--danger" style="display: none;">Bloquear</button>
                     </div>
                 </div>
 
-                <!-- Meta Mensual y Comparativa -->
                 <div class="goal-card">
                     <div class="goal-card__top">
                         <div>
-                            <span class="goal-card__label">🎯 Meta mensual (€):</span>
+                            <span class="goal-card__label">Meta mensual (€):</span>
                             <input type="number" id="monthlyGoalInput" class="goal-card__input" step="50" min="0" value="1200">
                         </div>
                         <div class="goal-card__badge-box">
@@ -85,11 +145,10 @@
                         <div id="goalProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
                     </div>
                     <div id="prevMonthComparison" class="goal-card__compare">
-                        📊 Comparativa mes anterior: Calculando...
+                        Comparativa mes anterior: Calculando...
                     </div>
                 </div>
 
-                <!-- Resumen de días y horas -->
                 <div class="stats-grid">
                     <div class="stat-pill">
                         <span class="stat-pill__label">Días trab.</span>
@@ -105,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- Calculadora Bruto / Neto / Bote -->
                 <div class="calc-box">
                     <div class="calc-box__row">
                         <div class="calc-box__field">
@@ -129,18 +187,17 @@
                         </div>
                     </div>
 
-                    <!-- Desglose Nómina Bruta, Neta y Bote en mano -->
                     <div class="payroll-breakdown">
                         <div class="payroll-row">
                             <span>Sueldo Bruto (Turnos):</span>
                             <strong id="statGrossMoney">0.00 €</strong>
                         </div>
                         <div class="payroll-row">
-                            <span>Sueldo Neto (Limpio al banco):</span>
+                            <span>Sueldo Neto (Limpio):</span>
                             <strong id="statNetMoney" style="color: var(--accent);">0.00 €</strong>
                         </div>
                         <div class="payroll-row">
-                            <span>🪙 Bote / Propinas (en mano):</span>
+                            <span>Bote / Propinas (en mano):</span>
                             <strong id="statMonthTips" style="color: #f59e0b;">0.00 €</strong>
                         </div>
                     </div>
@@ -159,20 +216,87 @@
             </div>
         </section>
 
-        <!-- ==================== VISTA 3: MI CAJA, HUCHA Y GASTOS FIJOS ==================== -->
+        <!-- ==================== VISTA 3: GYM / ENTRENAMIENTO ==================== -->
+        <section id="gymView" class="view">
+            <div class="panel-card">
+                <h3 class="panel-card__title">Gym y Rendimiento</h3>
+
+                <!-- Objetivo Semanal y Constancia -->
+                <div class="goal-card" style="margin-top: 10px;">
+                    <div class="goal-card__top">
+                        <div>
+                            <span class="goal-card__label">Objetivo entrenos / semana:</span>
+                            <input type="number" id="gymWeeklyGoalInput" class="goal-card__input" min="1" max="7" value="4">
+                        </div>
+                        <div class="goal-card__badge-box">
+                            <span id="gymWeekCountText" class="goal-percent-badge">0 / 4 esta semana</span>
+                            <small id="gymMonthCountText" class="goal-card__remaining">0 entrenos este mes</small>
+                        </div>
+                    </div>
+                    <div class="goal-progress">
+                        <div id="gymWeekProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="gym-mini-metrics">
+                        <span>Creatina este mes: <strong id="gymCreatineMonthText">0 días</strong></span>
+                        <span>Gasto Fitness: <strong id="gymFitnessSpendText">0.00 €</strong></span>
+                    </div>
+                </div>
+
+                <!-- Temporizador de Descanso entre Series -->
+                <div class="sub-box timer-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">Temporizador de Descanso</span>
+                        <span id="timerStatusBadge" class="size-badge">Listo</span>
+                    </div>
+                    <div id="timerDisplay" class="timer-display">01:30</div>
+                    <div class="timer-buttons">
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="60">60s</button>
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="90">90s</button>
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="120">120s</button>
+                        <button type="button" id="btnTimerStop" class="btn btn--sm btn--danger">Parar</button>
+                    </div>
+                </div>
+
+                <!-- Control de Peso Corporal -->
+                <div class="sub-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">Control de Peso Corporal</span>
+                        <strong id="weightDiffStat" style="font-size: 0.8rem; color: var(--accent);">Sin registros</strong>
+                    </div>
+                    <div class="piggy-controls">
+                        <input type="number" id="bodyWeightInput" step="0.1" min="20" max="300" placeholder="Ej: 76.5 kg">
+                        <button type="button" id="btnLogWeight" class="btn btn--sm btn--primary">Registrar kg</button>
+                    </div>
+                    <ul id="weightHistoryList" class="worked-list" style="max-height: 110px; margin-top: 8px;"></ul>
+                </div>
+
+                <!-- Registro Rápido de Pesos y Récords (PRs) -->
+                <div class="sub-box">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">Récords y Pesos (PRs)</span>
+                    </div>
+                    <div class="piggy-controls" style="margin-bottom: 10px;">
+                        <input type="text" id="newExerciseName" placeholder="Ej: Press Inclinado...">
+                        <input type="number" id="newExerciseWeight" step="0.5" min="0" placeholder="kg" style="max-width: 78px;">
+                        <button type="button" id="btnAddExercise" class="btn btn--sm btn--primary">+</button>
+                    </div>
+                    <div id="exercisesList" class="exercises-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VISTA 4: MI CAJA, HUCHA Y GASTOS FIJOS ==================== -->
         <section id="walletView" class="view">
             <div class="panel-card">
-                <!-- Tarjeta de Saldo Disponible -->
                 <div class="wallet-balance-card">
                     <span class="wallet-balance-card__label">SALDO DISPONIBLE EN CAJA</span>
                     <strong id="walletCurrentBalance" class="wallet-balance-card__amount">0.00 €</strong>
                     <div class="wallet-balance-card__row">
-                        <span class="wallet-pill wallet-pill--in">📈 Ingresado: <b id="walletTotalIn">0.00 €</b></span>
-                        <span class="wallet-pill wallet-pill--out">📉 Gastado: <b id="walletTotalOut">0.00 €</b></span>
+                        <span class="wallet-pill wallet-pill--in">Ingresado: <b id="walletTotalIn">0.00 €</b></span>
+                        <span class="wallet-pill wallet-pill--out">Gastado: <b id="walletTotalOut">0.00 €</b></span>
                     </div>
                 </div>
 
-                <!-- Añadir o Retirar Dinero -->
                 <div class="wallet-form">
                     <div class="calc-box__row">
                         <div class="calc-box__field">
@@ -180,25 +304,36 @@
                             <input type="number" id="walletAmountInput" step="0.5" min="0" placeholder="Ej: 50">
                         </div>
                         <div class="calc-box__field">
-                            <label for="walletConceptInput">Concepto:</label>
-                            <input type="text" id="walletConceptInput" placeholder="Ej: Cena, Gasolina...">
+                            <label for="walletCategorySelect">Categoría:</label>
+                            <select id="walletCategorySelect" class="form-select">
+                                <option value="General">General</option>
+                                <option value="Gym / Suplementos">Gym / Suplementos</option>
+                                <option value="Comida">Comida</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Ocio">Ocio</option>
+                            </select>
                         </div>
                     </div>
 
+                    <div class="calc-box__field" style="margin-top: 8px;">
+                        <label for="walletConceptInput">Concepto / Nota:</label>
+                        <input type="text" id="walletConceptInput" placeholder="Ej: Proteína, Creatina, Cena...">
+                    </div>
+
                     <div class="wallet-actions">
-                        <button type="button" id="btnWalletAdd" class="btn btn--wallet-in">➕ Añadir Dinero</button>
-                        <button type="button" id="btnWalletWithdraw" class="btn btn--wallet-out">➖ Retirar / Gasto</button>
+                        <button type="button" id="btnWalletAdd" class="btn btn--wallet-in">+ Añadir Dinero</button>
+                        <button type="button" id="btnWalletWithdraw" class="btn btn--wallet-out">- Retirar / Gasto</button>
                     </div>
 
                     <button type="button" id="btnSyncMonthToWallet" class="btn btn--outline wallet-sync-btn">
-                        🔄 Ingresar sueldo neto + bote de este mes a Mi Caja
+                        Ingresar sueldo neto + bote de este mes a Mi Caja
                     </button>
                 </div>
 
-                <!-- HUCHA DE AHORRO CON OBJETIVO VISUAL -->
+                <!-- Hucha de Ahorro -->
                 <div class="sub-box">
                     <div class="sub-box__header">
-                        <span class="sub-box__title">🐷 Hucha de Ahorro</span>
+                        <span class="sub-box__title">Hucha de Ahorro</span>
                         <span id="piggyPercentBadge" class="goal-percent-badge">0%</span>
                     </div>
                     <div class="calc-box__row" style="margin-bottom: 8px;">
@@ -225,24 +360,23 @@
                     </div>
                 </div>
 
-                <!-- GASTOS FIJOS / SUSCRIPCIONES MENSUALES -->
+                <!-- Gastos Fijos Mensuales -->
                 <div class="sub-box">
                     <div class="sub-box__header">
-                        <span class="sub-box__title">📌 Gastos Fijos Mensuales</span>
+                        <span class="sub-box__title">Gastos Fijos Mensuales</span>
                         <strong id="fixedExpensesTotalLabel" style="font-size: 0.82rem; color: var(--danger);">0.00 €/mes</strong>
                     </div>
                     <div class="piggy-controls" style="margin-bottom: 8px;">
-                        <input type="text" id="fixedExpenseName" placeholder="Ej: Gimnasio, Móvil...">
+                        <input type="text" id="fixedExpenseName" placeholder="Ej: Cuota Gym, Móvil...">
                         <input type="number" id="fixedExpenseAmount" step="1" min="0" placeholder="€" style="max-width: 80px;">
                         <button type="button" id="btnAddFixedExpense" class="btn btn--sm btn--primary">+</button>
                     </div>
                     <ul id="fixedExpensesList" class="worked-list" style="max-height: 130px; margin-bottom: 8px;"></ul>
                     <button type="button" id="btnApplyFixedExpenses" class="btn btn--danger" style="width: 100%; font-size: 0.78rem;">
-                        💸 Descontar todos los gastos fijos ahora
+                        Descontar todos los gastos fijos ahora
                     </button>
                 </div>
 
-                <!-- Historial de Movimientos -->
                 <div class="wallet-history-header">
                     <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
                     <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
@@ -251,36 +385,77 @@
             </div>
         </section>
 
-        <!-- ==================== VISTA 4: MIS TURNOS Y COLORES ==================== -->
+        <!-- ==================== VISTA 5: MIS TURNOS Y COLORES ==================== -->
         <section id="shiftsView" class="view">
             <div class="panel-card">
                 <div class="panel-card__header">
                     <div>
-                        <h3 class="panel-card__title">🎨 Configura tus Turnos</h3>
+                        <h3 class="panel-card__title">Configura tus Turnos</h3>
                         <p class="panel-card__desc">Edita colores, horarios y letras o crea turnos nuevos.</p>
                     </div>
-                    <button type="button" id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo Turno</button>
+                    <button type="button" id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo</button>
                 </div>
                 <div id="shiftsConfigList" class="shifts-list"></div>
             </div>
         </section>
 
-        <!-- ==================== BARRA DE PESTAÑAS INFERIOR ==================== -->
+        <!-- ==================== BARRA INFERIOR CON ICONOS PLANOS MINIMALISTAS ==================== -->
         <nav class="bottom-nav">
             <button type="button" class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
-                <span class="bottom-nav__icon">📅</span>
+                <div class="bottom-nav__icon-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="3"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
                 <span class="bottom-nav__label">Calendario</span>
             </button>
+
             <button type="button" class="bottom-nav__item" data-tab="statsView">
-                <span class="bottom-nav__icon">📊</span>
+                <div class="bottom-nav__icon-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
                 <span class="bottom-nav__label">Ganancias</span>
             </button>
+
+            <button type="button" class="bottom-nav__item" data-tab="gymView">
+                <div class="bottom-nav__icon-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 6.5h11"></path>
+                        <path d="M6.5 17.5h11"></path>
+                        <path d="M3 10v4"></path>
+                        <path d="M21 10v4"></path>
+                        <rect x="5" y="7" width="3" height="10" rx="1"></rect>
+                        <rect x="16" y="7" width="3" height="10" rx="1"></rect>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label">Gym</span>
+            </button>
+
             <button type="button" class="bottom-nav__item" data-tab="walletView">
-                <span class="bottom-nav__icon">💳</span>
+                <div class="bottom-nav__icon-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="3"></rect>
+                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                    </svg>
+                </div>
                 <span class="bottom-nav__label">Mi Caja</span>
             </button>
+
             <button type="button" class="bottom-nav__item" data-tab="shiftsView">
-                <span class="bottom-nav__icon">🎨</span>
+                <div class="bottom-nav__icon-box">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </div>
                 <span class="bottom-nav__label">Turnos</span>
             </button>
         </nav>
@@ -309,7 +484,7 @@
                     <div class="custom-color-box__top">
                         <label class="checkbox-row">
                             <input type="checkbox" id="dayUseCustomColor">
-                            <span>🎨 Color especial solo para este día</span>
+                            <span>Color especial solo para este día</span>
                         </label>
                         <div class="color-picker-wrapper">
                             <input type="color" id="dayCustomBgColor" value="#ffe082" class="color-picker-mini">
@@ -319,7 +494,28 @@
                     <div id="dayQuickPalette" class="day-quick-palette"></div>
                 </div>
 
-                <!-- 2. Horas trabajadas y Horas Extra -->
+                <!-- 2. Rutina Gym y Creatina del día -->
+                <div class="gym-day-box">
+                    <div class="gym-day-box__top">
+                        <label for="dayWorkoutGroup" class="section-block__label" style="margin:0;">Entreno Gym hoy:</label>
+                        <span id="gymTimeSuggestionHint" class="gym-time-hint">Sugerencia: 18:00</span>
+                    </div>
+                    <select id="dayWorkoutGroup" class="form-select" style="margin-top: 6px; margin-bottom: 8px;">
+                        <option value="">Sin entreno / Descanso</option>
+                        <option value="Pecho/Trí">Pecho y Tríceps</option>
+                        <option value="Espalda/Bí">Espalda y Bíceps</option>
+                        <option value="Pierna">Pierna</option>
+                        <option value="Hombro">Hombro y Core</option>
+                        <option value="Full Body">Full Body</option>
+                        <option value="Cardio">Cardio / HIIT</option>
+                    </select>
+                    <label class="checkbox-row">
+                        <input type="checkbox" id="dayCreatineTaken">
+                        <span>Creatina / Suplementación tomada hoy</span>
+                    </label>
+                </div>
+
+                <!-- 3. Horas trabajadas y Horas Extra -->
                 <div class="dual-counters">
                     <div class="counter-card">
                         <span class="counter-card__title">Horas trabajadas</span>
@@ -342,11 +538,11 @@
                     </div>
                 </div>
 
-                <!-- 3. Precio por hora y Bote / Propinas del día -->
+                <!-- 4. Precio por hora y Bote / Propinas -->
                 <div class="day-rates-box">
                     <div class="dual-counters" style="margin-bottom: 8px;">
                         <div class="counter-card">
-                            <span class="counter-card__title">💶 Precio Hora (€/h)</span>
+                            <span class="counter-card__title">Precio Hora (€/h)</span>
                             <small class="counter-card__sub">Tarifa normal hoy</small>
                             <div class="stepper">
                                 <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="-0.5">&minus;</button>
@@ -356,7 +552,7 @@
                         </div>
 
                         <div class="counter-card counter-card--extra">
-                            <span class="counter-card__title">💶 Precio Extra (€/h)</span>
+                            <span class="counter-card__title">Precio Extra (€/h)</span>
                             <small class="counter-card__sub">Tarifa extra hoy</small>
                             <div class="stepper">
                                 <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="-0.5">&minus;</button>
@@ -366,11 +562,10 @@
                         </div>
                     </div>
 
-                    <!-- Bote / Propinas en mano del día -->
                     <div class="counter-card" style="margin-bottom: 8px; border-color: #f59e0b;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <span class="counter-card__title">🪙 Bote / Propinas hoy (€)</span>
+                                <span class="counter-card__title">Bote / Propinas hoy (€)</span>
                                 <small class="counter-card__sub" style="margin:0;">Dinero extra en mano</small>
                             </div>
                             <div class="stepper" style="width: 145px;">
@@ -382,17 +577,17 @@
                     </div>
 
                     <div class="day-earned-preview">
-                        <span>💰 Ganancia total hoy:</span>
+                        <span>Ganancia total hoy:</span>
                         <strong id="modalDayEarnedValue">0.00 €</strong>
                     </div>
                 </div>
 
-                <!-- 4. Alarma / Despertador -->
+                <!-- 5. Alarma / Despertador -->
                 <div class="alarm-card">
                     <label class="alarm-card__check">
                         <input type="checkbox" id="dayAlarmEnabled">
                         <div class="alarm-card__info">
-                            <span class="alarm-card__title">⏰ Poner Alarma / Despertador</span>
+                            <span class="alarm-card__title">Poner Alarma / Despertador</span>
                             <small id="alarmShiftHint" class="alarm-card__desc">Elige a qué hora quieres el despertador:</small>
                         </div>
                     </label>
@@ -408,7 +603,7 @@
                     </div>
                 </div>
 
-                <!-- 5. Texto / Nota y Sticker arriba a la izquierda -->
+                <!-- 6. Texto / Nota y Sticker arriba a la izquierda -->
                 <div class="note-card">
                     <div class="note-card__top">
                         <label for="dayCustomText" class="section-block__label" style="margin:0;">Texto o nota en la casilla</label>
@@ -447,7 +642,7 @@
 
                 <!-- Copiar a otros días de la semana -->
                 <div class="repeat-week-box">
-                    <span class="repeat-week-box__title">⚡ Copiar también a otros días de esta semana:</span>
+                    <span class="repeat-week-box__title">Copiar también a otros días de esta semana:</span>
                     <div id="repeatWeekDaysContainer" class="repeat-week-days" style="margin-top: 8px;">
                         <button type="button" class="weekday-check-btn" data-dow="1">L</button>
                         <button type="button" class="weekday-check-btn" data-dow="2">M</button>
@@ -460,8 +655,8 @@
                 </div>
 
                 <div class="modal__footer">
-                    <button type="button" id="btnClearDay" class="btn btn--danger">🗑️ Vaciar</button>
-                    <button type="submit" id="btnSaveDay" class="btn btn--primary">💾 Guardar Cambios</button>
+                    <button type="button" id="btnClearDay" class="btn btn--danger">Vaciar</button>
+                    <button type="submit" id="btnSaveDay" class="btn btn--primary">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -523,6 +718,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=7"></script>
 </body>
 </html>
