@@ -45,6 +45,8 @@ const state = {
     piggyGoal: 600,
     piggySaved: 0,
     fixedExpenses: [],
+    debts: [],
+    debtTab: 'OWE',
     gymWeeklyGoal: 4,
     exercises: JSON.parse(JSON.stringify(DEFAULT_EXERCISES)),
     weightLogs: [],
@@ -102,6 +104,7 @@ function loadState() {
             state.piggyGoal = p.piggyGoal ?? 600;
             state.piggySaved = p.piggySaved ?? 0;
             state.fixedExpenses = p.fixedExpenses || [];
+            state.debts = p.debts || [];
             state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
             state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
             state.weightLogs = p.weightLogs || [];
@@ -136,6 +139,7 @@ function saveState() {
         piggyGoal: state.piggyGoal,
         piggySaved: state.piggySaved,
         fixedExpenses: state.fixedExpenses,
+        debts: state.debts,
         gymWeeklyGoal: state.gymWeeklyGoal,
         exercises: state.exercises,
         weightLogs: state.weightLogs,
@@ -178,6 +182,7 @@ function renderAll() {
     renderWallet();
     renderPiggyBank();
     renderFixedExpenses();
+    renderDebts();
     renderShiftsConfigList();
     renderPatternGenerator();
 }
@@ -989,6 +994,7 @@ function renderWallet() {
     document.getElementById('walletCurrentBalance').textContent = `${balance.toFixed(2)} €`;
     document.getElementById('walletTotalIn').textContent = `${totalIn.toFixed(2)} €`;
     document.getElementById('walletTotalOut').textContent = `${totalOut.toFixed(2)} €`;
+    renderDebts();
 }
 
 function renderPiggyBank() {
@@ -1029,6 +1035,82 @@ function renderFixedExpenses() {
         listEl.innerHTML = '<li class="worked-list__item">Sin gastos fijos configurados.</li>';
     }
     document.getElementById('fixedExpensesTotalLabel').textContent = `${total.toFixed(2)} €/mes`;
+}
+
+function renderDebts() {
+    const listEl = document.getElementById('debtsList');
+    const totalLabel = document.getElementById('debtsTotalLabel');
+    const freeBalanceEl = document.getElementById('debtFreeBalanceValue');
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+    let totalOwe = 0;
+    let totalOwed = 0;
+
+    state.debts.forEach(d => {
+        if (d.type === 'OWE') totalOwe += Number(d.amount) || 0;
+        else totalOwed += Number(d.amount) || 0;
+    });
+
+    const isOweTab = state.debtTab === 'OWE';
+    totalLabel.textContent = isOweTab
+        ? `Debo: ${totalOwe.toFixed(2)} €`
+        : `Me deben: ${totalOwed.toFixed(2)} €`;
+    totalLabel.style.color = isOweTab ? 'var(--danger)' : 'var(--accent)';
+
+    const filtered = state.debts.filter(d => d.type === state.debtTab);
+
+    filtered.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'worked-list__item';
+        const actionLabel = isOweTab ? 'Saldar' : 'Cobrado';
+        const amountClass = isOweTab ? 'movement-amount--out' : 'movement-amount--in';
+
+        li.innerHTML = `
+            <div>
+                <strong>${item.person}</strong>${item.concept ? ` · ${item.concept}` : ''}
+                <div style="font-size:0.68rem; color:var(--text-secondary);">${item.date}</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="${amountClass}">${Number(item.amount).toFixed(2)} €</span>
+                <button type="button" class="debt-settle-btn">${actionLabel}</button>
+                <button type="button" class="movement-delete-btn" title="Borrar sin mover caja">&times;</button>
+            </div>
+        `;
+
+        li.querySelector('.debt-settle-btn').addEventListener('click', () => {
+            const msg = isOweTab
+                ? `¿Has pagado ${Number(item.amount).toFixed(2)} € a ${item.person}?\n\nSe descontará de Mi Caja y se borrará la deuda.`
+                : `¿Te ha pagado ${item.person} ${Number(item.amount).toFixed(2)} €?\n\nSe sumará a Mi Caja y se borrará de la lista.`;
+            if (!confirm(msg)) return;
+
+            const conceptTxt = isOweTab
+                ? `Deuda pagada a ${item.person}${item.concept ? ' (' + item.concept + ')' : ''}`
+                : `Deuda cobrada de ${item.person}${item.concept ? ' (' + item.concept + ')' : ''}`;
+
+            state.debts = state.debts.filter(d => d.id !== item.id);
+            addWalletMovement(isOweTab ? 'OUT' : 'IN', item.amount, conceptTxt, 'General');
+            saveState();
+            renderDebts();
+        });
+
+        li.querySelector('.movement-delete-btn').addEventListener('click', () => {
+            state.debts = state.debts.filter(d => d.id !== item.id);
+            saveState();
+            renderDebts();
+        });
+
+        listEl.appendChild(li);
+    });
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = `<li class="worked-list__item">${isOweTab ? 'No debes dinero a nadie.' : 'Nadie te debe dinero ahora mismo.'}</li>`;
+    }
+
+    const { balance } = getWalletBalance();
+    const realFree = balance - totalOwe;
+    freeBalanceEl.textContent = `${realFree.toFixed(2)} €`;
+    freeBalanceEl.style.color = realFree >= 0 ? 'var(--accent)' : 'var(--danger)';
 }
 
 // 8. GESTIÓN DE TURNOS (CON TARIFA PROPIA Y PLUS) Y PATRONES ROTATIVOS
@@ -1598,6 +1680,53 @@ function bindEvents() {
             const cat = exp.name.toLowerCase().includes('gym') ? 'Gym / Suplementos' : 'General';
             addWalletMovement('OUT', exp.amount, `Gasto fijo: ${exp.name}`, cat);
         });
+    });
+
+    document.getElementById('debtTabOwe').addEventListener('click', () => {
+        state.debtTab = 'OWE';
+        document.getElementById('debtTabOwe').classList.add('debt-tab-btn--active');
+        document.getElementById('debtTabOwed').classList.remove('debt-tab-btn--active');
+        renderDebts();
+    });
+
+    document.getElementById('debtTabOwed').addEventListener('click', () => {
+        state.debtTab = 'OWED';
+        document.getElementById('debtTabOwed').classList.add('debt-tab-btn--active');
+        document.getElementById('debtTabOwe').classList.remove('debt-tab-btn--active');
+        renderDebts();
+    });
+
+    document.getElementById('btnAddDebt').addEventListener('click', () => {
+        const personEl = document.getElementById('debtPersonInput');
+        const conceptEl = document.getElementById('debtConceptInput');
+        const amountEl = document.getElementById('debtAmountInput');
+
+        const person = personEl.value.trim();
+        const concept = conceptEl.value.trim();
+        const amount = parseFloat(amountEl.value);
+
+        if (!person || !amount || amount <= 0) {
+            alert('Escribe el nombre de la persona y una cantidad mayor que 0 €.');
+            return;
+        }
+
+        const now = new Date();
+        const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+        state.debts.unshift({
+            id: 'D_' + Date.now(),
+            type: state.debtTab,
+            person,
+            concept,
+            amount: Number(amount.toFixed(2)),
+            date: dateStr
+        });
+
+        personEl.value = '';
+        conceptEl.value = '';
+        amountEl.value = '';
+        saveState();
+        renderDebts();
     });
 
     // Configurar Turnos (con Tarifa y Plus propio)
