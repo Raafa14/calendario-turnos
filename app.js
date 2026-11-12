@@ -21,6 +21,7 @@ const COLOR_PALETTE = [
 const STICKERS = ['', '🎂', '🏥', '🎉', '⚠️', '🏋️', '✈️', '🍻', '❤️', '⭐'];
 
 const state = {
+    walletMovements: [], // Lista de ingresos y gastos de Mi Caja
     monthlyGoal: 1200,
     statsPin: null,
     statsUnlocked: false,
@@ -55,6 +56,7 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     try {
+        state.walletMovements = parsed.walletMovements || [];
         const parsed = JSON.parse(raw);
         state.theme = parsed.theme || 'light';
         state.shifts = parsed.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
@@ -75,6 +77,7 @@ function loadState() {
 
 function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        walletMovements: state.walletMovements,
         theme: state.theme,
         shifts: state.shifts,
         daysData: state.daysData,
@@ -112,6 +115,7 @@ function renderAll() {
     renderTomorrowBanner();
     renderStats();
     renderShiftsConfigList();
+    renderWaller();
 }
 
 function renderCalendar() {
@@ -612,32 +616,36 @@ function bindEvents() {
     });
 
     // Pestañas (Con protección de PIN para Control Ganancias)
-    document.querySelectorAll('.tabs__btn').forEach(btn => {
+    // Navegación de la barra inferior (Bottom Nav)
+    document.querySelectorAll('.bottom-nav__item').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (btn.dataset.tab === 'statsView' && state.statsPin && !state.statsUnlocked) {
-                const entered = prompt('🔒 Introduce tu PIN de 4 dígitos para ver Control de Ganancias:');
+            const targetTab = btn.dataset.tab;
+            if ((targetTab === 'statsView' || targetTab === 'walletView') && state.statsPin && !state.statsUnlocked) {
+                const entered = prompt('🔒 Introduce tu PIN de 4 dígitos:');
                 if (entered !== state.statsPin) {
-                    if (entered !== null) alert('❌ PIN incorrecto. Acceso denegado.');
+                    if (entered !== null) alert('❌ PIN incorrecto.');
                     return;
                 }
                 state.statsUnlocked = true;
                 updatePinUI();
             }
 
-            document.querySelectorAll('.tabs__btn').forEach(b => b.classList.remove('tabs__btn--active'));
+            document.querySelectorAll('.bottom-nav__item').forEach(b => b.classList.remove('bottom-nav__item--active'));
             document.querySelectorAll('.view').forEach(v => v.classList.remove('view--active'));
-            btn.classList.add('tabs__btn--active');
-            document.getElementById(btn.dataset.tab).classList.add('view--active');
+            btn.classList.add('bottom-nav__item--active');
+            document.getElementById(targetTab).classList.add('view--active');
         });
     });
 
-    // Vaciar mes
-    document.getElementById('btnClearMonth').addEventListener('click', () => {
-        if (!confirm('¿Quieres vaciar todos los días de este mes?')) return;
-        const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
-        Object.keys(state.daysData).forEach(k => { if (k.startsWith(prefix)) delete state.daysData[k]; });
+    // Eventos de Mi Caja / Billetera
+    document.getElementById('btnWalletAdd').addEventListener('click', () => addWalletMovement('IN'));
+    document.getElementById('btnWalletWithdraw').addEventListener('click', () => addWalletMovement('OUT'));
+    document.getElementById('btnSyncMonthToWallet').addEventListener('click', syncMonthEarningsToWallet);
+    document.getElementById('btnClearWallet').addEventListener('click', () => {
+        if (!confirm('¿Vaciar todo el historial de Mi Caja?')) return;
+        state.walletMovements = [];
         saveState();
-        renderAll();
+        renderWallet();
     });
 
     // Exportar alarmas .ics al móvil
@@ -1029,3 +1037,103 @@ document.addEventListener('touchend', (event) => {
 document.addEventListener('gesturestart', (event) => {
     event.preventDefault();
 });
+
+
+// ==================== VISTA 4: MI CAJA / BILLETERA ====================
+function addWalletMovement(type) {
+    const amountInput = document.getElementById('walletAmountInput');
+    const conceptInput = document.getElementById('walletConceptInput');
+    const amount = parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        alert('Introduce una cantidad mayor que 0 €.');
+        return;
+    }
+
+    const defaultConcept = type === 'IN' ? 'Ingreso / Ahorro' : 'Retirada / Gasto';
+    const concept = conceptInput.value.trim() || defaultConcept;
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    state.walletMovements.unshift({
+        id: 'W_' + Date.now(),
+        type, // 'IN' o 'OUT'
+        amount,
+        concept,
+        date: dateStr
+    });
+
+    amountInput.value = '';
+    conceptInput.value = '';
+    saveState();
+    renderWallet();
+}
+
+function syncMonthEarningsToWallet() {
+    const monthEarned = getMonthTotalMoney(state.currentYear, state.currentMonth);
+    if (monthEarned <= 0) {
+        alert('Aún no tienes ganancias acumuladas en los turnos de este mes.');
+        return;
+    }
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const label = `Nómina / Turnos ${months[state.currentMonth]}`;
+
+    state.walletMovements.unshift({
+        id: 'W_' + Date.now(),
+        type: 'IN',
+        amount: Number(monthEarned.toFixed(2)),
+        concept: label,
+        date: `${state.currentMonth + 1}/${state.currentYear}`
+    });
+
+    saveState();
+    renderWallet();
+}
+
+function renderWallet() {
+    const listEl = document.getElementById('walletMovementsList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    let totalIn = 0;
+    let totalOut = 0;
+
+    state.walletMovements.forEach(item => {
+        if (item.type === 'IN') totalIn += Number(item.amount);
+        else totalOut += Number(item.amount);
+
+        const li = document.createElement('li');
+        li.className = 'worked-list__item';
+        const isIn = item.type === 'IN';
+        const sign = isIn ? '+' : '-';
+        const cls = isIn ? 'movement-amount--in' : 'movement-amount--out';
+
+        li.innerHTML = `
+            <div>
+                <strong>${item.concept}</strong>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">${item.date}</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="${cls}">${sign}${Number(item.amount).toFixed(2)} €</span>
+                <button type="button" class="movement-delete-btn" title="Borrar apunte">&times;</button>
+            </div>
+        `;
+
+        li.querySelector('.movement-delete-btn').addEventListener('click', () => {
+            state.walletMovements = state.walletMovements.filter(m => m.id !== item.id);
+            saveState();
+            renderWallet();
+        });
+
+        listEl.appendChild(li);
+    });
+
+    if (state.walletMovements.length === 0) {
+        listEl.innerHTML = '<li class="worked-list__item">Aún no hay movimientos en tu caja.</li>';
+    }
+
+    const balance = totalIn - totalOut;
+    document.getElementById('walletCurrentBalance').textContent = `${balance.toFixed(2)} €`;
+    document.getElementById('walletTotalIn').textContent = `${totalIn.toFixed(2)} €`;
+    document.getElementById('walletTotalOut').textContent = `${totalOut.toFixed(2)} €`;
+}
