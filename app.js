@@ -1,6 +1,5 @@
-const STORAGE_KEY = 'calendario_turnos_pro_v3';
+const STORAGE_KEY = 'shifterpro_v4_data';
 
-// TURNOS POR DEFECTO (Totalmente editables en color, letra y horario desde "Mis Turnos")
 const DEFAULT_SHIFTS = {
     NONE: { id: 'NONE', name: 'Ninguno',    short: '-', color: '#ffffff', textColor: '#1e293b', defaultHours: 0, startTime: '08:00', alarmTime: '06:00' },
     M:    { id: 'M',    name: 'Mañana',     short: 'M', color: '#fef08a', textColor: '#713f12', defaultHours: 8, startTime: '08:00', alarmTime: '06:00' },
@@ -21,23 +20,26 @@ const COLOR_PALETTE = [
 const STICKERS = ['', '🎂', '🏥', '🎉', '⚠️', '🏋️', '✈️', '🍻', '❤️', '⭐'];
 
 const state = {
-    walletMovements: [], // Lista de ingresos y gastos de Mi Caja
-    monthlyGoal: 1200,
-    statsPin: null,
-    statsUnlocked: false,
-    repeatSelectedDows: [],
     theme: 'light',
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     shifts: JSON.parse(JSON.stringify(DEFAULT_SHIFTS)),
-    daysData: {}, // Calendario 100% vacío de fábrica
+    daysData: {},
     hourlyRate: 10,
     extraRate: 12,
-    // Estado temporal del modal de Día
+    retentionPercent: 0,
+    monthlyGoal: 1200,
+    statsPin: null,
+    statsUnlocked: false,
+    walletMovements: [],
+    piggyTitle: 'Ahorro / Viaje',
+    piggyGoal: 600,
+    piggySaved: 0,
+    fixedExpenses: [],
     editingDateKey: null,
     modalSelectedShift: 'NONE',
     modalSelectedSticker: '',
-    // Estado temporal del modal de Turno
+    repeatSelectedDows: [],
     editingShiftId: null
 };
 
@@ -54,47 +56,59 @@ document.addEventListener('DOMContentLoaded', () => {
 // 1. PERSISTENCIA Y TEMA
 function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    try {
-        state.walletMovements = parsed.walletMovements || [];
-        const parsed = JSON.parse(raw);
-        state.theme = parsed.theme || 'light';
-        state.shifts = parsed.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
-        state.daysData = parsed.daysData || {};
-        state.hourlyRate = parsed.hourlyRate ?? 10;
-        state.extraRate = parsed.extraRate ?? 12;
-        state.monthlyGoal = parsed.monthlyGoal ?? 1200;
-        state.statsPin = parsed.statsPin || null;
-    } catch (err) {
-        console.error('Error leyendo localStorage:', err);
+    if (raw) {
+        try {
+            const p = JSON.parse(raw);
+            state.theme = p.theme || 'light';
+            state.shifts = p.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
+            state.daysData = p.daysData || {};
+            state.hourlyRate = p.hourlyRate ?? 10;
+            state.extraRate = p.extraRate ?? 12;
+            state.retentionPercent = p.retentionPercent ?? 0;
+            state.monthlyGoal = p.monthlyGoal ?? 1200;
+            state.statsPin = p.statsPin || null;
+            state.walletMovements = p.walletMovements || [];
+            state.piggyTitle = p.piggyTitle || 'Ahorro / Viaje';
+            state.piggyGoal = p.piggyGoal ?? 600;
+            state.piggySaved = p.piggySaved ?? 0;
+            state.fixedExpenses = p.fixedExpenses || [];
+        } catch (err) {
+            console.error('Error cargando datos:', err);
+        }
     }
-    const goalInput = document.getElementById('monthlyGoalInput');
-    if (goalInput) goalInput.value = state.monthlyGoal;
-    updatePinUI();
+
     document.getElementById('hourlyRateInput').value = state.hourlyRate;
     document.getElementById('extraRateInput').value = state.extraRate;
+    document.getElementById('retentionPercentInput').value = state.retentionPercent;
+    document.getElementById('monthlyGoalInput').value = state.monthlyGoal;
+    document.getElementById('piggyTitleInput').value = state.piggyTitle;
+    document.getElementById('piggyGoalInput').value = state.piggyGoal;
+    updatePinUI();
 }
 
 function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        walletMovements: state.walletMovements,
         theme: state.theme,
         shifts: state.shifts,
         daysData: state.daysData,
         hourlyRate: state.hourlyRate,
         extraRate: state.extraRate,
+        retentionPercent: state.retentionPercent,
         monthlyGoal: state.monthlyGoal,
-        statsPin: state.statsPin
+        statsPin: state.statsPin,
+        walletMovements: state.walletMovements,
+        piggyTitle: state.piggyTitle,
+        piggyGoal: state.piggyGoal,
+        piggySaved: state.piggySaved,
+        fixedExpenses: state.fixedExpenses
     }));
 }
 
 function applyTheme() {
     document.documentElement.setAttribute('data-theme', state.theme);
-    const btn = document.getElementById('btnThemeToggle');
-    btn.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+    document.getElementById('btnThemeToggle').textContent = state.theme === 'dark' ? '☀️' : '🌙';
 }
 
-// Calcula contraste oscuro/claro para texto sobre cualquier color hex
 function getContrastText(hexColor) {
     if (!hexColor || hexColor === '#ffffff') return '#1e293b';
     const hex = hexColor.replace('#', '');
@@ -115,7 +129,9 @@ function renderAll() {
     renderTomorrowBanner();
     renderStats();
     renderShiftsConfigList();
-    renderWaller();
+    renderWallet();
+    renderPiggyBank();
+    renderFixedExpenses();
 }
 
 function renderCalendar() {
@@ -145,36 +161,16 @@ function renderCalendar() {
         if (dateKey === todayKey) cell.classList.add('day-cell--today');
 
         paintCell(cell, day, state.daysData[dateKey]);
-
-        // Al pulsar una casilla se abre directamente el modal de edición
         cell.addEventListener('click', () => openDayModal(dateKey, day));
         grid.appendChild(cell);
     }
 }
 
-function initDayQuickPalette() {
-    const container = document.getElementById('dayQuickPalette');
-    if (!container) return;
-    container.innerHTML = '';
-    COLOR_PALETTE.forEach(hex => {
-        const dot = document.createElement('div');
-        dot.className = 'day-Quick-dot';
-        dot.style.backgroundColor = hex;
-        dot.addEventListener('click', () => {
-            document.getElementById('dayUseCustomColor').checked = true;
-            document.getElementById('dayCustomBgColor').value = hex;
-            document.getElementById('dayColorHexLabel').textContent = hex.toUpperCase();
-            updateLivePreview();
-        });
-        container.appendChild(dot);
-    });
-}
-
+// PINTA LA CASILLA CON EL ICONO PEQUEÑO ARRIBA A LA IZQUIERDA Y EL TEXTO LIMPIO EN EL CENTRO
 function paintCell(cellEl, dayNumber, info) {
     cellEl.innerHTML = '';
     const shift = (info && state.shifts[info.shiftId]) ? state.shifts[info.shiftId] : state.shifts.NONE;
 
-    // Color de fondo: Color personalizado del día o color del turno
     let bgColor = '';
     let txtColor = '';
     if (info && info.useCustomColor && info.customBgColor) {
@@ -188,23 +184,35 @@ function paintCell(cellEl, dayNumber, info) {
     cellEl.style.backgroundColor = bgColor;
     cellEl.style.color = txtColor;
 
-    // Fila Superior: Alarma a la izquierda y número de día a la derecha (como en tu foto 1)
+    // 1. FILA SUPERIOR: Sticker pequeño arriba a la izquierda + alarma, y número a la derecha
     const top = document.createElement('div');
     top.className = 'day-cell__top';
 
-    const alarmBadge = document.createElement('span');
+    const topLeft = document.createElement('div');
+    topLeft.className = 'day-cell__top-left';
+
+    if (info && info.sticker) {
+        const stickerMini = document.createElement('span');
+        stickerMini.className = 'day-cell__sticker-mini';
+        stickerMini.textContent = info.sticker;
+        topLeft.appendChild(stickerMini);
+    }
+
     if (info && info.alarmEnabled && info.alarmTime) {
+        const alarmBadge = document.createElement('span');
         alarmBadge.className = 'day-cell__alarm';
         alarmBadge.textContent = `⏰${info.alarmTime}`;
+        topLeft.appendChild(alarmBadge);
     }
-    top.appendChild(alarmBadge);
+
+    top.appendChild(topLeft);
 
     const dayNumSpan = document.createElement('span');
     dayNumSpan.textContent = dayNumber;
     top.appendChild(dayNumSpan);
     cellEl.appendChild(top);
 
-    // Centro de la casilla
+    // 2. CENTRO EXCLUSIVO PARA EL TEXTO O LA LETRA DEL TURNO (Sin stickers que lo empujen)
     const middle = document.createElement('div');
     middle.className = 'day-cell__middle';
 
@@ -212,7 +220,7 @@ function paintCell(cellEl, dayNumber, info) {
     const prioritize = info ? info.prioritizeText : true;
     const hasShiftLetter = shift && shift.id !== 'NONE' && shift.short && shift.short !== '-';
 
-    if (hasText && prioritize) {
+    if (hasText && (prioritize || !hasShiftLetter)) {
         const noteSpan = document.createElement('span');
         noteSpan.className = 'day-cell__note';
         noteSpan.style.fontSize = `${info.fontSize || 13}px`;
@@ -223,30 +231,10 @@ function paintCell(cellEl, dayNumber, info) {
         letterSpan.className = 'day-cell__letter';
         letterSpan.textContent = shift.short;
         middle.appendChild(letterSpan);
-        if (hasText) {
-            const subNote = document.createElement('span');
-            subNote.className = 'day-cell__note';
-            subNote.style.fontSize = `${info.fontSize || 11}px`;
-            subNote.textContent = info.customText;
-            middle.appendChild(subNote);
-        }
-    } else if (hasText) {
-        const noteSpan = document.createElement('span');
-        noteSpan.className = 'day-cell__note';
-        noteSpan.style.fontSize = `${info.fontSize || 13}px`;
-        noteSpan.textContent = info.customText;
-        middle.appendChild(noteSpan);
-    }
-
-    if (info && info.sticker) {
-        const st = document.createElement('span');
-        st.className = 'day-cell__sticker';
-        st.textContent = info.sticker;
-        middle.appendChild(st);
     }
     cellEl.appendChild(middle);
 
-    // Fila Inferior: Etiqueta EXTRA, letra achicada si hay texto grande, y horas
+    // 3. FILA INFERIOR: EXTRA / Mini letra / Bote / Horas
     const bottom = document.createElement('div');
     bottom.className = 'day-cell__bottom';
 
@@ -260,6 +248,11 @@ function paintCell(cellEl, dayNumber, info) {
         miniShift.className = 'mini-shift-tag';
         miniShift.textContent = shift.short;
         bottom.appendChild(miniShift);
+    } else if (info && Number(info.tips) > 0) {
+        const tipIcon = document.createElement('span');
+        tipIcon.style.fontSize = '0.56rem';
+        tipIcon.textContent = '🪙';
+        bottom.appendChild(tipIcon);
     }
 
     const totalH = (info ? (Number(info.hours) || 0) + (Number(info.extraHours) || 0) : 0);
@@ -273,7 +266,7 @@ function paintCell(cellEl, dayNumber, info) {
     cellEl.appendChild(bottom);
 }
 
-// 3. MODAL DETALLE DE JORNADA (FOTO 1)
+// 3. MODAL DE JORNADA
 function renderShiftCardsInModal() {
     const container = document.getElementById('modalShiftSelector');
     container.innerHTML = '';
@@ -296,7 +289,6 @@ function renderShiftCardsInModal() {
 
         btn.addEventListener('click', () => {
             state.modalSelectedShift = shift.id;
-            // Autocompletar horas, hora de entrada y alarma sugerida del turno
             document.getElementById('dayHours').value = shift.defaultHours ?? 0;
             document.getElementById('dayStartTime').value = shift.startTime || '08:00';
             document.getElementById('dayAlarmTime').value = shift.alarmTime || '06:00';
@@ -313,11 +305,9 @@ function updateAlarmHintText() {
     const shift = state.shifts[state.modalSelectedShift] || state.shifts.NONE;
     const start = document.getElementById('dayStartTime').value || '08:00';
     const hint = document.getElementById('alarmShiftHint');
-    if (shift.id !== 'NONE') {
-        hint.textContent = `Turno ${shift.name}: entras a las ${start}. Elige a qué hora quieres el despertador:`;
-    } else {
-        hint.textContent = `Entras a las ${start}. Elige a qué hora quieres el despertador:`;
-    }
+    hint.textContent = shift.id !== 'NONE'
+        ? `Turno ${shift.name}: entras a las ${start}. Elige despertador:`
+        : `Entras a las ${start}. Elige despertador:`;
 }
 
 function initStickerSelector() {
@@ -340,9 +330,24 @@ function initStickerSelector() {
 function highlightSelectedSticker() {
     const buttons = document.querySelectorAll('#stickerList .sticker-btn');
     STICKERS.forEach((icon, idx) => {
-        if (buttons[idx]) {
-            buttons[idx].classList.toggle('sticker-btn--active', state.modalSelectedSticker === icon);
-        }
+        if (buttons[idx]) buttons[idx].classList.toggle('sticker-btn--active', state.modalSelectedSticker === icon);
+    });
+}
+
+function initDayQuickPalette() {
+    const container = document.getElementById('dayQuickPalette');
+    container.innerHTML = '';
+    COLOR_PALETTE.forEach(hex => {
+        const dot = document.createElement('div');
+        dot.className = 'day-Quick-dot';
+        dot.style.backgroundColor = hex;
+        dot.addEventListener('click', () => {
+            document.getElementById('dayUseCustomColor').checked = true;
+            document.getElementById('dayCustomBgColor').value = hex;
+            document.getElementById('dayColorHexLabel').textContent = hex.toUpperCase();
+            updateLivePreview();
+        });
+        container.appendChild(dot);
     });
 }
 
@@ -356,6 +361,7 @@ function openDayModal(dateKey, dayNumber) {
         extraHours: 0,
         hourlyRate: state.hourlyRate,
         extraRate: state.extraRate,
+        tips: 0,
         alarmEnabled: false,
         startTime: '08:00',
         alarmTime: '06:00',
@@ -382,6 +388,7 @@ function openDayModal(dateKey, dayNumber) {
     document.getElementById('dayExtraHours').value = saved.extraHours ?? 0;
     document.getElementById('dayHourlyRate').value = saved.hourlyRate ?? state.hourlyRate;
     document.getElementById('dayExtraRate').value = saved.extraRate ?? state.extraRate;
+    document.getElementById('dayTips').value = saved.tips ?? 0;
 
     document.getElementById('dayAlarmEnabled').checked = Boolean(saved.alarmEnabled);
     document.getElementById('dayStartTime').value = saved.startTime || '08:00';
@@ -398,8 +405,8 @@ function openDayModal(dateKey, dayNumber) {
     highlightSelectedSticker();
     updateAlarmHintText();
     updateLivePreview();
-
     initRepeatWeekButtons(dateObj.getDay());
+
     document.getElementById('dayModal').classList.add('modal--open');
 }
 
@@ -417,6 +424,7 @@ function collectDayModalData() {
         extraHours: parseFloat(document.getElementById('dayExtraHours').value) || 0,
         hourlyRate: parseFloat(document.getElementById('dayHourlyRate').value) || 0,
         extraRate: parseFloat(document.getElementById('dayExtraRate').value) || 0,
+        tips: parseFloat(document.getElementById('dayTips').value) || 0,
         alarmEnabled: document.getElementById('dayAlarmEnabled').checked,
         startTime: document.getElementById('dayStartTime').value,
         alarmTime: document.getElementById('dayAlarmTime').value,
@@ -429,16 +437,15 @@ function collectDayModalData() {
 
 function updateLivePreview() {
     const previewCell = document.getElementById('cellPreview');
-    const dayNum = state.editingDateKey ? parseInt(state.editingDateKey.split('-')[2], 10) : 18;
+    const dayNum = state.editingDateKey ? parseInt(state.editingDateKey.split('-')[2], 10) : 12;
     const data = collectDayModalData();
     paintCell(previewCell, dayNum, data);
 
-    // Calcular en vivo cuánto ganas ese día según las horas y el precio/hora puesto en el modal
-    const earnedToday = (data.hours * data.hourlyRate) + (data.extraHours * data.extraRate);
-    const earnedEl = document.getElementById('modalDayEarnedValue');
-    if (earnedEl) {
-        earnedEl.textContent = `${earnedToday.toFixed(2)} €`;
-    }
+    const shiftPay = (data.hours * data.hourlyRate) + (data.extraHours * data.extraRate);
+    const totalToday = shiftPay + data.tips;
+    document.getElementById('modalDayEarnedValue').textContent = data.tips > 0
+        ? `${totalToday.toFixed(2)} € (${shiftPay.toFixed(2)}€ + ${data.tips.toFixed(2)}€ bote)`
+        : `${totalToday.toFixed(2)} €`;
 }
 
 function syncPresetButtons(size) {
@@ -447,7 +454,7 @@ function syncPresetButtons(size) {
     });
 }
 
-// 4. CONTROL DE GANANCIAS Y BANNER DE MAÑANA
+// 4. GANANCIAS Y NÓMINA REAL (BRUTO / NETO / BOTE)
 function renderTomorrowBanner() {
     const tmr = new Date();
     tmr.setDate(tmr.getDate() + 1);
@@ -457,78 +464,263 @@ function renderTomorrowBanner() {
 
     if (info && (info.shiftId !== 'NONE' || info.alarmEnabled)) {
         const shiftName = state.shifts[info.shiftId] ? state.shifts[info.shiftId].name : 'Jornada';
-        const alarmTxt = info.alarmEnabled ? ` · 🔔 Alarma a las <strong>${info.alarmTime}</strong>` : '';
+        const alarmTxt = info.alarmEnabled ? ` · 🔔 Alarma ${info.alarmTime}` : '';
         banner.innerHTML = `📅 <strong>Mañana (${shiftName}):</strong> Entrada ${info.startTime}${alarmTxt}`;
     } else {
         banner.innerHTML = `<span>🌙 Mañana sin turno ni alarma programada</span>`;
     }
 }
 
-function renderStats() {
-    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+function getMonthPayrollSummary(year, month) {
+    const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
     let daysWorked = 0;
     let normalHours = 0;
     let extraHours = 0;
-
-    const listEl = document.getElementById('workedDaysList');
-    listEl.innerHTML = '';
+    let grossMoney = 0;
+    let totalTips = 0;
 
     Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
         const d = state.daysData[key];
         const h = Number(d.hours) || 0;
         const ex = Number(d.extraHours) || 0;
+        const tips = Number(d.tips) || 0;
+        const r = d.hourlyRate ?? state.hourlyRate;
+        const exR = d.extraRate ?? state.extraRate;
 
-        if (h > 0 || ex > 0) {
+        if (h > 0 || ex > 0 || tips > 0) {
             daysWorked++;
             normalHours += h;
             extraHours += ex;
+            grossMoney += (h * r) + (ex * exR);
+            totalTips += tips;
+        }
+    });
 
+    const retention = (Number(state.retentionPercent) || 0) / 100;
+    const netMoney = grossMoney * (1 - retention);
+    return { daysWorked, normalHours, extraHours, grossMoney, netMoney, totalTips, realTotal: netMoney + totalTips };
+}
+
+function renderStats() {
+    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    const listEl = document.getElementById('workedDaysList');
+    listEl.innerHTML = '';
+
+    const summary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
+
+    Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
+        const d = state.daysData[key];
+        const h = Number(d.hours) || 0;
+        const ex = Number(d.extraHours) || 0;
+        const tips = Number(d.tips) || 0;
+        const r = d.hourlyRate ?? state.hourlyRate;
+        const exR = d.extraRate ?? state.extraRate;
+
+        if (h > 0 || ex > 0 || tips > 0) {
             const dayNum = parseInt(key.split('-')[2], 10);
-            const sName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Día';
-            const dayMoney = (h * state.hourlyRate + ex * state.extraRate).toFixed(2);
+            const sName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Jornada';
+            const dayPay = (h * r) + (ex * exR);
 
             const li = document.createElement('li');
             li.className = 'worked-list__item';
             li.innerHTML = `
                 <span>Día ${dayNum} · <strong>${sName}</strong> ${d.customText ? '(' + d.customText + ')' : ''}</span>
-                <strong>${h}h ${ex > 0 ? '+ ' + ex + 'h extra' : ''} → ${dayMoney} €</strong>
+                <strong>${h + ex}h → ${dayPay.toFixed(2)} € ${tips > 0 ? '+ 🪙' + tips.toFixed(2) + '€' : ''}</strong>
             `;
             listEl.appendChild(li);
         }
     });
 
-    if (daysWorked === 0) {
+    if (summary.daysWorked === 0) {
         listEl.innerHTML = '<li class="worked-list__item">Aún no has registrado horas este mes.</li>';
     }
 
-    document.getElementById('statDaysWorked').textContent = daysWorked;
-    document.getElementById('statNormalHours').textContent = `${normalHours} h`;
-    document.getElementById('statExtraHours').textContent = `${extraHours} h`;
-    document.getElementById('calcTotalHoursInput').value = normalHours;
+    document.getElementById('statDaysWorked').textContent = summary.daysWorked;
+    document.getElementById('statNormalHours').textContent = `${summary.normalHours} h`;
+    document.getElementById('statExtraHours').textContent = `${summary.extraHours} h`;
+    document.getElementById('calcTotalHoursInput').value = summary.normalHours;
 
-    recalculateEarnings(extraHours);
+    recalculateEarnings(summary.extraHours, summary.totalTips);
 }
 
-function recalculateEarnings(extraFromMonth = null) {
+function recalculateEarnings(extraFromMonth = null, tipsFromMonth = null) {
     const normalH = parseFloat(document.getElementById('calcTotalHoursInput').value) || 0;
     const rate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
     const exRate = parseFloat(document.getElementById('extraRateInput').value) || 0;
+    const retentionPct = parseFloat(document.getElementById('retentionPercentInput').value) || 0;
 
-    const extraText = document.getElementById('statExtraHours').textContent;
-    const extraH = extraFromMonth !== null ? extraFromMonth : (parseFloat(extraText) || 0);
+    const currentSummary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
+    const extraH = extraFromMonth !== null ? extraFromMonth : currentSummary.extraHours;
+    const tips = tipsFromMonth !== null ? tipsFromMonth : currentSummary.totalTips;
 
     state.hourlyRate = rate;
     state.extraRate = exRate;
+    state.retentionPercent = retentionPct;
     saveState();
 
-    const total = (normalH * rate) + (extraH * exRate);
-    document.getElementById('statTotalMoney').textContent = `${total.toFixed(2)} €`;
-    document.getElementById('earnedFormulaText').textContent =
-    extraH > 0 ? `${normalH}h × ${rate}€ + ${extraH}h extra × ${exRate}€` : `${normalH}h × ${rate}€/h`;
-    updateGoalAndComparison(total);
+    const gross = (normalH * rate) + (extraH * exRate);
+    const net = gross * (1 - (retentionPct / 100));
+    const totalReal = net + tips;
+
+    document.getElementById('statGrossMoney').textContent = `${gross.toFixed(2)} €`;
+    document.getElementById('statNetMoney').textContent = `${net.toFixed(2)} €`;
+    document.getElementById('statMonthTips').textContent = `${tips.toFixed(2)} €`;
+    document.getElementById('statTotalMoney').textContent = `${totalReal.toFixed(2)} €`;
+    document.getElementById('earnedFormulaText').textContent = retentionPct > 0
+        ? `Bruto ${gross.toFixed(2)}€ (-${retentionPct}% ret.) + ${tips.toFixed(2)}€ bote`
+        : `${normalH}h × ${rate}€ + ${extraH}h extra × ${exRate}€`;
+
+    updateGoalAndComparison(totalReal);
 }
 
-// 5. GESTIÓN DE TURNOS Y COLORES ("🎨 MIS TURNOS")
+function updateGoalAndComparison(currentEarned) {
+    const goal = Number(state.monthlyGoal) || 0;
+    const pct = goal > 0 ? Math.min(100, Math.round((currentEarned / goal) * 100)) : 0;
+    const remaining = Math.max(0, goal - currentEarned);
+
+    document.getElementById('goalPercentBadge').textContent = `${pct}%`;
+    document.getElementById('goalRemainingText').textContent = remaining === 0 && goal > 0
+        ? '🎉 ¡Meta superada!'
+        : `Faltan ${remaining.toFixed(2)} €`;
+    document.getElementById('goalProgressBar').style.width = `${pct}%`;
+
+    let prevM = state.currentMonth - 1;
+    let prevY = state.currentYear;
+    if (prevM < 0) { prevM = 11; prevY--; }
+
+    const prevTotal = getMonthPayrollSummary(prevY, prevM).realTotal;
+    const diff = currentEarned - prevTotal;
+    const compareEl = document.getElementById('prevMonthComparison');
+
+    if (prevTotal === 0) {
+        compareEl.textContent = '📊 Mes anterior: 0.00 € registrados';
+    } else {
+        const sign = diff >= 0 ? '+' : '';
+        const emoji = diff >= 0 ? '📈' : '📉';
+        compareEl.innerHTML = `${emoji} Mes anterior: <strong>${prevTotal.toFixed(2)} €</strong> (${sign}${diff.toFixed(2)} €)`;
+    }
+}
+
+// 5. MI CAJA, HUCHA DE AHORRO Y GASTOS FIJOS
+function getWalletBalance() {
+    let totalIn = 0;
+    let totalOut = 0;
+    state.walletMovements.forEach(m => {
+        if (m.type === 'IN') totalIn += Number(m.amount);
+        else totalOut += Number(m.amount);
+    });
+    return { totalIn, totalOut, balance: totalIn - totalOut };
+}
+
+function addWalletMovement(type, customAmount = null, customConcept = null) {
+    const amountInput = document.getElementById('walletAmountInput');
+    const conceptInput = document.getElementById('walletConceptInput');
+    const amount = customAmount !== null ? customAmount : parseFloat(amountInput.value);
+
+    if (!amount || amount <= 0) {
+        alert('Introduce una cantidad mayor que 0 €.');
+        return;
+    }
+
+    const defaultConcept = type === 'IN' ? 'Ingreso en Caja' : 'Retirada / Gasto';
+    const concept = customConcept || conceptInput.value.trim() || defaultConcept;
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    state.walletMovements.unshift({
+        id: 'W_' + Date.now() + Math.random(),
+        type,
+        amount: Number(amount.toFixed(2)),
+        concept,
+        date: dateStr
+    });
+
+    if (customAmount === null) {
+        amountInput.value = '';
+        conceptInput.value = '';
+    }
+    saveState();
+    renderWallet();
+}
+
+function renderWallet() {
+    const listEl = document.getElementById('walletMovementsList');
+    listEl.innerHTML = '';
+
+    const { totalIn, totalOut, balance } = getWalletBalance();
+
+    state.walletMovements.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'worked-list__item';
+        const isIn = item.type === 'IN';
+        li.innerHTML = `
+            <div>
+                <strong>${item.concept}</strong>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">${item.date}</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <span class="${isIn ? 'movement-amount--in' : 'movement-amount--out'}">${isIn ? '+' : '-'}${Number(item.amount).toFixed(2)} €</span>
+                <button type="button" class="movement-delete-btn" title="Borrar">&times;</button>
+            </div>
+        `;
+        li.querySelector('.movement-delete-btn').addEventListener('click', () => {
+            state.walletMovements = state.walletMovements.filter(m => m.id !== item.id);
+            saveState();
+            renderWallet();
+        });
+        listEl.appendChild(li);
+    });
+
+    if (state.walletMovements.length === 0) {
+        listEl.innerHTML = '<li class="worked-list__item">Aún no hay movimientos en tu caja.</li>';
+    }
+
+    document.getElementById('walletCurrentBalance').textContent = `${balance.toFixed(2)} €`;
+    document.getElementById('walletTotalIn').textContent = `${totalIn.toFixed(2)} €`;
+    document.getElementById('walletTotalOut').textContent = `${totalOut.toFixed(2)} €`;
+}
+
+function renderPiggyBank() {
+    const goal = Number(state.piggyGoal) || 0;
+    const saved = Number(state.piggySaved) || 0;
+    const pct = goal > 0 ? Math.min(100, Math.round((saved / goal) * 100)) : 0;
+
+    document.getElementById('piggySavedAmount').textContent = `${saved.toFixed(2)} €`;
+    document.getElementById('piggyPercentBadge').textContent = `${pct}%`;
+    document.getElementById('piggyProgressBar').style.width = `${pct}%`;
+}
+
+function renderFixedExpenses() {
+    const listEl = document.getElementById('fixedExpensesList');
+    listEl.innerHTML = '';
+    let total = 0;
+
+    state.fixedExpenses.forEach(exp => {
+        total += Number(exp.amount) || 0;
+        const li = document.createElement('li');
+        li.className = 'worked-list__item';
+        li.innerHTML = `
+            <span>${exp.name}</span>
+            <div>
+                <strong>-${Number(exp.amount).toFixed(2)} €</strong>
+                <button type="button" class="movement-delete-btn">&times;</button>
+            </div>
+        `;
+        li.querySelector('button').addEventListener('click', () => {
+            state.fixedExpenses = state.fixedExpenses.filter(f => f.id !== exp.id);
+            saveState();
+            renderFixedExpenses();
+        });
+        listEl.appendChild(li);
+    });
+
+    if (state.fixedExpenses.length === 0) {
+        listEl.innerHTML = '<li class="worked-list__item">Sin gastos fijos configurados.</li>';
+    }
+    document.getElementById('fixedExpensesTotalLabel').textContent = `${total.toFixed(2)} €/mes`;
+}
+
+// 6. GESTIÓN DE TURNOS Y COLORES
 function renderShiftsConfigList() {
     const container = document.getElementById('shiftsConfigList');
     container.innerHTML = '';
@@ -537,24 +729,16 @@ function renderShiftsConfigList() {
         if (shift.id === 'NONE') return;
         const row = document.createElement('div');
         row.className = 'shift-row-item';
-
         row.innerHTML = `
             <div class="shift-row-item__left">
-                <div class="shift-color-swatch" style="background:${shift.color}; color:${shift.textColor}">
-                    ${shift.short}
-                </div>
+                <div class="shift-color-swatch" style="background:${shift.color}; color:${shift.textColor}">${shift.short}</div>
                 <div>
                     <strong>${shift.name}</strong>
-                    <div style="font-size:0.74rem; color:var(--text-secondary);">
-                        ${shift.defaultHours}h · Entrada ${shift.startTime} · Alarma ${shift.alarmTime}
-                    </div>
+                    <div style="font-size:0.72rem; color:var(--text-secondary);">${shift.defaultHours}h · Entrada ${shift.startTime} · Alarma ${shift.alarmTime}</div>
                 </div>
             </div>
-            <button type="button" class="btn btn--sm" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-primary);">
-                ✏️ Editar Color / Hora
-            </button>
+            <button type="button" class="btn btn--sm btn--outline">✏️ Editar</button>
         `;
-
         row.querySelector('button').addEventListener('click', () => openShiftConfigModal(shift.id));
         container.appendChild(row);
     });
@@ -567,9 +751,7 @@ function initColorPalette() {
         const dot = document.createElement('div');
         dot.className = 'palette-dot';
         dot.style.backgroundColor = hex;
-        dot.addEventListener('click', () => {
-            document.getElementById('cfgShiftColor').value = hex;
-        });
+        dot.addEventListener('click', () => { document.getElementById('cfgShiftColor').value = hex; });
         grid.appendChild(dot);
     });
 }
@@ -581,21 +763,84 @@ function openShiftConfigModal(shiftId = null) {
         ? { name: '', short: '', color: '#fde047', defaultHours: 8, startTime: '08:00', alarmTime: '06:00' }
         : state.shifts[shiftId];
 
-    document.getElementById('shiftModalTitle').textContent = isNew ? 'Crear Nuevo Turno' : `Editar Turno (${s.name})`;
+    document.getElementById('shiftModalTitle').textContent = isNew ? 'Crear Nuevo Turno' : `Editar (${s.name})`;
     document.getElementById('cfgShiftName').value = s.name;
     document.getElementById('cfgShiftShort').value = s.short;
     document.getElementById('cfgShiftColor').value = s.color;
     document.getElementById('cfgShiftHours').value = s.defaultHours;
     document.getElementById('cfgShiftStart').value = s.startTime;
     document.getElementById('cfgShiftAlarm').value = s.alarmTime;
-
     document.getElementById('btnDeleteShiftType').style.display = isNew ? 'none' : 'block';
     document.getElementById('shiftConfigModal').classList.add('modal--open');
 }
 
-// 6. EVENTOS DE INTERFAZ
+// 7. REPETIR SEMANA, PIN Y EVENTOS
+function initRepeatWeekButtons(currentDow) {
+    state.repeatSelectedDows = [];
+    document.querySelectorAll('.weekday-check-btn').forEach(btn => {
+        const dow = parseInt(btn.dataset.dow, 10);
+        btn.classList.remove('weekday-check-btn--selected', 'weekday-check-btn--current');
+        if (dow === currentDow) btn.classList.add('weekday-check-btn--current');
+    });
+}
+
+function applyRepeatToSelectedWeekDays(baseDateKey, dataToCopy) {
+    if (!state.repeatSelectedDows || state.repeatSelectedDows.length === 0) return;
+    const [y, m, d] = baseDateKey.split('-').map(Number);
+    const baseDate = new Date(y, m - 1, d);
+    const baseDow = baseDate.getDay();
+    const diffToMonday = (baseDow === 0) ? -6 : 1 - baseDow;
+    const mondayDate = new Date(y, m - 1, d + diffToMonday);
+
+    state.repeatSelectedDows.forEach(targetDow => {
+        const offsetFromMonday = (targetDow === 0) ? 6 : targetDow - 1;
+        const targetDate = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + offsetFromMonday);
+        const targetKey = formatDateKey(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+        state.daysData[targetKey] = JSON.parse(JSON.stringify(dataToCopy));
+    });
+}
+
+function updatePinUI() {
+    const statusText = document.getElementById('pinStatusText');
+    const btnConfig = document.getElementById('btnConfigPin');
+    const btnLock = document.getElementById('btnLockNow');
+    if (state.statsPin) {
+        statusText.textContent = '🔐 Protegido con PIN';
+        btnConfig.textContent = '⚙️ PIN';
+        btnLock.style.display = state.statsUnlocked ? 'inline-block' : 'none';
+    } else {
+        statusText.textContent = '🔓 Sin PIN';
+        btnConfig.textContent = '🔒 Activar PIN';
+        btnLock.style.display = 'none';
+    }
+}
+
+function switchTab(targetTabId) {
+    if ((targetTabId === 'statsView' || targetTabId === 'walletView') && state.statsPin && !state.statsUnlocked) {
+        const entered = prompt('🔒 Introduce tu PIN de 4 dígitos:');
+        if (entered !== state.statsPin) {
+            if (entered !== null) alert('❌ PIN incorrecto.');
+            return;
+        }
+        state.statsUnlocked = true;
+        updatePinUI();
+    }
+
+    document.querySelectorAll('.bottom-nav__item').forEach(b => {
+        b.classList.toggle('bottom-nav__item--active', b.dataset.tab === targetTabId);
+    });
+    document.querySelectorAll('.view').forEach(v => {
+        v.classList.toggle('view--active', v.id === targetTabId);
+    });
+}
+
 function bindEvents() {
-    // Botón Modo Claro / Modo Oscuro
+    // NAVEGACIÓN INFERIOR (Compatible al 100% con iPhone Safari)
+    document.querySelectorAll('.bottom-nav__item').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // Tema Claro / Oscuro
     document.getElementById('btnThemeToggle').addEventListener('click', () => {
         state.theme = state.theme === 'light' ? 'dark' : 'light';
         applyTheme();
@@ -615,162 +860,106 @@ function bindEvents() {
         renderAll();
     });
 
-    // Pestañas (Con protección de PIN para Control Ganancias)
-    // Navegación de la barra inferior (Bottom Nav)
-    document.querySelectorAll('.bottom-nav__item').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.dataset.tab;
-            if ((targetTab === 'statsView' || targetTab === 'walletView') && state.statsPin && !state.statsUnlocked) {
-                const entered = prompt('🔒 Introduce tu PIN de 4 dígitos:');
-                if (entered !== state.statsPin) {
-                    if (entered !== null) alert('❌ PIN incorrecto.');
-                    return;
-                }
-                state.statsUnlocked = true;
-                updatePinUI();
-            }
-
-            document.querySelectorAll('.bottom-nav__item').forEach(b => b.classList.remove('bottom-nav__item--active'));
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('view--active'));
-            btn.classList.add('bottom-nav__item--active');
-            document.getElementById(targetTab).classList.add('view--active');
-        });
-    });
-
-    // Eventos de Mi Caja / Billetera
-    document.getElementById('btnWalletAdd').addEventListener('click', () => addWalletMovement('IN'));
-    document.getElementById('btnWalletWithdraw').addEventListener('click', () => addWalletMovement('OUT'));
-    document.getElementById('btnSyncMonthToWallet').addEventListener('click', syncMonthEarningsToWallet);
-    document.getElementById('btnClearWallet').addEventListener('click', () => {
-        if (!confirm('¿Vaciar todo el historial de Mi Caja?')) return;
-        state.walletMovements = [];
+    // Vaciar mes
+    document.getElementById('btnClearMonth').addEventListener('click', () => {
+        if (!confirm('¿Vaciar todos los días de este mes?')) return;
+        const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+        Object.keys(state.daysData).forEach(k => { if (k.startsWith(prefix)) delete state.daysData[k]; });
         saveState();
-        renderWallet();
+        renderAll();
     });
 
-    // Exportar alarmas .ics al móvil
-    document.getElementById('btnExportICS').addEventListener('click', exportAlarmsToICS);
+    // Backup JSON y Exportar ICS
+    document.getElementById('btnExportBackup').addEventListener('click', () => {
+        const blob = new Blob([localStorage.getItem(STORAGE_KEY) || '{}'], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `shifterpro_backup_${state.currentYear}_${state.currentMonth + 1}.json`;
+        a.click();
+    });
 
-    // Botones + y - de horas trabajadas y horas extra
+    document.getElementById('btnImportBackup').addEventListener('click', () => document.getElementById('inputImportBackup').click());
+    document.getElementById('inputImportBackup').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                if (!parsed.daysData) return alert('❌ Archivo no válido.');
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                loadState();
+                applyTheme();
+                renderAll();
+                alert('✅ Copia restaurada.');
+            } catch { alert('❌ Error leyendo archivo.'); }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    document.getElementById('btnExportICS').addEventListener('click', () => {
+        const keys = Object.keys(state.daysData);
+        if (!keys.length) return alert('No hay turnos guardados.');
+        let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ShifterPro//ES\n';
+        keys.forEach(k => {
+            const d = state.daysData[k];
+            if (!d || (d.shiftId === 'NONE' && !d.customText)) return;
+            const sName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Turno';
+            ics += `BEGIN:VEVENT\nSUMMARY:${sName} ${d.customText || ''}\nDTSTART:${k.replace(/-/g, '')}T${(d.startTime || '08:00').replace(':', '')}00\nEND:VEVENT\n`;
+        });
+        ics += 'END:VCALENDAR';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+        a.download = 'shifterpro_turnos.ics';
+        a.click();
+    });
+
+    // Botones - y + de los steppers
     document.querySelectorAll('.stepper__btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = document.getElementById(btn.dataset.stepTarget);
             const step = parseFloat(btn.dataset.step);
-            const current = parseFloat(input.value) || 0;
-            input.value = Math.max(0, Math.min(24, current + step));
+            const val = Math.max(0, (parseFloat(input.value) || 0) + step);
+            input.value = val;
             updateLivePreview();
         });
     });
 
-    // Color libre del día
-    document.getElementById('dayUseCustomColor').addEventListener('change', (e) => {
-        document.getElementById('dayCustomBgColor').disabled = !e.target.checked;
+    // Color especial del día
+    document.getElementById('dayUseCustomColor').addEventListener('change', updateLivePreview);
+    document.getElementById('dayCustomBgColor').addEventListener('input', (e) => {
+        document.getElementById('dayUseCustomColor').checked = true;
+        document.getElementById('dayColorHexLabel').textContent = e.target.value.toUpperCase();
         updateLivePreview();
     });
-    document.getElementById('dayCustomBgColor').addEventListener('input', updateLivePreview);
 
-    // Tamaño del texto (Presets + Slider)
+    // Presets y slider de tamaño de letra
     document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const size = btn.dataset.size;
-            document.getElementById('dayFontSize').value = size;
-            document.getElementById('fontSizeBadge').textContent = `${size} px`;
-            syncPresetButtons(size);
+            const s = btn.dataset.size;
+            document.getElementById('dayFontSize').value = s;
+            document.getElementById('fontSizeBadge').textContent = `${s} px`;
+            syncPresetButtons(s);
             updateLivePreview();
         });
     });
 
     document.getElementById('dayFontSize').addEventListener('input', (e) => {
-        const size = e.target.value;
-        document.getElementById('fontSizeBadge').textContent = `${size} px`;
-        syncPresetButtons(size);
+        const s = e.target.value;
+        document.getElementById('fontSizeBadge').textContent = `${s} px`;
+        syncPresetButtons(s);
         updateLivePreview();
     });
 
-    ['dayHours', 'dayExtraHours', 'dayAlarmEnabled', 'dayStartTime', 'dayAlarmTime', 'dayCustomText', 'dayPrioritizeText'].forEach(id => {
+    ['dayHours', 'dayExtraHours', 'dayHourlyRate', 'dayExtraRate', 'dayTips', 'dayAlarmEnabled', 'dayStartTime', 'dayAlarmTime', 'dayCustomText', 'dayPrioritizeText'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             updateAlarmHintText();
             updateLivePreview();
         });
     });
 
-    // Cerrar y Guardar Modal de Día
-    document.getElementById('btnCloseDayModal').addEventListener('click', closeDayModal);
-
-    document.getElementById('dayForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!state.editingDateKey) return;
-
-        const data = collectDayModalData();
-        const isEmpty = data.shiftId === 'NONE' && !data.useCustomColor && data.hours === 0 &&
-                        data.extraHours === 0 && !data.alarmEnabled && !data.customText && !data.sticker;
-
-        if (isEmpty) {
-            delete state.daysData[state.editingDateKey];
-        } else {
-            state.daysData[state.editingDateKey] = data;
-            applyRepeatToSelectedWeekDays(state.editingDateKey, data); // <-- CLONA A LOS DÍAS ELEGIDOS
-        }
-
-        saveState();
-        renderAll();
-        closeDayModal();
-    });
-
-    document.getElementById('btnClearDay').addEventListener('click', () => {
-        if (state.editingDateKey) {
-            delete state.daysData[state.editingDateKey];
-            saveState();
-            renderAll();
-            closeDayModal();
-        }
-    });
-
-    // Calculadora de ganancias en vivo
-    ['calcTotalHoursInput', 'hourlyRateInput', 'extraRateInput'].forEach(id => {
-        document.getElementById(id).addEventListener('input', () => {
-            recalculateEarnings();
-            renderStats();
-        });
-    });
-
-    // Modal de Crear / Editar Turno y Color
-    document.getElementById('btnNewShift').addEventListener('click', () => openShiftConfigModal(null));
-    document.getElementById('btnCloseShiftModal').addEventListener('click', () => {
-        document.getElementById('shiftConfigModal').classList.remove('modal--open');
-    });
-
-    document.getElementById('shiftConfigForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = state.editingShiftId || ('S_' + Date.now());
-        const color = document.getElementById('cfgShiftColor').value;
-
-        state.shifts[id] = {
-            id,
-            name: document.getElementById('cfgShiftName').value.trim(),
-            short: document.getElementById('cfgShiftShort').value.trim().toUpperCase(),
-            color,
-            textColor: getContrastText(color),
-            defaultHours: parseFloat(document.getElementById('cfgShiftHours').value) || 0,
-            startTime: document.getElementById('cfgShiftStart').value || '08:00',
-            alarmTime: document.getElementById('cfgShiftAlarm').value || '06:00'
-        };
-
-        saveState();
-        renderAll();
-        document.getElementById('shiftConfigModal').classList.remove('modal--open');
-    });
-
-    document.getElementById('btnDeleteShiftType').addEventListener('click', () => {
-        if (state.editingShiftId && state.editingShiftId !== 'NONE') {
-            delete state.shifts[state.editingShiftId];
-            saveState();
-            renderAll();
-            document.getElementById('shiftConfigModal').classList.remove('modal--open');
-        }
-    });
-
-    // FUNCIÓN 1: Botones L M X J V S D para repetir en la semana
+    // Botones repetir semana
     document.querySelectorAll('.weekday-check-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.classList.contains('weekday-check-btn--current')) return;
@@ -786,354 +975,174 @@ function bindEvents() {
         });
     });
 
-    // FUNCIÓN 4: Exportar e Importar Copia de Seguridad (.json)
-    document.getElementById('btnExportBackup').addEventListener('click', exportBackupJSON);
-    document.getElementById('btnImportBackup').addEventListener('click', () => {
-        document.getElementById('inputImportBackup').click();
+    // Modal Día: Cerrar, Vaciar, Guardar
+    document.getElementById('btnCloseDayModal').addEventListener('click', closeDayModal);
+    document.getElementById('btnClearDay').addEventListener('click', () => {
+        if (state.editingDateKey) {
+            delete state.daysData[state.editingDateKey];
+            saveState();
+            renderAll();
+            closeDayModal();
+        }
     });
-    document.getElementById('inputImportBackup').addEventListener('change', importBackupJSON);
 
-    // FUNCIÓN 5: Cambio en la Meta Mensual
+    document.getElementById('dayForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!state.editingDateKey) return;
+        const data = collectDayModalData();
+        const isEmpty = data.shiftId === 'NONE' && !data.useCustomColor && data.hours === 0 &&
+                        data.extraHours === 0 && data.tips === 0 && !data.alarmEnabled && !data.customText && !data.sticker;
+
+        if (isEmpty) {
+            delete state.daysData[state.editingDateKey];
+        } else {
+            state.daysData[state.editingDateKey] = data;
+            applyRepeatToSelectedWeekDays(state.editingDateKey, data);
+        }
+        saveState();
+        renderAll();
+        closeDayModal();
+    });
+
+    // Calculadora de Ganancias y Retenciones
+    ['calcTotalHoursInput', 'hourlyRateInput', 'extraRateInput', 'retentionPercentInput'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => recalculateEarnings());
+    });
+
     document.getElementById('monthlyGoalInput').addEventListener('input', (e) => {
         state.monthlyGoal = parseFloat(e.target.value) || 0;
         saveState();
         recalculateEarnings();
     });
 
-    // FUNCIÓN 6: Configurar o quitar PIN y botón de bloqueo inmediato
-    document.getElementById('btnConfigPin').addEventListener('click', configureStatsPin);
+    // PIN
+    document.getElementById('btnConfigPin').addEventListener('click', () => {
+        if (state.statsPin) {
+            const cur = prompt('PIN actual:');
+            if (cur !== state.statsPin) return alert('❌ PIN incorrecto.');
+            const next = prompt('Nuevo PIN de 4 dígitos (vacío para quitar):');
+            if (next === null) return;
+            state.statsPin = next.trim() || null;
+            state.statsUnlocked = Boolean(state.statsPin);
+        } else {
+            const p = prompt('Crea un PIN de 4 números:');
+            if (!p || !p.trim()) return;
+            state.statsPin = p.trim();
+            state.statsUnlocked = true;
+        }
+        saveState();
+        updatePinUI();
+    });
+
     document.getElementById('btnLockNow').addEventListener('click', () => {
         state.statsUnlocked = false;
         updatePinUI();
-        // Volver automáticamente a la pestaña de calendario al bloquear
-        document.querySelector('.tabs__btn[data-tab="calendarView"]').click();
-    });
-}
-
-// Exporta los turnos y alarmas del mes a Google Calendar / Apple Calendar (.ics)
-function exportAlarmsToICS() {
-    const keys = Object.keys(state.daysData);
-    if (keys.length === 0) {
-        alert('Aún no tienes turnos ni alarmas guardadas para exportar.');
-        return;
-    }
-
-    let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//MiCalendarioTurnos//ES\n';
-    keys.forEach(dateKey => {
-        const d = state.daysData[dateKey];
-        if (!d || (d.shiftId === 'NONE' && !d.customText)) return;
-        const shiftName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Turno';
-        const cleanDate = dateKey.replace(/-/g, '');
-        const startH = (d.startTime || '08:00').replace(':', '') + '00';
-
-        ics += 'BEGIN:VEVENT\n';
-        ics += `SUMMARY:${shiftName} ${d.customText ? '- ' + d.customText : ''}\n`;
-        ics += `DTSTART:${cleanDate}T${startH}\n`;
-        if (d.alarmEnabled) {
-            ics += 'BEGIN:VALARM\nTRIGGER:-PT2H\nACTION:DISPLAY\nDESCRIPTION:Alarma de turno\nEND:VALARM\n';
-        }
-        ics += 'END:VEVENT\n';
-    });
-    ics += 'END:VCALENDAR';
-
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'mis_turnos.ics';
-    link.click();
-}
-
-// ==================== FUNCIÓN 1: COPIAR DÍA A LA MISMA SEMANA ====================
-function initRepeatWeekButtons(currentDayOfWeek) {
-    state.repeatSelectedDows = [];
-    document.querySelectorAll('.weekday-check-btn').forEach(btn => {
-        const dow = parseInt(btn.dataset.dow, 10);
-        btn.classList.remove('weekday-check-btn--selected', 'weekday-check-btn--current');
-        if (dow === currentDayOfWeek) {
-            btn.classList.add('weekday-check-btn--current');
-        }
-    });
-}
-
-function applyRepeatToSelectedWeekDays(baseDateKey, dataToCopy) {
-    if (!state.repeatSelectedDows || state.repeatSelectedDows.length === 0) return;
-
-    const [y, m, d] = baseDateKey.split('-').map(Number);
-    const baseDate = new Date(y, m - 1, d);
-    const baseDow = baseDate.getDay();
-    // Calcular el Lunes de esa misma semana
-    const diffToMonday = (baseDow === 0) ? -6 : 1 - baseDow;
-    const mondayDate = new Date(y, m - 1, d + diffToMonday);
-
-    state.repeatSelectedDows.forEach(targetDow => {
-        const offsetFromMonday = (targetDow === 0) ? 6 : targetDow - 1;
-        const targetDate = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + offsetFromMonday);
-        const targetKey = formatDateKey(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-        state.daysData[targetKey] = JSON.parse(JSON.stringify(dataToCopy));
-    });
-}
-
-// ==================== FUNCIÓN 4: COPIA DE SEGURIDAD (JSON) ====================
-function exportBackupJSON() {
-    const backup = {
-        version: 3,
-        exportedAt: new Date().toISOString(),
-        theme: state.theme,
-        shifts: state.shifts,
-        daysData: state.daysData,
-        hourlyRate: state.hourlyRate,
-        extraRate: state.extraRate,
-        monthlyGoal: state.monthlyGoal,
-        statsPin: state.statsPin
-    };
-
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `copia_calendario_${state.currentYear}_${state.currentMonth + 1}.json`;
-    link.click();
-}
-
-function importBackupJSON(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const parsed = JSON.parse(event.target.result);
-            if (!parsed.daysData || !parsed.shifts) {
-                alert('❌ El archivo no parece una copia válida del calendario.');
-                return;
-            }
-            state.theme = parsed.theme || 'light';
-            state.shifts = parsed.shifts;
-            state.daysData = parsed.daysData;
-            state.hourlyRate = parsed.hourlyRate ?? 10;
-            state.extraRate = parsed.extraRate ?? 12;
-            state.monthlyGoal = parsed.monthlyGoal ?? 1200;
-            state.statsPin = parsed.statsPin || null;
-
-            saveState();
-            applyTheme();
-            renderAll();
-            alert('✅ Copia de seguridad restaurada correctamente.');
-        } catch (err) {
-            alert('❌ Error al leer el archivo de copia de seguridad.');
-        }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-}
-
-// ==================== FUNCIÓN 5: META MENSUAL Y COMPARATIVA ====================
-function getMonthTotalMoney(year, month) {
-    const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
-    let total = 0;
-    Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(k => {
-        const d = state.daysData[k];
-        const h = Number(d.hours) || 0;
-        const ex = Number(d.extraHours) || 0;
-        const r = d.hourlyRate ?? state.hourlyRate;
-        const exR = d.extraRate ?? state.extraRate;
-        total += (h * r) + (ex * exR);
-    });
-    return total;
-}
-
-function updateGoalAndComparison(currentEarned) {
-    const goal = Number(state.monthlyGoal) || 0;
-    const pct = goal > 0 ? Math.min(100, Math.round((currentEarned / goal) * 100)) : 0;
-    const remaining = Math.max(0, goal - currentEarned);
-
-    const badge = document.getElementById('goalPercentBadge');
-    const remText = document.getElementById('goalRemainingText');
-    const bar = document.getElementById('goalProgressBar');
-
-    if (badge && remText && bar) {
-        badge.textContent = `${pct}%`;
-        remText.textContent = remaining === 0 && goal > 0 ? '🎉 ¡Meta superada!' : `Faltan ${remaining.toFixed(2)} €`;
-        bar.style.width = `${pct}%`;
-    }
-
-    // Calcular mes anterior
-    let prevM = state.currentMonth - 1;
-    let prevY = state.currentYear;
-    if (prevM < 0) { prevM = 11; prevY--; }
-
-    const prevTotal = getMonthTotalMoney(prevY, prevM);
-    const diff = currentEarned - prevTotal;
-    const compareEl = document.getElementById('prevMonthComparison');
-
-    if (compareEl) {
-        if (prevTotal === 0) {
-            compareEl.textContent = `📊 Mes anterior: 0.00 € registrados`;
-        } else {
-            const sign = diff >= 0 ? '+' : '';
-            const emoji = diff >= 0 ? '📈' : '📉';
-            compareEl.innerHTML = `${emoji} Mes anterior: <strong>${prevTotal.toFixed(2)} €</strong> (${sign}${diff.toFixed(2)} € este mes)`;
-        }
-    }
-}
-
-// ==================== FUNCIÓN 6: BLOQUEO CON PIN ====================
-function updatePinUI() {
-    const statusText = document.getElementById('pinStatusText');
-    const btnConfig = document.getElementById('btnConfigPin');
-    const btnLock = document.getElementById('btnLockNow');
-    if (!statusText || !btnConfig || !btnLock) return;
-
-    if (state.statsPin) {
-        statusText.textContent = '🔐 Protegido con PIN';
-        btnConfig.textContent = '⚙️ Cambiar/Quitar PIN';
-        btnLock.style.display = state.statsUnlocked ? 'inline-block' : 'none';
-    } else {
-        statusText.textContent = '🔓 Pestaña sin PIN de bloqueo';
-        btnConfig.textContent = '🔒 Activar PIN';
-        btnLock.style.display = 'none';
-    }
-}
-
-function configureStatsPin() {
-    if (state.statsPin) {
-        const current = prompt('Introduce tu PIN actual para modificarlo (o déjalo en blanco para cancelar):');
-        if (current === null || current === '') return;
-        if (current !== state.statsPin) {
-            alert('❌ PIN actual incorrecto.');
-            return;
-        }
-        const nextPin = prompt('Escribe un nuevo PIN de 4 dígitos, o déjalo vacío para ELIMINAR el bloqueo por PIN:');
-        if (nextPin === null) return;
-        if (nextPin.trim() === '') {
-            state.statsPin = null;
-            state.statsUnlocked = false;
-            alert('🔓 Bloqueo con PIN desactivado.');
-        } else {
-            state.statsPin = nextPin.trim();
-            state.statsUnlocked = true;
-            alert('✅ Nuevo PIN guardado.');
-        }
-    } else {
-        const newPin = prompt('🔒 Crea un PIN de 4 números para proteger tu pestaña de Control de Ganancias:');
-        if (!newPin || newPin.trim() === '') return;
-        state.statsPin = newPin.trim();
-        state.statsUnlocked = true;
-        alert('✅ PIN activado. Cuando cierres la app o pulses "Bloquear", pedirá el PIN.');
-    }
-    saveState();
-    updatePinUI();
-}
-
-// Bloqueo total de doble toque (zoom lupa) y pellizco en iOS
-let lastTouchEnd = 0;
-document.addEventListener('touchend', (event) => {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, { passive: false });
-
-document.addEventListener('gesturestart', (event) => {
-    event.preventDefault();
-});
-
-
-// ==================== VISTA 4: MI CAJA / BILLETERA ====================
-function addWalletMovement(type) {
-    const amountInput = document.getElementById('walletAmountInput');
-    const conceptInput = document.getElementById('walletConceptInput');
-    const amount = parseFloat(amountInput.value);
-
-    if (!amount || amount <= 0) {
-        alert('Introduce una cantidad mayor que 0 €.');
-        return;
-    }
-
-    const defaultConcept = type === 'IN' ? 'Ingreso / Ahorro' : 'Retirada / Gasto';
-    const concept = conceptInput.value.trim() || defaultConcept;
-    const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-
-    state.walletMovements.unshift({
-        id: 'W_' + Date.now(),
-        type, // 'IN' o 'OUT'
-        amount,
-        concept,
-        date: dateStr
+        switchTab('calendarView');
     });
 
-    amountInput.value = '';
-    conceptInput.value = '';
-    saveState();
-    renderWallet();
-}
+    // Eventos de Mi Caja, Hucha y Gastos Fijos
+    document.getElementById('btnWalletAdd').addEventListener('click', () => addWalletMovement('IN'));
+    document.getElementById('btnWalletWithdraw').addEventListener('click', () => addWalletMovement('OUT'));
 
-function syncMonthEarningsToWallet() {
-    const monthEarned = getMonthTotalMoney(state.currentYear, state.currentMonth);
-    if (monthEarned <= 0) {
-        alert('Aún no tienes ganancias acumuladas en los turnos de este mes.');
-        return;
-    }
-    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const label = `Nómina / Turnos ${months[state.currentMonth]}`;
-
-    state.walletMovements.unshift({
-        id: 'W_' + Date.now(),
-        type: 'IN',
-        amount: Number(monthEarned.toFixed(2)),
-        concept: label,
-        date: `${state.currentMonth + 1}/${state.currentYear}`
+    document.getElementById('btnSyncMonthToWallet').addEventListener('click', () => {
+        const summary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
+        if (summary.realTotal <= 0) return alert('No hay ganancias acumuladas este mes.');
+        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        addWalletMovement('IN', summary.realTotal, `Nómina + Bote (${months[state.currentMonth]})`);
     });
 
-    saveState();
-    renderWallet();
-}
+    document.getElementById('btnClearWallet').addEventListener('click', () => {
+        if (!confirm('¿Vaciar el historial de Mi Caja?')) return;
+        state.walletMovements = [];
+        saveState();
+        renderWallet();
+    });
 
-function renderWallet() {
-    const listEl = document.getElementById('walletMovementsList');
-    if (!listEl) return;
-    listEl.innerHTML = '';
+    document.getElementById('piggyTitleInput').addEventListener('input', (e) => {
+        state.piggyTitle = e.target.value;
+        saveState();
+    });
 
-    let totalIn = 0;
-    let totalOut = 0;
+    document.getElementById('piggyGoalInput').addEventListener('input', (e) => {
+        state.piggyGoal = parseFloat(e.target.value) || 0;
+        saveState();
+        renderPiggyBank();
+    });
 
-    state.walletMovements.forEach(item => {
-        if (item.type === 'IN') totalIn += Number(item.amount);
-        else totalOut += Number(item.amount);
+    document.getElementById('btnPiggyDeposit').addEventListener('click', () => {
+        const input = document.getElementById('piggyTransferInput');
+        const amt = parseFloat(input.value);
+        if (!amt || amt <= 0) return alert('Introduce una cantidad para meter en la hucha.');
+        state.piggySaved += amt;
+        addWalletMovement('OUT', amt, `🐷 Apartado a Hucha: ${state.piggyTitle}`);
+        input.value = '';
+        saveState();
+        renderPiggyBank();
+    });
 
-        const li = document.createElement('li');
-        li.className = 'worked-list__item';
-        const isIn = item.type === 'IN';
-        const sign = isIn ? '+' : '-';
-        const cls = isIn ? 'movement-amount--in' : 'movement-amount--out';
+    document.getElementById('btnPiggyWithdraw').addEventListener('click', () => {
+        const input = document.getElementById('piggyTransferInput');
+        const amt = parseFloat(input.value);
+        if (!amt || amt <= 0 || amt > state.piggySaved) return alert('Cantidad no válida o mayor que lo ahorrado.');
+        state.piggySaved -= amt;
+        addWalletMovement('IN', amt, `🐷 Retirado de Hucha: ${state.piggyTitle}`);
+        input.value = '';
+        saveState();
+        renderPiggyBank();
+    });
 
-        li.innerHTML = `
-            <div>
-                <strong>${item.concept}</strong>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">${item.date}</div>
-            </div>
-            <div style="display:flex; align-items:center;">
-                <span class="${cls}">${sign}${Number(item.amount).toFixed(2)} €</span>
-                <button type="button" class="movement-delete-btn" title="Borrar apunte">&times;</button>
-            </div>
-        `;
+    document.getElementById('btnAddFixedExpense').addEventListener('click', () => {
+        const nameEl = document.getElementById('fixedExpenseName');
+        const amtEl = document.getElementById('fixedExpenseAmount');
+        const name = nameEl.value.trim();
+        const amount = parseFloat(amtEl.value);
+        if (!name || !amount || amount <= 0) return alert('Escribe un nombre y una cantidad válida.');
+        state.fixedExpenses.push({ id: 'F_' + Date.now(), name, amount });
+        nameEl.value = '';
+        amtEl.value = '';
+        saveState();
+        renderFixedExpenses();
+    });
 
-        li.querySelector('.movement-delete-btn').addEventListener('click', () => {
-            state.walletMovements = state.walletMovements.filter(m => m.id !== item.id);
-            saveState();
-            renderWallet();
+    document.getElementById('btnApplyFixedExpenses').addEventListener('click', () => {
+        if (state.fixedExpenses.length === 0) return alert('Añade primero algún gasto fijo arriba.');
+        if (!confirm('¿Descontar todos los gastos fijos de tu saldo ahora?')) return;
+        state.fixedExpenses.forEach(exp => {
+            addWalletMovement('OUT', exp.amount, `📌 Gasto fijo: ${exp.name}`);
         });
-
-        listEl.appendChild(li);
     });
 
-    if (state.walletMovements.length === 0) {
-        listEl.innerHTML = '<li class="worked-list__item">Aún no hay movimientos en tu caja.</li>';
-    }
+    // Modal Configurar Turnos
+    document.getElementById('btnNewShift').addEventListener('click', () => openShiftConfigModal(null));
+    document.getElementById('btnCloseShiftModal').addEventListener('click', () => {
+        document.getElementById('shiftConfigModal').classList.remove('modal--open');
+    });
 
-    const balance = totalIn - totalOut;
-    document.getElementById('walletCurrentBalance').textContent = `${balance.toFixed(2)} €`;
-    document.getElementById('walletTotalIn').textContent = `${totalIn.toFixed(2)} €`;
-    document.getElementById('walletTotalOut').textContent = `${totalOut.toFixed(2)} €`;
+    document.getElementById('shiftConfigForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = state.editingShiftId || ('S_' + Date.now());
+        const color = document.getElementById('cfgShiftColor').value;
+        state.shifts[id] = {
+            id,
+            name: document.getElementById('cfgShiftName').value.trim(),
+            short: document.getElementById('cfgShiftShort').value.trim().toUpperCase(),
+            color,
+            textColor: getContrastText(color),
+            defaultHours: parseFloat(document.getElementById('cfgShiftHours').value) || 0,
+            startTime: document.getElementById('cfgShiftStart').value || '08:00',
+            alarmTime: document.getElementById('cfgShiftAlarm').value || '06:00'
+        };
+        saveState();
+        renderAll();
+        document.getElementById('shiftConfigModal').classList.remove('modal--open');
+    });
+
+    document.getElementById('btnDeleteShiftType').addEventListener('click', () => {
+        if (state.editingShiftId && state.editingShiftId !== 'NONE') {
+            delete state.shifts[state.editingShiftId];
+            saveState();
+            renderAll();
+            document.getElementById('shiftConfigModal').classList.remove('modal--open');
+        }
+    });
 }
