@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="icono.jpg">
     <link rel="icon" type="image/jpeg" href="icono.jpg">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 
@@ -31,7 +31,6 @@
                 </div>
 
                 <div class="header__actions">
-                    <!-- Modo Claro / Oscuro -->
                     <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">
                         <svg id="iconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -49,7 +48,6 @@
                         </svg>
                     </button>
 
-                    <!-- Guardar Copia de Seguridad -->
                     <button type="button" id="btnExportBackup" class="icon-btn" title="Guardar Copia (.json)">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -58,7 +56,6 @@
                         </svg>
                     </button>
 
-                    <!-- Restaurar Copia -->
                     <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar Copia (.json)">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -68,15 +65,13 @@
                     </button>
                     <input type="file" id="inputImportBackup" accept=".json" style="display: none;">
 
-                    <!-- Exportar Alarmas ICS -->
-                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar alarmas (.ics)">
+                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar todos los turnos (.ics)">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
                     </button>
 
-                    <!-- Vaciar Mes -->
                     <button type="button" id="btnClearMonth" class="icon-btn" title="Vaciar mes actual">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -171,7 +166,7 @@
                             <input type="number" id="calcTotalHoursInput" step="0.5" min="0" value="0">
                         </div>
                         <div class="calc-box__field">
-                            <label for="hourlyRateInput">Precio hora (€/h):</label>
+                            <label for="hourlyRateInput">Tarifa base (€/h):</label>
                             <input type="number" id="hourlyRateInput" step="0.5" min="0" value="10">
                         </div>
                     </div>
@@ -189,7 +184,7 @@
 
                     <div class="payroll-breakdown">
                         <div class="payroll-row">
-                            <span>Sueldo Bruto (Turnos):</span>
+                            <span>Sueldo Bruto (Turnos + Pluses):</span>
                             <strong id="statGrossMoney">0.00 €</strong>
                         </div>
                         <div class="payroll-row">
@@ -221,7 +216,6 @@
             <div class="panel-card">
                 <h3 class="panel-card__title">Gym y Rendimiento</h3>
 
-                <!-- Objetivo Semanal y Constancia -->
                 <div class="goal-card" style="margin-top: 10px;">
                     <div class="goal-card__top">
                         <div>
@@ -242,7 +236,6 @@
                     </div>
                 </div>
 
-                <!-- Temporizador de Descanso entre Series -->
                 <div class="sub-box timer-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Temporizador de Descanso</span>
@@ -257,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- Control de Peso Corporal -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Control de Peso Corporal</span>
@@ -270,7 +262,6 @@
                     <ul id="weightHistoryList" class="worked-list" style="max-height: 110px; margin-top: 8px;"></ul>
                 </div>
 
-                <!-- Registro Rápido de Pesos y Récords (PRs) -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Récords y Pesos (PRs)</span>
@@ -330,7 +321,6 @@
                     </button>
                 </div>
 
-                <!-- Hucha de Ahorro -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Hucha de Ahorro</span>
@@ -360,7 +350,6 @@
                     </div>
                 </div>
 
-                <!-- Gastos Fijos Mensuales -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Gastos Fijos Mensuales</span>
@@ -385,17 +374,68 @@
             </div>
         </section>
 
-        <!-- ==================== VISTA 5: MIS TURNOS Y COLORES ==================== -->
+        <!-- ==================== VISTA 5: MIS TURNOS Y PATRONES ROTATIVOS ==================== -->
         <section id="shiftsView" class="view">
+            <!-- Tarjeta 1: Lista de turnos y sus tarifas/pluses -->
             <div class="panel-card">
                 <div class="panel-card__header">
                     <div>
                         <h3 class="panel-card__title">Configura tus Turnos</h3>
-                        <p class="panel-card__desc">Edita colores, horarios y letras o crea turnos nuevos.</p>
+                        <p class="panel-card__desc">Edita colores, tarifas por hora, pluses y horarios.</p>
                     </div>
                     <button type="button" id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo</button>
                 </div>
                 <div id="shiftsConfigList" class="shifts-list"></div>
+            </div>
+
+            <!-- Tarjeta 2: Generador de Patrones Rotativos -->
+            <div class="panel-card" style="margin-top: 14px;">
+                <div class="panel-card__header" style="margin-bottom: 8px;">
+                    <div>
+                        <h3 class="panel-card__title">Generador de Patrones Rotativos</h3>
+                        <p class="panel-card__desc">Toca los turnos en orden para armar tu ciclo (ej. M - M - A - A - L - L) y rellena el calendario.</p>
+                    </div>
+                </div>
+
+                <!-- Botones para añadir pasos al patrón -->
+                <div id="patternShiftButtons" class="pattern-btns-grid"></div>
+
+                <!-- Secuencia armada -->
+                <div class="pattern-sequence-box">
+                    <div class="pattern-sequence-box__top">
+                        <span class="pattern-sequence-box__label">Secuencia actual (<b id="patternLengthBadge">0</b> días):</span>
+                        <div class="pattern-sequence-box__actions">
+                            <button type="button" id="btnPatternUndo" class="btn btn--sm btn--outline" title="Borrar último">←</button>
+                            <button type="button" id="btnPatternClear" class="btn btn--sm btn--danger">Limpiar</button>
+                        </div>
+                    </div>
+                    <div id="patternSequenceDisplay" class="pattern-chips-row">
+                        <span class="pattern-empty-hint">Pulsa los turnos de arriba para crear tu ciclo...</span>
+                    </div>
+                </div>
+
+                <!-- Fecha de inicio y duración -->
+                <div class="calc-box__row" style="margin-top: 10px;">
+                    <div class="calc-box__field">
+                        <label for="patternStartDate">Empezar desde el día:</label>
+                        <input type="date" id="patternStartDate">
+                    </div>
+                    <div class="calc-box__field">
+                        <label for="patternDurationSelect">Repetir durante:</label>
+                        <select id="patternDurationSelect" class="form-select">
+                            <option value="month">Resto del mes</option>
+                            <option value="7">1 semana (7 días)</option>
+                            <option value="14">2 semanas (14 días)</option>
+                            <option value="28">4 semanas (28 días)</option>
+                            <option value="60">2 meses (60 días)</option>
+                            <option value="90">3 meses (90 días)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" id="btnApplyPattern" class="btn btn--primary" style="width: 100%; margin-top: 12px;">
+                    Aplicar patrón al calendario
+                </button>
             </div>
         </section>
 
@@ -473,13 +513,11 @@
             </div>
 
             <form id="dayForm" class="modal__body">
-                <!-- 1. Turno asignado -->
                 <div class="section-block">
                     <label class="section-block__label">Turno asignado</label>
                     <div id="modalShiftSelector" class="shift-cards-grid"></div>
                 </div>
 
-                <!-- Color libre para este día -->
                 <div class="custom-color-box">
                     <div class="custom-color-box__top">
                         <label class="checkbox-row">
@@ -494,7 +532,6 @@
                     <div id="dayQuickPalette" class="day-quick-palette"></div>
                 </div>
 
-                <!-- 2. Rutina Gym y Creatina del día -->
                 <div class="gym-day-box">
                     <div class="gym-day-box__top">
                         <label for="dayWorkoutGroup" class="section-block__label" style="margin:0;">Entreno Gym hoy:</label>
@@ -515,7 +552,6 @@
                     </label>
                 </div>
 
-                <!-- 3. Horas trabajadas y Horas Extra -->
                 <div class="dual-counters">
                     <div class="counter-card">
                         <span class="counter-card__title">Horas trabajadas</span>
@@ -538,7 +574,6 @@
                     </div>
                 </div>
 
-                <!-- 4. Precio por hora y Bote / Propinas -->
                 <div class="day-rates-box">
                     <div class="dual-counters" style="margin-bottom: 8px;">
                         <div class="counter-card">
@@ -562,13 +597,22 @@
                         </div>
                     </div>
 
-                    <div class="counter-card" style="margin-bottom: 8px; border-color: #f59e0b;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <span class="counter-card__title">Bote / Propinas hoy (€)</span>
-                                <small class="counter-card__sub" style="margin:0;">Dinero extra en mano</small>
+                    <!-- Plus fijo del turno (Nocturnidad/Festivo) y Bote en mano -->
+                    <div class="dual-counters" style="margin-bottom: 8px;">
+                        <div class="counter-card">
+                            <span class="counter-card__title">Plus Turno (€)</span>
+                            <small class="counter-card__sub">Nocturnidad / fijo</small>
+                            <div class="stepper">
+                                <button type="button" class="stepper__btn" data-step-target="dayShiftPlus" data-step="-1">&minus;</button>
+                                <input type="number" id="dayShiftPlus" class="stepper__input" step="0.5" min="0" value="0">
+                                <button type="button" class="stepper__btn" data-step-target="dayShiftPlus" data-step="1">+</button>
                             </div>
-                            <div class="stepper" style="width: 145px;">
+                        </div>
+
+                        <div class="counter-card" style="border-color: #f59e0b;">
+                            <span class="counter-card__title">Bote / Propinas (€)</span>
+                            <small class="counter-card__sub">Extra en mano</small>
+                            <div class="stepper">
                                 <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="-1">&minus;</button>
                                 <input type="number" id="dayTips" class="stepper__input" step="0.5" min="0" value="0">
                                 <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="1">+</button>
@@ -582,7 +626,6 @@
                     </div>
                 </div>
 
-                <!-- 5. Alarma / Despertador -->
                 <div class="alarm-card">
                     <label class="alarm-card__check">
                         <input type="checkbox" id="dayAlarmEnabled">
@@ -603,7 +646,6 @@
                     </div>
                 </div>
 
-                <!-- 6. Texto / Nota y Sticker arriba a la izquierda -->
                 <div class="note-card">
                     <div class="note-card__top">
                         <label for="dayCustomText" class="section-block__label" style="margin:0;">Texto o nota en la casilla</label>
@@ -640,7 +682,6 @@
                     </div>
                 </div>
 
-                <!-- Copiar a otros días de la semana -->
                 <div class="repeat-week-box">
                     <span class="repeat-week-box__title">Copiar también a otros días de esta semana:</span>
                     <div id="repeatWeekDaysContainer" class="repeat-week-days" style="margin-top: 8px;">
@@ -677,11 +718,11 @@
                 <div class="calc-box__row">
                     <div class="calc-box__field">
                         <label for="cfgShiftName">Nombre del turno:</label>
-                        <input type="text" id="cfgShiftName" required placeholder="Ej: Mañana">
+                        <input type="text" id="cfgShiftName" required placeholder="Ej: Noche">
                     </div>
                     <div class="calc-box__field">
                         <label for="cfgShiftShort">Letra (máx 3):</label>
-                        <input type="text" id="cfgShiftShort" maxlength="3" required placeholder="Ej: M">
+                        <input type="text" id="cfgShiftShort" maxlength="3" required placeholder="Ej: N">
                     </div>
                 </div>
 
@@ -705,6 +746,17 @@
                     </div>
                 </div>
 
+                <div class="calc-box__row" style="margin-top: 10px;">
+                    <div class="calc-box__field">
+                        <label for="cfgShiftRate">Precio hora propio (€/h):</label>
+                        <input type="number" id="cfgShiftRate" step="0.5" min="0" placeholder="0 = usar base">
+                    </div>
+                    <div class="calc-box__field">
+                        <label for="cfgShiftPlus">Plus fijo por turno (€):</label>
+                        <input type="number" id="cfgShiftPlus" step="0.5" min="0" value="0" placeholder="Ej: 15">
+                    </div>
+                </div>
+
                 <div class="calc-box__field" style="margin-top: 10px;">
                     <label for="cfgShiftAlarm">Alarma sugerida:</label>
                     <input type="time" id="cfgShiftAlarm" value="06:00">
@@ -718,6 +770,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>
