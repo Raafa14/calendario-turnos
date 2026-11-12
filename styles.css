@@ -1125,3 +1125,53 @@ html, body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
 }
 
+/* ESTILOS DE DEUDAS PENDIENTES (MI CAJA) */
+.debt-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: var(--bg-card);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.debt-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.debt-tab-btn--active {
+    background: var(--mono-invert-bg);
+    color: var(--mono-invert-fg);
+}
+
+.debt-settle-btn {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.debt-free-bar {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+}
