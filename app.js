@@ -986,23 +986,34 @@ function bindEvents() {
         }
     });
 
-    document.getElementById('dayForm').addEventListener('submit', (e) => {
-        e.preventDefault();
+    function handleSaveDay(e) {
+        if (e) e.preventDefault();
         if (!state.editingDateKey) return;
+
         const data = collectDayModalData();
         const isEmpty = data.shiftId === 'NONE' && !data.useCustomColor && data.hours === 0 &&
-                        data.extraHours === 0 && data.tips === 0 && !data.alarmEnabled && !data.customText && !data.sticker;
+                        data.extraHours === 0 && data.tips === 0 && !data.alarmEnabled &&
+                        !data.customText && !data.sticker;
 
         if (isEmpty) {
             delete state.daysData[state.editingDateKey];
         } else {
             state.daysData[state.editingDateKey] = data;
-            applyRepeatToSelectedWeekDays(state.editingDateKey, data);
+            if (typeof applyRepeatToSelectedWeekDays === 'function') {
+                applyRepeatToSelectedWeekDays(state.editingDateKey, data);
+            }
         }
+
         saveState();
         renderAll();
         closeDayModal();
-    });
+    }
+
+    const dayFormEl = document.getElementById('dayForm');
+    if (dayFormEl) dayFormEl.addEventListener('submit', handleSaveDay);
+
+    const btnSaveDayEl = document.getElementById('btnSaveDay');
+    if (btnSaveDayEl) btnSaveDayEl.addEventListener('click', handleSaveDay);
 
     // Calculadora de Ganancias y Retenciones
     ['calcTotalHoursInput', 'hourlyRateInput', 'extraRateInput', 'retentionPercentInput'].forEach(id => {
