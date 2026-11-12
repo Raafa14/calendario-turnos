@@ -1180,3 +1180,174 @@ body {
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
+
+/* REDISEÑO MINIMALISTA Y ALTA LEGIBILIDAD */
+.app {
+    padding-bottom: 76px; /* Espacio para que la barra inferior nunca tape el contenido */
+    position: relative;
+}
+
+.header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tomorrow-banner {
+    margin-bottom: 0;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+}
+
+/* BARRA DE PESTAÑAS INFERIOR (BOTTOM NAV) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
+    z-index: 150;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.bottom-nav__item {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.bottom-nav__icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.bottom-nav__label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+.bottom-nav__item--active {
+    color: var(--accent);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+/* PESTAÑA "MI CAJA / BILLETERA" */
+.wallet-balance-card {
+    background: var(--header-bg);
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.wallet-balance-card__label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.wallet-balance-card__amount {
+    display: block;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+}
+
+.wallet-balance-card__row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.wallet-pill {
+    font-size: 0.74rem;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.wallet-pill--in b { color: #34d399; }
+.wallet-pill--out b { color: #f87171; }
+
+.wallet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btn--wallet-in {
+    background: #10b981;
+    color: #ffffff;
+    padding: 12px;
+    font-size: 0.86rem;
+}
+
+.btn--wallet-out {
+    background: #ef4444;
+    color: #ffffff;
+    padding: 12px;
+    font-size: 0.86rem;
+}
+
+.wallet-sync-btn {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.78rem;
+    padding: 10px;
+}
+
+.wallet-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 18px 0 8px;
+}
+
+.wallet-clear-link {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.movement-amount--in {
+    color: #10b981;
+    font-weight: 900;
+}
+
+.movement-amount--out {
+    color: #ef4444;
+    font-weight: 900;
+}
+
+.movement-delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
