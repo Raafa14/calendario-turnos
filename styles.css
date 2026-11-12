@@ -42,6 +42,22 @@
     margin: 0;
     padding: 0;
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    touch-action: manipulation; /* Elimina el zoom al dar 2 toques seguidos */
+    -webkit-tap-highlight-color: transparent; /* Quita el destello gris de iOS al tocar */
+}
+
+html, body {
+    touch-action: pan-x pan-y; /* Permite deslizar pero prohíbe hacer zoom */
+    -webkit-text-size-adjust: 100%;
+    user-select: none; /* Evita que al mantener pulsado salga la lupa de seleccionar texto */
+    -webkit-user-select: none;
+}
+
+/* Permitimos seleccionar texto únicamente dentro de las cajas de escribir */
+input, textarea {
+    user-select: auto;
+    -webkit-user-select: auto;
+    font-size: 16px !important; /* TRUCO iOS: Si un input tiene menos de 16px, el iPhone hace zoom automático al abrir el teclado */
 }
 
 body {
