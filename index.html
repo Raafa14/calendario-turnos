@@ -1,40 +1,37 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    <title>ShifterPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShifterPro">
-    <link rel="apple-touch-icon" href="icono.jpg">
-    <link rel="icon" type="image/jpeg" href="icono.jpg">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="styles.css?v=19">
+    <title>ShifterPro</title>
+    <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
-
     <div class="app">
-        <!-- CABECERA SUPERIOR CON ICONOS MINIMALISTAS PLANOS -->
+        <!-- CABECERA -->
         <header class="header">
             <div class="header__top">
                 <div class="header__brand">
                     <div class="brand-squircle">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="3"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line>
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
                     </div>
-                    <h1 class="header__title">Shifter<span style="color: var(--accent);">Pro</span></h1>
+                    <h1 class="header__title">ShifterPro</h1>
                 </div>
 
                 <div class="header__actions">
-                    <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar Modo Claro / Oscuro">
-                        <svg id="iconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar tema">
+                        <svg id="iconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                         </svg>
-                        <svg id="iconSun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <svg id="iconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
                             <circle cx="12" cy="12" r="5"></circle>
                             <line x1="12" y1="1" x2="12" y2="3"></line>
                             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -47,32 +44,32 @@
                         </svg>
                     </button>
 
-                    <button type="button" id="btnExportBackup" class="icon-btn" title="Guardar Copia (.json)">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="btnExportBackup" class="icon-btn" title="Descargar copia de seguridad">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
                     </button>
 
-                    <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar Copia (.json)">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="btnImportBackup" class="icon-btn" title="Restaurar copia">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                     </button>
-                    <input type="file" id="inputImportBackup" accept=".json" style="display: none;">
+                    <input type="file" id="inputImportBackup" accept=".json" style="display:none;">
 
-                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar todos los turnos (.ics)">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="btnExportICS" class="icon-btn" title="Exportar turnos a Calendario (.ics)">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
                     </button>
 
                     <button type="button" id="btnClearMonth" class="icon-btn" title="Vaciar mes actual">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
@@ -85,189 +82,334 @@
             </div>
         </header>
 
-        <!-- BARRA DE NAVEGACIÓN DE MES -->
+        <!-- SELECTOR DE MES -->
         <div class="month-bar">
             <button type="button" id="btnPrevMonth" class="month-bar__arrow" aria-label="Mes anterior">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </button>
             <h2 id="currentMonthLabel" class="month-bar__title">NOVIEMBRE 2026</h2>
             <button type="button" id="btnNextMonth" class="month-bar__arrow" aria-label="Mes siguiente">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
         </div>
 
-        <!-- ==================== VISTA 1: CALENDARIO ==================== -->
+        <!-- VISTA 1: CALENDARIO -->
         <main id="calendarView" class="view view--active">
-            <div class="calendar">
-                <div class="calendar__weekdays">
-                    <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
-                </div>
-                <div id="calendarGrid" class="calendar__grid"></div>
+            <div class="calendar__weekdays">
+                <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
             </div>
+            <div id="calendarGrid" class="calendar__grid"></div>
             <p class="helper-hint">Toca cualquier casilla para configurar turno, entreno, nota o alarma.</p>
         </main>
 
-        <!-- ==================== VISTA 2: GANANCIAS Y NÓMINA REAL ==================== -->
-        <section id="statsView" class="view">
+        <!-- VISTA 2: MI CAJA + GANANCIAS -->
+        <section id="walletView" class="view">
             <div class="panel-card">
-                <h3 class="panel-card__title">Ganancias y Nómina Real</h3>
+                <div class="panel-card__header" style="margin-bottom: 8px;">
+                    <div>
+                        <h3 class="panel-card__title">Finanzas</h3>
+                        <p class="panel-card__desc">Control de saldo, nómina, hucha y deudas</p>
+                    </div>
+                </div>
 
+                <!-- SELECTOR DOBLE: MI CAJA | GANANCIAS -->
+                <div class="debt-tabs" style="margin-bottom: 10px;">
+                    <button type="button" id="walletSubTabCaja" class="debt-tab-btn debt-tab-btn--active">Mi Caja</button>
+                    <button type="button" id="walletSubTabGanancias" class="debt-tab-btn">Ganancias</button>
+                </div>
+
+                <!-- BARRA DE SEGURIDAD PIN -->
                 <div class="pin-security-bar">
-                    <span id="pinStatusText">Pestaña sin PIN de bloqueo</span>
+                    <span id="pinStatusText">Sin PIN</span>
                     <div class="pin-security-bar__btns">
-                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">Configurar PIN</button>
-                        <button type="button" id="btnLockNow" class="btn btn--sm btn--danger" style="display: none;">Bloquear</button>
+                        <button type="button" id="btnConfigPin" class="btn btn--sm btn--outline">Activar PIN</button>
+                        <button type="button" id="btnLockNow" class="btn btn--sm btn--danger" style="display:none;">Bloquear</button>
                     </div>
                 </div>
 
-                <div class="goal-card">
-                    <div class="goal-card__top">
-                        <div>
-                            <span class="goal-card__label">Meta mensual (€):</span>
-                            <input type="number" id="monthlyGoalInput" class="goal-card__input" step="50" min="0" value="1200">
+                <!-- SUB-APARTADO A: MI CAJA -->
+                <div id="walletSubPanelCaja">
+                    <div class="wallet-balance-card">
+                        <span class="wallet-balance-card__label">SALDO DISPONIBLE EN MI CAJA</span>
+                        <strong id="walletCurrentBalance" class="wallet-balance-card__amount">0.00 €</strong>
+                        <div class="wallet-balance-card__row">
+                            <span class="wallet-pill wallet-pill--in">Ingresos: <b id="walletTotalIn">0.00 €</b></span>
+                            <span class="wallet-pill wallet-pill--out">Gastos: <b id="walletTotalOut">0.00 €</b></span>
                         </div>
-                        <div class="goal-card__badge-box">
-                            <span id="goalPercentBadge" class="goal-percent-badge">0%</span>
-                            <small id="goalRemainingText" class="goal-card__remaining">Faltan 1200.00 €</small>
-                        </div>
                     </div>
-                    <div class="goal-progress">
-                        <div id="goalProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
-                    </div>
-                    <div id="prevMonthComparison" class="goal-card__compare">
-                        Comparativa mes anterior: Calculando...
-                    </div>
-                </div>
 
-                <div class="stats-grid">
-                    <div class="stat-pill">
-                        <span class="stat-pill__label">Días trab.</span>
-                        <strong id="statDaysWorked" class="stat-pill__value">0</strong>
-                    </div>
-                    <div class="stat-pill">
-                        <span class="stat-pill__label">Horas norm.</span>
-                        <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
-                    </div>
-                    <div class="stat-pill">
-                        <span class="stat-pill__label">Horas EXTRA</span>
-                        <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
-                    </div>
-                </div>
-
-                <div class="calc-box">
                     <div class="calc-box__row">
                         <div class="calc-box__field">
-                            <label for="calcTotalHoursInput">Horas normales mes:</label>
-                            <input type="number" id="calcTotalHoursInput" step="0.5" min="0" value="0">
+                            <label>Cantidad (€)</label>
+                            <input type="number" id="walletAmountInput" step="0.5" min="0" placeholder="0.00">
                         </div>
                         <div class="calc-box__field">
-                            <label for="hourlyRateInput">Tarifa base (€/h):</label>
-                            <input type="number" id="hourlyRateInput" step="0.5" min="0" value="10">
+                            <label>Categoría</label>
+                            <select id="walletCategorySelect" class="form-select">
+                                <option value="General">General</option>
+                                <option value="Gym / Suplementos">Gym / Suplementos</option>
+                                <option value="Comida / Ocio">Comida / Ocio</option>
+                                <option value="Hogar / Facturas">Hogar / Facturas</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="calc-box__field" style="margin-top: 8px;">
+                        <input type="text" id="walletConceptInput" placeholder="Concepto (Ej: Compra, Gasolina, Cena...)">
+                    </div>
+
+                    <div class="wallet-actions">
+                        <button type="button" id="btnWalletAdd" class="btn btn--wallet-in">+ Ingresar</button>
+                        <button type="button" id="btnWalletWithdraw" class="btn btn--wallet-out">- Retirar</button>
+                    </div>
+
+                    <button type="button" id="btnSyncMonthToWallet" class="btn btn--outline wallet-sync-btn">
+                        Ingresar sueldo neto + bote de este mes a Mi Caja
+                    </button>
+
+                    <!-- Hucha de Ahorro -->
+                    <div class="sub-box">
+                        <div class="sub-box__header">
+                            <span class="sub-box__title">Hucha de Ahorro</span>
+                            <span id="piggyPercentBadge" class="goal-percent-badge">0%</span>
+                        </div>
+                        <div class="calc-box__row">
+                            <div class="calc-box__field">
+                                <label>Nombre de la meta:</label>
+                                <input type="text" id="piggyTitleInput" placeholder="Ahorro / Viaje">
+                            </div>
+                            <div class="calc-box__field">
+                                <label>Objetivo (€):</label>
+                                <input type="number" id="piggyGoalInput" step="10" min="0" placeholder="600">
+                            </div>
+                        </div>
+                        <div class="piggy-status-row">
+                            <span>Ahorrado en hucha:</span>
+                            <strong id="piggySavedAmount">0.00 €</strong>
+                        </div>
+                        <div class="goal-progress">
+                            <div id="piggyProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
+                        </div>
+                        <div class="piggy-controls">
+                            <input type="number" id="piggyTransferInput" step="5" min="0" placeholder="Cantidad €">
+                            <button type="button" id="btnPiggyDeposit" class="btn btn--sm btn--primary">Meter</button>
+                            <button type="button" id="btnPiggyWithdraw" class="btn btn--sm btn--outline">Sacar</button>
+                        </div>
+                    </div>
+
+                    <!-- Gastos Fijos Mensuales -->
+                    <div class="sub-box">
+                        <div class="sub-box__header">
+                            <span class="sub-box__title">Gastos Fijos Mensuales</span>
+                            <strong id="fixedExpensesTotalLabel" style="font-size: 0.82rem; color: var(--danger);">0.00 €/mes</strong>
+                        </div>
+                        <div class="piggy-controls" style="margin-top:0;">
+                            <input type="text" id="fixedExpenseName" placeholder="Ej: Cuota Gym, Móvil...">
+                            <input type="number" id="fixedExpenseAmount" step="1" min="0" placeholder="€" style="max-width: 82px;">
+                            <button type="button" id="btnAddFixedExpense" class="btn btn--sm btn--primary">+</button>
+                        </div>
+                        <ul id="fixedExpensesList" class="worked-list" style="max-height: 130px; margin-top: 8px;"></ul>
+                        <button type="button" id="btnApplyFixedExpenses" class="btn btn--danger" style="width:100%; margin-top:8px; font-size:0.76rem;">
+                            Descontar todos los gastos fijos ahora
+                        </button>
+                    </div>
+
+                    <!-- Deudas Pendientes (Debo / Me deben) -->
+                    <div class="sub-box">
+                        <div class="sub-box__header">
+                            <span class="sub-box__title">Deudas Pendientes</span>
+                            <strong id="debtsTotalLabel" style="font-size: 0.82rem; color: var(--danger);">Debo: 0.00 €</strong>
+                        </div>
+
+                        <div class="debt-tabs">
+                            <button type="button" id="debtTabOwe" class="debt-tab-btn debt-tab-btn--active">Debo dinero</button>
+                            <button type="button" id="debtTabOwed" class="debt-tab-btn">Me deben</button>
+                        </div>
+
+                        <div class="calc-box__row" style="margin-top: 8px;">
+                            <div class="calc-box__field">
+                                <input type="text" id="debtPersonInput" placeholder="Persona (Ej: Carlos)">
+                            </div>
+                            <div class="calc-box__field">
+                                <input type="text" id="debtConceptInput" placeholder="Concepto (Ej: Cena)">
+                            </div>
+                        </div>
+
+                        <div class="piggy-controls">
+                            <input type="number" id="debtAmountInput" step="0.5" min="0" placeholder="Cantidad €">
+                            <button type="button" id="btnAddDebt" class="btn btn--sm btn--primary">+ Apuntar</button>
+                        </div>
+
+                        <ul id="debtsList" class="worked-list" style="max-height: 150px; margin-top: 8px;"></ul>
+
+                        <div class="debt-free-bar">
+                            <span>Saldo real libre tras deudas:</span>
+                            <strong id="debtFreeBalanceValue">0.00 €</strong>
+                        </div>
+                    </div>
+
+                    <div class="wallet-history-header">
+                        <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
+                        <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
+                    </div>
+                    <ul id="walletMovementsList" class="worked-list"></ul>
+                </div>
+
+                <!-- SUB-APARTADO B: GANANCIAS -->
+                <div id="walletSubPanelGanancias" style="display:none;">
+                    <div class="goal-card">
+                        <div class="goal-card__top">
+                            <div>
+                                <label class="goal-card__label">Meta mensual (€)</label>
+                                <input type="number" id="monthlyGoalInput" class="goal-card__input" step="50" min="0">
+                            </div>
+                            <div class="goal-card__badge-box">
+                                <span id="goalPercentBadge" class="goal-percent-badge">0%</span>
+                                <span id="goalRemainingText" class="goal-card__remaining">Faltan 0.00 €</span>
+                            </div>
+                        </div>
+                        <div class="goal-progress">
+                            <div id="goalProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
+                        </div>
+                        <div id="prevMonthComparison" class="goal-card__compare">Mes anterior: 0.00 € registrados</div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-pill">
+                            <span class="stat-pill__label">Días trab.</span>
+                            <strong id="statDaysWorked" class="stat-pill__value">0</strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill__label">Horas base</span>
+                            <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill__label">Horas extra</span>
+                            <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
+                        </div>
+                    </div>
+
+                    <div class="calc-box__row">
+                        <div class="calc-box__field">
+                            <label>Horas base mes</label>
+                            <input type="number" id="calcTotalHoursInput" step="0.5" min="0">
+                        </div>
+                        <div class="calc-box__field">
+                            <label>Tarifa base (€/h)</label>
+                            <input type="number" id="hourlyRateInput" step="0.5" min="0">
                         </div>
                     </div>
 
                     <div class="calc-box__row" style="margin-top: 8px;">
                         <div class="calc-box__field">
-                            <label for="extraRateInput">Precio hora EXTRA (€/h):</label>
-                            <input type="number" id="extraRateInput" step="0.5" min="0" value="12">
+                            <label>Tarifa extra (€/h)</label>
+                            <input type="number" id="extraRateInput" step="0.5" min="0">
                         </div>
                         <div class="calc-box__field">
-                            <label for="retentionPercentInput">Retención IRPF / SS (%):</label>
-                            <input type="number" id="retentionPercentInput" step="0.5" min="0" max="60" value="0">
+                            <label>Retención / IRPF (%)</label>
+                            <input type="number" id="retentionPercentInput" step="0.5" min="0" max="60">
                         </div>
                     </div>
 
                     <div class="payroll-breakdown">
                         <div class="payroll-row">
-                            <span>Sueldo Bruto (Turnos + Pluses):</span>
+                            <span>Total Bruto (horas + pluses):</span>
                             <strong id="statGrossMoney">0.00 €</strong>
                         </div>
                         <div class="payroll-row">
-                            <span>Sueldo Neto (Limpio):</span>
-                            <strong id="statNetMoney" style="color: var(--accent);">0.00 €</strong>
+                            <span>Sueldo Neto (tras retención):</span>
+                            <strong id="statNetMoney">0.00 €</strong>
                         </div>
                         <div class="payroll-row">
-                            <span>Bote / Propinas (en mano):</span>
-                            <strong id="statMonthTips" style="color: #f59e0b;">0.00 €</strong>
+                            <span>Bote / Propinas del mes:</span>
+                            <strong id="statMonthTips">0.00 €</strong>
                         </div>
                     </div>
 
                     <div class="earned-banner">
                         <div>
-                            <span class="earned-banner__label">TOTAL REAL (NETO + BOTE)</span>
-                            <small id="earnedFormulaText" class="earned-banner__sub">0h × 10€/h</small>
+                            <span class="earned-banner__label">TOTAL REAL DEL MES</span>
+                            <span id="earnedFormulaText" class="earned-banner__sub">0h base + 0h extra</span>
                         </div>
                         <strong id="statTotalMoney" class="earned-banner__total">0.00 €</strong>
                     </div>
-                </div>
 
-                <h4 class="panel-card__subtitle">Desglose de jornadas del mes</h4>
-                <ul id="workedDaysList" class="worked-list"></ul>
+                    <h4 class="panel-card__subtitle">Desglose por jornadas</h4>
+                    <ul id="workedDaysList" class="worked-list"></ul>
+                </div>
             </div>
         </section>
 
-        <!-- ==================== VISTA 3: GYM / ENTRENAMIENTO ==================== -->
+        <!-- VISTA 3: GYM -->
         <section id="gymView" class="view">
             <div class="panel-card">
-                <h3 class="panel-card__title">Gym y Rendimiento</h3>
-
-                <div class="goal-card" style="margin-top: 10px;">
-                    <div class="goal-card__top">
-                        <div>
-                            <span class="goal-card__label">Objetivo entrenos / semana:</span>
-                            <input type="number" id="gymWeeklyGoalInput" class="goal-card__input" min="1" max="7" value="4">
-                        </div>
-                        <div class="goal-card__badge-box">
-                            <span id="gymWeekCountText" class="goal-percent-badge">0 / 4 esta semana</span>
-                            <small id="gymMonthCountText" class="goal-card__remaining">0 entrenos este mes</small>
-                        </div>
+                <div class="panel-card__header">
+                    <div>
+                        <h3 class="panel-card__title">Entrenamiento y Progreso</h3>
+                        <p class="panel-card__desc">Constancia semanal, descansos, peso y marcas</p>
                     </div>
-                    <div class="goal-progress">
-                        <div id="gymWeekProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
-                    </div>
-                    <div class="gym-mini-metrics">
-                        <span>Creatina este mes: <strong id="gymCreatineMonthText">0 días</strong></span>
-                        <span>Gasto Fitness: <strong id="gymFitnessSpendText">0.00 €</strong></span>
+                    <div style="text-align:right;">
+                        <label style="font-size:0.68rem; font-weight:800; color:var(--text-secondary); display:block;">Meta/sem</label>
+                        <input type="number" id="gymWeeklyGoalInput" min="1" max="7" style="width:56px; text-align:center; padding:5px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-subtle); color:var(--text-primary); font-weight:800;">
                     </div>
                 </div>
 
+                <div class="goal-card">
+                    <div class="goal-card__top" style="margin-bottom:6px;">
+                        <strong id="gymWeekCountText" style="font-size:0.86rem;">0 / 4 esta semana</strong>
+                        <span id="gymMonthCountText" style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">0 entrenos este mes</span>
+                    </div>
+                    <div class="goal-progress">
+                        <div id="gymWeekProgressBar" class="goal-progress__bar" style="width:0%;"></div>
+                    </div>
+                    <div class="gym-mini-metrics">
+                        <span>Creatina este mes: <strong id="gymCreatineMonthText">0 días</strong></span>
+                        <span>Gasto fitness: <strong id="gymFitnessSpendText">0.00 €</strong></span>
+                    </div>
+                </div>
+
+                <!-- Temporizador de descanso -->
                 <div class="sub-box timer-box">
-                    <div class="sub-box__header">
+                    <div class="sub-box__header" style="margin-bottom:4px;">
                         <span class="sub-box__title">Temporizador de Descanso</span>
                         <span id="timerStatusBadge" class="size-badge">Listo</span>
                     </div>
                     <div id="timerDisplay" class="timer-display">01:30</div>
                     <div class="timer-buttons">
-                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="60">60s</button>
-                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="90">90s</button>
-                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="120">120s</button>
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="60">1:00</button>
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="90">1:30</button>
+                        <button type="button" class="btn btn--sm btn--outline timer-preset-btn" data-seconds="120">2:00</button>
                         <button type="button" id="btnTimerStop" class="btn btn--sm btn--danger">Parar</button>
                     </div>
                 </div>
 
+                <!-- Control de Peso Corporal -->
                 <div class="sub-box">
                     <div class="sub-box__header">
-                        <span class="sub-box__title">Control de Peso Corporal</span>
-                        <strong id="weightDiffStat" style="font-size: 0.8rem; color: var(--accent);">Sin registros</strong>
+                        <span class="sub-box__title">Peso Corporal (kg)</span>
+                        <span id="weightDiffStat" style="font-size:0.75rem; font-weight:800; color:var(--accent);">Sin registros</span>
                     </div>
-                    <div class="piggy-controls">
-                        <input type="number" id="bodyWeightInput" step="0.1" min="20" max="300" placeholder="Ej: 76.5 kg">
-                        <button type="button" id="btnLogWeight" class="btn btn--sm btn--primary">Registrar kg</button>
+                    <div class="piggy-controls" style="margin-top:0;">
+                        <input type="number" id="bodyWeightInput" step="0.1" min="20" max="250" placeholder="Ej: 76.5">
+                        <button type="button" id="btnLogWeight" class="btn btn--sm btn--primary">Anotar</button>
                     </div>
-                    <ul id="weightHistoryList" class="worked-list" style="max-height: 110px; margin-top: 8px;"></ul>
+                    <ul id="weightHistoryList" class="worked-list" style="max-height:110px; margin-top:8px;"></ul>
                 </div>
 
+                <!-- Marcas y Cargas por Ejercicio -->
                 <div class="sub-box">
                     <div class="sub-box__header">
-                        <span class="sub-box__title">Récords y Pesos (PRs)</span>
+                        <span class="sub-box__title">Cargas por Ejercicio</span>
                     </div>
-                    <div class="piggy-controls" style="margin-bottom: 10px;">
+                    <div class="piggy-controls" style="margin-top:0; margin-bottom:10px;">
                         <input type="text" id="newExerciseName" placeholder="Ej: Press Inclinado...">
-                        <input type="number" id="newExerciseWeight" step="0.5" min="0" placeholder="kg" style="max-width: 78px;">
+                        <input type="number" id="newExerciseWeight" step="2.5" min="0" placeholder="kg" style="max-width:74px;">
                         <button type="button" id="btnAddExercise" class="btn btn--sm btn--primary">+</button>
                     </div>
                     <div id="exercisesList" class="exercises-list"></div>
@@ -275,208 +417,129 @@
             </div>
         </section>
 
-        <!-- ==================== VISTA 4: MI CAJA, HUCHA Y GASTOS FIJOS ==================== -->
-        <section id="walletView" class="view">
+        <!-- VISTA 4: TAREAS Y BLOC RÁPIDO -->
+        <section id="tasksView" class="view">
             <div class="panel-card">
-                <div class="wallet-balance-card">
-                    <span class="wallet-balance-card__label">SALDO DISPONIBLE EN CAJA</span>
-                    <strong id="walletCurrentBalance" class="wallet-balance-card__amount">0.00 €</strong>
-                    <div class="wallet-balance-card__row">
-                        <span class="wallet-pill wallet-pill--in">Ingresado: <b id="walletTotalIn">0.00 €</b></span>
-                        <span class="wallet-pill wallet-pill--out">Gastado: <b id="walletTotalOut">0.00 €</b></span>
+                <div class="panel-card__header" style="margin-bottom:8px;">
+                    <div>
+                        <h3 class="panel-card__title">Tareas y Notas</h3>
+                        <p class="panel-card__desc">Pendientes rápidos, recordatorios y bloc personal</p>
+                    </div>
+                    <span id="tasksProgressBadge" class="goal-percent-badge">0 / 0</span>
+                </div>
+
+                <div class="goal-progress" style="margin-bottom:12px;">
+                    <div id="tasksProgressBar" class="goal-progress__bar" style="width:0%;"></div>
+                </div>
+
+                <!-- Añadir nueva tarea -->
+                <div class="piggy-controls" style="margin-top:0;">
+                    <input type="text" id="taskTextInput" placeholder="Nueva tarea (Ej: Pedir día libre...)">
+                    <button type="button" id="btnTaskUrgentToggle" class="task-urgent-toggle" title="Marcar urgente">!</button>
+                    <button type="button" id="btnAddTask" class="btn btn--sm btn--primary">+</button>
+                </div>
+
+                <div class="task-filters-row">
+                    <select id="taskCategorySelect" class="form-select" style="max-width:122px; height:34px; font-size:0.76rem !important; padding:4px 26px 4px 8px;">
+                        <option value="Personal">Personal</option>
+                        <option value="Trabajo">Trabajo</option>
+                        <option value="Gym">Gym</option>
+                        <option value="Compras">Compras</option>
+                    </select>
+                    <div class="task-filter-pills" id="taskFilterPills">
+                        <button type="button" class="task-pill-btn task-pill-btn--active" data-filter="ALL">Todas</button>
+                        <button type="button" class="task-pill-btn" data-filter="Trabajo">Trabajo</button>
+                        <button type="button" class="task-pill-btn" data-filter="Gym">Gym</button>
+                        <button type="button" class="task-pill-btn" data-filter="Personal">Personal</button>
                     </div>
                 </div>
 
-                <div class="wallet-form">
-                    <div class="calc-box__row">
+                <!-- Pendientes -->
+                <div class="wallet-history-header" style="margin-top:14px;">
+                    <h4 class="panel-card__subtitle" style="margin:0;">Pendientes (<span id="tasksPendingCount">0</span>)</h4>
+                </div>
+                <ul id="tasksPendingList" class="tasks-list"></ul>
+
+                <!-- Completadas -->
+                <div class="wallet-history-header" style="margin-top:14px;">
+                    <h4 class="panel-card__subtitle" style="margin:0;">Completadas (<span id="tasksCompletedCount">0</span>)</h4>
+                    <button type="button" id="btnClearCompletedTasks" class="wallet-clear-link">Limpiar hechas</button>
+                </div>
+                <ul id="tasksCompletedList" class="tasks-list tasks-list--completed"></ul>
+
+                <!-- Bloc de notas rápido -->
+                <div class="sub-box" style="margin-top:16px;">
+                    <div class="sub-box__header" style="margin-bottom:6px;">
+                        <span class="sub-box__title">Bloc de Notas Rápido</span>
+                        <span id="quickNoteSavedBadge" class="size-badge">Guardado</span>
+                    </div>
+                    <textarea id="quickNoteTextarea" class="quick-note-area" rows="4" placeholder="Apunta aquí códigos, horarios, tallas o cualquier dato fijo..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 5: CONFIGURACIÓN DE TURNOS Y PATRONES -->
+        <section id="shiftsView" class="view">
+            <div class="panel-card">
+                <div class="panel-card__header">
+                    <div>
+                        <h3 class="panel-card__title">Tipos de Turno</h3>
+                        <p class="panel-card__desc">Personaliza colores, horas, tarifas y pluses</p>
+                    </div>
+                    <button type="button" id="btnNewShift" class="btn btn--sm btn--primary">+ Nuevo</button>
+                </div>
+
+                <div id="shiftsConfigList" class="shifts-list"></div>
+
+                <!-- Generador de Patrones Rotativos -->
+                <div class="sub-box" style="margin-top:16px;">
+                    <div class="sub-box__header">
+                        <span class="sub-box__title">Generador de Patrones Rotativos</span>
+                    </div>
+                    <p class="panel-card__desc" style="margin-bottom:8px;">Crea tu secuencia (Ej: M, M, A, A, N, N, L, L) y rellena semanas o el mes completo en un toque.</p>
+
+                    <div id="patternShiftButtons" class="pattern-btns-grid"></div>
+
+                    <div class="pattern-sequence-box">
+                        <div class="pattern-sequence-box__top">
+                            <span class="pattern-sequence-box__label">Secuencia (<strong id="patternLengthBadge">0</strong> días):</span>
+                            <div class="pattern-sequence-box__actions">
+                                <button type="button" id="btnPatternUndo" class="btn btn--sm btn--outline">Deshacer</button>
+                                <button type="button" id="btnPatternClear" class="btn btn--sm btn--danger">Limpiar</button>
+                            </div>
+                        </div>
+                        <div id="patternSequenceDisplay" class="pattern-chips-row"></div>
+                    </div>
+
+                    <div class="calc-box__row" style="margin-top:10px;">
                         <div class="calc-box__field">
-                            <label for="walletAmountInput">Cantidad (€):</label>
-                            <input type="number" id="walletAmountInput" step="0.5" min="0" placeholder="Ej: 50">
+                            <label>Fecha de inicio</label>
+                            <input type="date" id="patternStartDate">
                         </div>
                         <div class="calc-box__field">
-                            <label for="walletCategorySelect">Categoría:</label>
-                            <select id="walletCategorySelect" class="form-select">
-                                <option value="General">General</option>
-                                <option value="Gym / Suplementos">Gym / Suplementos</option>
-                                <option value="Comida">Comida</option>
-                                <option value="Transporte">Transporte</option>
-                                <option value="Ocio">Ocio</option>
+                            <label>Duración</label>
+                            <select id="patternDurationSelect" class="form-select">
+                                <option value="7">7 días (1 semana)</option>
+                                <option value="14" selected>14 días (2 semanas)</option>
+                                <option value="21">21 días (3 semanas)</option>
+                                <option value="28">28 días (4 semanas)</option>
+                                <option value="month">Resto del mes</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="calc-box__field" style="margin-top: 8px;">
-                        <label for="walletConceptInput">Concepto / Nota:</label>
-                        <input type="text" id="walletConceptInput" placeholder="Ej: Proteína, Creatina, Cena...">
-                    </div>
-
-                    <div class="wallet-actions">
-                        <button type="button" id="btnWalletAdd" class="btn btn--wallet-in">+ Añadir Dinero</button>
-                        <button type="button" id="btnWalletWithdraw" class="btn btn--wallet-out">- Retirar / Gasto</button>
-                    </div>
-
-                    <button type="button" id="btnSyncMonthToWallet" class="btn btn--outline wallet-sync-btn">
-                        Ingresar sueldo neto + bote de este mes a Mi Caja
+                    <button type="button" id="btnApplyPattern" class="btn btn--primary" style="width:100%; margin-top:10px;">
+                        Aplicar ciclo al calendario
                     </button>
                 </div>
-
-                <div class="sub-box">
-                    <div class="sub-box__header">
-                        <span class="sub-box__title">Hucha de Ahorro</span>
-                        <span id="piggyPercentBadge" class="goal-percent-badge">0%</span>
-                    </div>
-                    <div class="calc-box__row" style="margin-bottom: 8px;">
-                        <div class="calc-box__field">
-                            <label for="piggyTitleInput">Nombre de la meta:</label>
-                            <input type="text" id="piggyTitleInput" value="Ahorro / Viaje">
-                        </div>
-                        <div class="calc-box__field">
-                            <label for="piggyGoalInput">Objetivo (€):</label>
-                            <input type="number" id="piggyGoalInput" step="50" min="0" value="600">
-                        </div>
-                    </div>
-                    <div class="piggy-status-row">
-                        <span>Ahorrado en hucha:</span>
-                        <strong id="piggySavedAmount">0.00 €</strong>
-                    </div>
-                    <div class="goal-progress">
-                        <div id="piggyProgressBar" class="goal-progress__bar" style="width: 0%;"></div>
-                    </div>
-                    <div class="piggy-controls">
-                        <input type="number" id="piggyTransferInput" step="5" min="0" placeholder="Cantidad €">
-                        <button type="button" id="btnPiggyDeposit" class="btn btn--sm btn--primary">Meter</button>
-                        <button type="button" id="btnPiggyWithdraw" class="btn btn--sm btn--outline">Sacar</button>
-                    </div>
-                </div>
-
-                <div class="sub-box">
-                    <div class="sub-box__header">
-                        <span class="sub-box__title">Gastos Fijos Mensuales</span>
-                        <strong id="fixedExpensesTotalLabel" style="font-size: 0.82rem; color: var(--danger);">0.00 €/mes</strong>
-                    </div>
-                    <div class="piggy-controls" style="margin-bottom: 8px;">
-                        <input type="text" id="fixedExpenseName" placeholder="Ej: Cuota Gym, Móvil...">
-                        <input type="number" id="fixedExpenseAmount" step="1" min="0" placeholder="€" style="max-width: 80px;">
-                        <button type="button" id="btnAddFixedExpense" class="btn btn--sm btn--primary">+</button>
-                    </div>
-                    <ul id="fixedExpensesList" class="worked-list" style="max-height: 130px; margin-bottom: 8px;"></ul>
-                    <button type="button" id="btnApplyFixedExpenses" class="btn btn--danger" style="width: 100%; font-size: 0.78rem;">
-                        Descontar todos los gastos fijos ahora
-                    </button>
-                </div>
-
-                <!-- Deudas Pendientes (Debo / Me deben) -->
-                <div class="sub-box">
-                    <div class="sub-box__header">
-                        <span class="sub-box__title">Deudas Pendientes</span>
-                        <strong id="debtsTotalLabel" style="font-size: 0.82rem; color: var(--danger);">Debo: 0.00 €</strong>
-                    </div>
-
-                    <div class="debt-tabs">
-                        <button type="button" id="debtTabOwe" class="debt-tab-btn debt-tab-btn--active">Debo dinero</button>
-                        <button type="button" id="debtTabOwed" class="debt-tab-btn">Me deben</button>
-                    </div>
-
-                    <div class="calc-box__row" style="margin-top: 8px;">
-                        <div class="calc-box__field">
-                            <input type="text" id="debtPersonInput" placeholder="Persona (Ej: Carlos)">
-                        </div>
-                        <div class="calc-box__field">
-                            <input type="text" id="debtConceptInput" placeholder="Concepto (Ej: Cena)">
-                        </div>
-                    </div>
-
-                    <div class="piggy-controls">
-                        <input type="number" id="debtAmountInput" step="0.5" min="0" placeholder="Cantidad €">
-                        <button type="button" id="btnAddDebt" class="btn btn--sm btn--primary">+ Apuntar</button>
-                    </div>
-
-                    <ul id="debtsList" class="worked-list" style="max-height: 150px; margin-top: 8px;"></ul>
-
-                    <div class="debt-free-bar">
-                        <span>Saldo real libre tras deudas:</span>
-                        <strong id="debtFreeBalanceValue">0.00 €</strong>
-                    </div>
-                </div>
-
-                <div class="wallet-history-header">
-                    <h4 class="panel-card__subtitle" style="margin:0;">Historial de movimientos</h4>
-                    <button type="button" id="btnClearWallet" class="wallet-clear-link">Limpiar historial</button>
-                </div>
-                <ul id="walletMovementsList" class="worked-list"></ul>
             </div>
         </section>
 
-        <!-- ==================== VISTA 5: MIS TURNOS Y PATRONES ROTATIVOS ==================== -->
-        <section id="shiftsView" class="view">
-            <!-- Tarjeta 1: Lista de turnos y sus tarifas/pluses -->
-            <div class="panel-card">
-                <div class="panel-card__header">
-                    <div>
-                        <h3 class="panel-card__title">Configura tus Turnos</h3>
-                        <p class="panel-card__desc">Edita colores, tarifas por hora, pluses y horarios.</p>
-                    </div>
-                    <button type="button" id="btnNewShift" class="btn btn--primary btn--sm">+ Nuevo</button>
-                </div>
-                <div id="shiftsConfigList" class="shifts-list"></div>
-            </div>
-
-            <!-- Tarjeta 2: Generador de Patrones Rotativos -->
-            <div class="panel-card" style="margin-top: 14px;">
-                <div class="panel-card__header" style="margin-bottom: 8px;">
-                    <div>
-                        <h3 class="panel-card__title">Generador de Patrones Rotativos</h3>
-                        <p class="panel-card__desc">Toca los turnos en orden para armar tu ciclo (ej. M - M - A - A - L - L) y rellena el calendario.</p>
-                    </div>
-                </div>
-
-                <!-- Botones para añadir pasos al patrón -->
-                <div id="patternShiftButtons" class="pattern-btns-grid"></div>
-
-                <!-- Secuencia armada -->
-                <div class="pattern-sequence-box">
-                    <div class="pattern-sequence-box__top">
-                        <span class="pattern-sequence-box__label">Secuencia actual (<b id="patternLengthBadge">0</b> días):</span>
-                        <div class="pattern-sequence-box__actions">
-                            <button type="button" id="btnPatternUndo" class="btn btn--sm btn--outline" title="Borrar último">←</button>
-                            <button type="button" id="btnPatternClear" class="btn btn--sm btn--danger">Limpiar</button>
-                        </div>
-                    </div>
-                    <div id="patternSequenceDisplay" class="pattern-chips-row">
-                        <span class="pattern-empty-hint">Pulsa los turnos de arriba para crear tu ciclo...</span>
-                    </div>
-                </div>
-
-                <!-- Fecha de inicio y duración -->
-                <div class="calc-box__row" style="margin-top: 10px;">
-                    <div class="calc-box__field">
-                        <label for="patternStartDate">Empezar desde el día:</label>
-                        <input type="date" id="patternStartDate">
-                    </div>
-                    <div class="calc-box__field">
-                        <label for="patternDurationSelect">Repetir durante:</label>
-                        <select id="patternDurationSelect" class="form-select">
-                            <option value="month">Resto del mes</option>
-                            <option value="7">1 semana (7 días)</option>
-                            <option value="14">2 semanas (14 días)</option>
-                            <option value="28">4 semanas (28 días)</option>
-                            <option value="60">2 meses (60 días)</option>
-                            <option value="90">3 meses (90 días)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button type="button" id="btnApplyPattern" class="btn btn--primary" style="width: 100%; margin-top: 12px;">
-                    Aplicar patrón al calendario
-                </button>
-            </div>
-        </section>
-
-        <!-- ==================== BARRA INFERIOR CON ICONOS PLANOS MINIMALISTAS ==================== -->
+        <!-- BARRA INFERIOR FLOTANTE (5 ICONOS) -->
         <nav class="bottom-nav">
             <button type="button" class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
                 <div class="bottom-nav__icon-box">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="3"></rect>
                         <line x1="16" y1="2" x2="16" y2="6"></line>
                         <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -486,35 +549,9 @@
                 <span class="bottom-nav__label">Calendario</span>
             </button>
 
-            <button type="button" class="bottom-nav__item" data-tab="statsView">
-                <div class="bottom-nav__icon-box">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                </div>
-                <span class="bottom-nav__label">Ganancias</span>
-            </button>
-
-            <button type="button" class="bottom-nav__item" data-tab="gymView">
-                <div class="bottom-nav__icon-box">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6.5 6.5h11"></path>
-                        <path d="M6.5 17.5h11"></path>
-                        <path d="M3 10v4"></path>
-                        <path d="M21 10v4"></path>
-                        <rect x="5" y="7" width="3" height="10" rx="1"></rect>
-                        <rect x="16" y="7" width="3" height="10" rx="1"></rect>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                </div>
-                <span class="bottom-nav__label">Gym</span>
-            </button>
-
             <button type="button" class="bottom-nav__item" data-tab="walletView">
                 <div class="bottom-nav__icon-box">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="5" width="20" height="14" rx="3"></rect>
                         <line x1="2" y1="10" x2="22" y2="10"></line>
                     </svg>
@@ -522,11 +559,34 @@
                 <span class="bottom-nav__label">Mi Caja</span>
             </button>
 
+            <button type="button" class="bottom-nav__item" data-tab="gymView">
+                <div class="bottom-nav__icon-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6.5 6.5h11"></path>
+                        <path d="M6.5 17.5h11"></path>
+                        <rect x="3" y="8" width="3" height="8" rx="1"></rect>
+                        <rect x="18" y="8" width="3" height="8" rx="1"></rect>
+                        <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label">Gym</span>
+            </button>
+
+            <button type="button" class="bottom-nav__item" data-tab="tasksView">
+                <div class="bottom-nav__icon-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <span class="bottom-nav__label">Tareas</span>
+            </button>
+
             <button type="button" class="bottom-nav__item" data-tab="shiftsView">
                 <div class="bottom-nav__icon-box">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </div>
                 <span class="bottom-nav__label">Turnos</span>
@@ -534,137 +594,120 @@
         </nav>
     </div>
 
-    <!-- ==================== MODAL 1: DETALLE DE JORNADA ==================== -->
+    <!-- MODAL 1: EDITAR JORNADA DEL CALENDARIO -->
     <div id="dayModal" class="modal">
         <div class="modal__dialog">
             <div class="modal__header">
                 <div>
-                    <span class="modal__eyebrow">DETALLE DE JORNADA</span>
+                    <span class="modal__eyebrow">CONFIGURAR JORNADA</span>
                     <h3 id="modalFullDateTitle" class="modal__title">Jueves, 12 de Noviembre</h3>
                 </div>
                 <button type="button" id="btnCloseDayModal" class="modal__close">&times;</button>
             </div>
 
-            <form id="dayForm" class="modal__body">
+            <form id="dayForm">
                 <div class="section-block">
-                    <label class="section-block__label">Turno asignado</label>
+                    <label class="section-block__label">1. Selecciona el turno</label>
                     <div id="modalShiftSelector" class="shift-cards-grid"></div>
                 </div>
 
+                <!-- Color personalizado -->
                 <div class="custom-color-box">
                     <div class="custom-color-box__top">
                         <label class="checkbox-row">
                             <input type="checkbox" id="dayUseCustomColor">
-                            <span>Color especial solo para este día</span>
+                            <span>Color personalizado de casilla</span>
                         </label>
                         <div class="color-picker-wrapper">
-                            <input type="color" id="dayCustomBgColor" value="#ffe082" class="color-picker-mini">
+                            <input type="color" id="dayCustomBgColor" class="color-picker-mini" value="#ffe082">
                             <span id="dayColorHexLabel" class="color-hex-tag">#FFE082</span>
                         </div>
                     </div>
                     <div id="dayQuickPalette" class="day-quick-palette"></div>
                 </div>
 
+                <!-- Gym y Creatina del día -->
                 <div class="gym-day-box">
                     <div class="gym-day-box__top">
-                        <label for="dayWorkoutGroup" class="section-block__label" style="margin:0;">Entreno Gym hoy:</label>
-                        <span id="gymTimeSuggestionHint" class="gym-time-hint">Sugerencia: 18:00</span>
+                        <span class="section-block__label" style="margin:0;">Entrenamiento del día</span>
+                        <span id="gymTimeSuggestionHint" class="gym-time-hint">Ideal 17:30</span>
                     </div>
-                    <select id="dayWorkoutGroup" class="form-select" style="margin-top: 6px; margin-bottom: 8px;">
-                        <option value="">Sin entreno / Descanso</option>
-                        <option value="Pecho/Trí">Pecho y Tríceps</option>
-                        <option value="Espalda/Bí">Espalda y Bíceps</option>
-                        <option value="Pierna">Pierna</option>
-                        <option value="Hombro">Hombro y Core</option>
-                        <option value="Full Body">Full Body</option>
-                        <option value="Cardio">Cardio / HIIT</option>
-                    </select>
-                    <label class="checkbox-row">
-                        <input type="checkbox" id="dayCreatineTaken">
-                        <span>Creatina / Suplementación tomada hoy</span>
-                    </label>
+                    <div class="calc-box__row" style="margin-top:8px; align-items:center;">
+                        <select id="dayWorkoutGroup" class="form-select">
+                            <option value="">Sin entreno</option>
+                            <option value="Pecho">Pecho</option>
+                            <option value="Espalda">Espalda</option>
+                            <option value="Pierna">Pierna</option>
+                            <option value="Hombro">Hombro</option>
+                            <option value="Brazos">Brazos</option>
+                            <option value="Fullbody">Fullbody</option>
+                            <option value="Cardio">Cardio</option>
+                        </select>
+                        <label class="checkbox-row" style="justify-content:flex-end;">
+                            <input type="checkbox" id="dayCreatineTaken">
+                            <span>Creatina tomada</span>
+                        </label>
+                    </div>
                 </div>
 
+                <!-- Contadores de Horas -->
                 <div class="dual-counters">
                     <div class="counter-card">
-                        <span class="counter-card__title">Horas trabajadas</span>
-                        <small class="counter-card__sub">Ej: 8h, 6.5h...</small>
+                        <span class="counter-card__title">Horas Turno</span>
+                        <span class="counter-card__sub">Jornada base</span>
                         <div class="stepper">
                             <button type="button" class="stepper__btn" data-step-target="dayHours" data-step="-0.5">&minus;</button>
-                            <input type="number" id="dayHours" class="stepper__input" step="0.5" min="0" max="24" value="0">
+                            <input type="number" id="dayHours" class="stepper__input" step="0.5" min="0" value="0">
                             <button type="button" class="stepper__btn" data-step-target="dayHours" data-step="0.5">+</button>
                         </div>
                     </div>
 
                     <div class="counter-card counter-card--extra">
                         <span class="counter-card__title">Horas Extra</span>
-                        <small class="counter-card__sub">Etiqueta "EXTRA"</small>
+                        <span class="counter-card__sub">Suplementarias</span>
                         <div class="stepper">
                             <button type="button" class="stepper__btn" data-step-target="dayExtraHours" data-step="-0.5">&minus;</button>
-                            <input type="number" id="dayExtraHours" class="stepper__input" step="0.5" min="0" max="24" value="0">
+                            <input type="number" id="dayExtraHours" class="stepper__input" step="0.5" min="0" value="0">
                             <button type="button" class="stepper__btn" data-step-target="dayExtraHours" data-step="0.5">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="day-rates-box">
-                    <div class="dual-counters" style="margin-bottom: 8px;">
-                        <div class="counter-card">
-                            <span class="counter-card__title">Precio Hora (€/h)</span>
-                            <small class="counter-card__sub">Tarifa normal hoy</small>
-                            <div class="stepper">
-                                <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="-0.5">&minus;</button>
-                                <input type="number" id="dayHourlyRate" class="stepper__input" step="0.5" min="0" value="10">
-                                <button type="button" class="stepper__btn" data-step-target="dayHourlyRate" data-step="0.5">+</button>
-                            </div>
-                        </div>
-
-                        <div class="counter-card counter-card--extra">
-                            <span class="counter-card__title">Precio Extra (€/h)</span>
-                            <small class="counter-card__sub">Tarifa extra hoy</small>
-                            <div class="stepper">
-                                <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="-0.5">&minus;</button>
-                                <input type="number" id="dayExtraRate" class="stepper__input" step="0.5" min="0" value="12">
-                                <button type="button" class="stepper__btn" data-step-target="dayExtraRate" data-step="0.5">+</button>
-                            </div>
-                        </div>
+                <!-- Tarifas, Plus y Bote del día -->
+                <div class="calc-box__row" style="margin-bottom:8px;">
+                    <div class="calc-box__field">
+                        <label>Tarifa base (€/h)</label>
+                        <input type="number" id="dayHourlyRate" step="0.5" min="0">
                     </div>
-
-                    <!-- Plus fijo del turno (Nocturnidad/Festivo) y Bote en mano -->
-                    <div class="dual-counters" style="margin-bottom: 8px;">
-                        <div class="counter-card">
-                            <span class="counter-card__title">Plus Turno (€)</span>
-                            <small class="counter-card__sub">Nocturnidad / fijo</small>
-                            <div class="stepper">
-                                <button type="button" class="stepper__btn" data-step-target="dayShiftPlus" data-step="-1">&minus;</button>
-                                <input type="number" id="dayShiftPlus" class="stepper__input" step="0.5" min="0" value="0">
-                                <button type="button" class="stepper__btn" data-step-target="dayShiftPlus" data-step="1">+</button>
-                            </div>
-                        </div>
-
-                        <div class="counter-card" style="border-color: #f59e0b;">
-                            <span class="counter-card__title">Bote / Propinas (€)</span>
-                            <small class="counter-card__sub">Extra en mano</small>
-                            <div class="stepper">
-                                <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="-1">&minus;</button>
-                                <input type="number" id="dayTips" class="stepper__input" step="0.5" min="0" value="0">
-                                <button type="button" class="stepper__btn" data-step-target="dayTips" data-step="1">+</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="day-earned-preview">
-                        <span>Ganancia total hoy:</span>
-                        <strong id="modalDayEarnedValue">0.00 €</strong>
+                    <div class="calc-box__field">
+                        <label>Tarifa extra (€/h)</label>
+                        <input type="number" id="dayExtraRate" step="0.5" min="0">
                     </div>
                 </div>
 
+                <div class="calc-box__row" style="margin-bottom:10px;">
+                    <div class="calc-box__field">
+                        <label>Plus turno (€)</label>
+                        <input type="number" id="dayShiftPlus" step="1" min="0">
+                    </div>
+                    <div class="calc-box__field">
+                        <label>Bote / Propinas (€)</label>
+                        <input type="number" id="dayTips" step="0.5" min="0">
+                    </div>
+                </div>
+
+                <div class="day-earned-preview">
+                    <span>Ganancia estimada hoy:</span>
+                    <strong id="modalDayEarnedValue">0.00 €</strong>
+                </div>
+
+                <!-- Alarma -->
                 <div class="alarm-card">
                     <label class="alarm-card__check">
                         <input type="checkbox" id="dayAlarmEnabled">
-                        <div class="alarm-card__info">
-                            <span class="alarm-card__title">Poner Alarma / Despertador</span>
-                            <small id="alarmShiftHint" class="alarm-card__desc">Elige a qué hora quieres el despertador:</small>
+                        <div>
+                            <span class="alarm-card__title">Activar alarma despertador</span>
+                            <span id="alarmShiftHint" class="alarm-card__desc">Entras a las 08:00. Elige despertador:</span>
                         </div>
                     </label>
                     <div class="alarm-card__times">
@@ -679,45 +722,42 @@
                     </div>
                 </div>
 
+                <!-- Texto y Stickers -->
                 <div class="note-card">
                     <div class="note-card__top">
-                        <label for="dayCustomText" class="section-block__label" style="margin:0;">Texto o nota en la casilla</label>
+                        <span class="section-block__label" style="margin:0;">Nota en casilla</span>
                         <span id="fontSizeBadge" class="size-badge">13 px</span>
                     </div>
-
-                    <input type="text" id="dayCustomText" class="text-input" placeholder="Escribe aquí tu texto (ej. Examen Ruben, Libre...)">
-
+                    <input type="text" id="dayCustomText" class="text-input" placeholder="Ej: Médico 10:30, Cambio turno...">
                     <div class="size-controls">
-                        <span class="size-controls__label">Tamaño del texto:</span>
+                        <span class="size-controls__label">Tamaño texto:</span>
                         <div class="size-presets">
-                            <button type="button" class="preset-btn" data-size="10">Peq</button>
-                            <button type="button" class="preset-btn preset-btn--active" data-size="13">Med</button>
-                            <button type="button" class="preset-btn" data-size="15">Grande</button>
-                            <button type="button" class="preset-btn" data-size="18">Gigante</button>
+                            <button type="button" class="preset-btn" data-size="10">Pequeño</button>
+                            <button type="button" class="preset-btn preset-btn--active" data-size="13">Normal</button>
+                            <button type="button" class="preset-btn" data-size="16">Grande</button>
                         </div>
                     </div>
-
-                    <input type="range" id="dayFontSize" class="range-slider" min="8" max="20" value="13">
-
-                    <label class="checkbox-row" style="margin-top: 8px;">
+                    <input type="range" id="dayFontSize" class="range-slider" min="9" max="18" value="13">
+                    <label class="checkbox-row" style="margin-top:8px;">
                         <input type="checkbox" id="dayPrioritizeText" checked>
-                        <span>Ver mi texto grande en el centro (achicar letra M, A, N)</span>
+                        <span>Mostrar texto en grande en el centro de la casilla</span>
                     </label>
 
                     <div class="sticker-bar">
-                        <span class="sticker-bar__label">Icono arriba a la izquierda:</span>
+                        <span class="sticker-bar__label">Icono rápido:</span>
                         <div id="stickerList" class="sticker-list"></div>
                     </div>
 
                     <div class="live-preview-box">
-                        <span class="live-preview-box__label">VISTA PREVIA DE LA CASILLA:</span>
+                        <span class="live-preview-box__label">VISTA PREVIA DE CASILLA</span>
                         <div id="cellPreview" class="day-cell day-cell--preview"></div>
                     </div>
                 </div>
 
+                <!-- Repetir en la misma semana -->
                 <div class="repeat-week-box">
-                    <span class="repeat-week-box__title">Copiar también a otros días de esta semana:</span>
-                    <div id="repeatWeekDaysContainer" class="repeat-week-days" style="margin-top: 8px;">
+                    <span class="repeat-week-box__title">Copiar también en esta semana:</span>
+                    <div class="repeat-week-days" style="margin-top:6px;">
                         <button type="button" class="weekday-check-btn" data-dow="1">L</button>
                         <button type="button" class="weekday-check-btn" data-dow="2">M</button>
                         <button type="button" class="weekday-check-btn" data-dow="3">X</button>
@@ -729,14 +769,14 @@
                 </div>
 
                 <div class="modal__footer">
-                    <button type="button" id="btnClearDay" class="btn btn--danger">Vaciar</button>
-                    <button type="submit" id="btnSaveDay" class="btn btn--primary">Guardar Cambios</button>
+                    <button type="button" id="btnClearDay" class="btn btn--danger">Limpiar día</button>
+                    <button type="submit" id="btnSaveDay" class="btn btn--primary">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ==================== MODAL 2: CREAR / EDITAR TURNO ==================== -->
+    <!-- MODAL 2: CONFIGURAR TIPO DE TURNO -->
     <div id="shiftConfigModal" class="modal">
         <div class="modal__dialog">
             <div class="modal__header">
@@ -747,62 +787,80 @@
                 <button type="button" id="btnCloseShiftModal" class="modal__close">&times;</button>
             </div>
 
-            <form id="shiftConfigForm" class="modal__body">
-                <div class="calc-box__row">
+            <form id="shiftConfigForm">
+                <div class="calc-box__row" style="margin-bottom:10px;">
                     <div class="calc-box__field">
-                        <label for="cfgShiftName">Nombre del turno:</label>
-                        <input type="text" id="cfgShiftName" required placeholder="Ej: Noche">
+                        <label>Nombre</label>
+                        <input type="text" id="cfgShiftName" required placeholder="Ej: Mañana">
                     </div>
                     <div class="calc-box__field">
-                        <label for="cfgShiftShort">Letra (máx 3):</label>
-                        <input type="text" id="cfgShiftShort" maxlength="3" required placeholder="Ej: N">
-                    </div>
-                </div>
-
-                <div class="section-block" style="margin-top: 12px;">
-                    <label class="section-block__label">Color del turno:</label>
-                    <div id="colorPaletteGrid" class="palette-grid"></div>
-                    <div class="custom-color-bar" style="margin-top: 8px;">
-                        <span>O color libre:</span>
-                        <input type="color" id="cfgShiftColor" value="#fff3b0" class="color-picker-mini">
+                        <label>Letra (máx 2)</label>
+                        <input type="text" id="cfgShiftShort" maxlength="2" required placeholder="M">
                     </div>
                 </div>
 
-                <div class="calc-box__row" style="margin-top: 12px;">
+                <div class="custom-color-bar">
+                    <span>Color de fondo:</span>
+                    <input type="color" id="cfgShiftColor" class="color-picker-mini" value="#fde047">
+                </div>
+                <div id="colorPaletteGrid" class="palette-grid" style="margin-bottom:12px;"></div>
+
+                <div class="calc-box__row" style="margin-bottom:10px;">
                     <div class="calc-box__field">
-                        <label for="cfgShiftHours">Horas por defecto:</label>
-                        <input type="number" id="cfgShiftHours" step="0.5" min="0" max="24" value="8">
+                        <label>Horas por defecto</label>
+                        <input type="number" id="cfgShiftHours" step="0.5" min="0" value="8">
                     </div>
                     <div class="calc-box__field">
-                        <label for="cfgShiftStart">Hora entrada:</label>
+                        <label>Hora de entrada</label>
                         <input type="time" id="cfgShiftStart" value="08:00">
                     </div>
                 </div>
 
-                <div class="calc-box__row" style="margin-top: 10px;">
+                <div class="calc-box__row" style="margin-bottom:10px;">
                     <div class="calc-box__field">
-                        <label for="cfgShiftRate">Precio hora propio (€/h):</label>
-                        <input type="number" id="cfgShiftRate" step="0.5" min="0" placeholder="0 = usar base">
+                        <label>Tarifa propia (€/h, opc.)</label>
+                        <input type="number" id="cfgShiftRate" step="0.5" min="0" placeholder="Usa general">
                     </div>
                     <div class="calc-box__field">
-                        <label for="cfgShiftPlus">Plus fijo por turno (€):</label>
-                        <input type="number" id="cfgShiftPlus" step="0.5" min="0" value="0" placeholder="Ej: 15">
+                        <label>Plus fijo por turno (€)</label>
+                        <input type="number" id="cfgShiftPlus" step="1" min="0" value="0">
                     </div>
                 </div>
 
-                <div class="calc-box__field" style="margin-top: 10px;">
-                    <label for="cfgShiftAlarm">Alarma sugerida:</label>
+                <div class="calc-box__field" style="margin-bottom:14px;">
+                    <label>Hora de alarma sugerida</label>
                     <input type="time" id="cfgShiftAlarm" value="06:00">
                 </div>
 
-                <div class="modal__footer" style="margin-top: 16px;">
+                <div class="modal__footer">
                     <button type="button" id="btnDeleteShiftType" class="btn btn--danger">Eliminar</button>
-                    <button type="submit" class="btn btn--primary">Guardar Turno</button>
+                    <button type="submit" class="btn btn--primary">Guardar turno</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="app.js?v=11"></script>
+    <!-- MODAL 3: ENVIAR TAREA AL CALENDARIO -->
+    <div id="taskToCalModal" class="modal">
+        <div class="modal__dialog" style="max-width: 360px;">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">PASAR AL CALENDARIO</span>
+                    <h3 class="modal__title">Elegir fecha</h3>
+                </div>
+                <button type="button" id="btnCloseTaskCalModal" class="modal__close">&times;</button>
+            </div>
+            <p id="taskCalPreviewText" class="panel-card__desc" style="margin-bottom:10px; font-weight:700; color:var(--text-primary);"></p>
+            <div class="calc-box__field" style="margin-bottom:14px;">
+                <label>Selecciona el día del calendario:</label>
+                <input type="date" id="taskCalDateInput">
+            </div>
+            <div class="modal__footer">
+                <button type="button" id="btnConfirmTaskToCal" class="btn btn--primary">Apuntar en casilla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=12"></script>
 </body>
 </html>
