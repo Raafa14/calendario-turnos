@@ -396,6 +396,9 @@ select option {
     gap: 4px;
     padding: 3px 0;
     cursor: pointer;
+    border-radius: 999px !important;
+    padding: 4px 0 !important;
+    transition: background 0.2s ease !important;
 }
 
 .bottom-nav__icon-box {
@@ -409,6 +412,12 @@ select option {
     align-items: center;
     justify-content: center;
     transition: all 0.18s ease;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+:root[data-theme="dark"] .bottom-nav__item--active {
+    background: rgba(255, 255, 255, 0.13) !important;
 }
 
 .bottom-nav__label {
@@ -424,6 +433,8 @@ select option {
     border-color: var(--mono-invert-bg);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
+    background: var(--mono-invert-bg) !important;
+    color: var(--mono-invert-fg) !important;
 }
 
 .bottom-nav__item--active .bottom-nav__label {
@@ -1089,6 +1100,10 @@ select option {
     transform: none !important;
 }
 
+.bottom-nav__item--active {
+    background: rgba(15, 23, 42, 0.08) !important;
+}
+
 /* ADAPTACIÓN A BORDES REDONDEADOS Y ÁREA SEGURA DEL IPHONE (SAFE AREAS) */
 /* REDONDEO EN LAS 4 ESQUINAS (ADAPTADO A LA PANTALLA DEL IPHONE) */
 html, body {
@@ -1114,15 +1129,20 @@ html, body {
 }
 
 .bottom-nav {
-    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
-    left: 10px !important;
-    right: 10px !important;
-    max-width: 460px !important;
+    position: fixed !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    max-width: 456px !important;
     margin: 0 auto !important;
-    border-radius: 24px !important;
-    border: 1px solid var(--border-color) !important;
-    padding: 8px 6px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+    border-radius: 999px !important;
+    padding: 7px 10px !important;
+    background: rgba(255, 255, 255, 0.65) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14),
+                inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
 }
 
 /* ESTILOS DE DEUDAS PENDIENTES (MI CAJA) */
@@ -1174,4 +1194,11 @@ html, body {
     align-items: center;
     font-size: 0.76rem;
     color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .bottom-nav {
+    background: rgba(24, 32, 48, 0.58) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
 }
