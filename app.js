@@ -236,7 +236,6 @@ function paintCell(cellEl, dayNumber, info) {
     cellEl.style.backgroundColor = bgColor;
     cellEl.style.color = txtColor;
 
-    // 1. FILA SUPERIOR: Sticker arriba a la izquierda + alarma, y número a la derecha
     const top = document.createElement('div');
     top.className = 'day-cell__top';
 
@@ -264,7 +263,6 @@ function paintCell(cellEl, dayNumber, info) {
     top.appendChild(dayNumSpan);
     cellEl.appendChild(top);
 
-    // 2. CENTRO: Texto personalizado o letra del turno
     const middle = document.createElement('div');
     middle.className = 'day-cell__middle';
 
@@ -286,7 +284,6 @@ function paintCell(cellEl, dayNumber, info) {
     }
     cellEl.appendChild(middle);
 
-    // 3. FILA INFERIOR: EXTRA / Gym / Mini letra / Horas
     const bottom = document.createElement('div');
     bottom.className = 'day-cell__bottom';
 
@@ -697,7 +694,6 @@ function recalculateEarnings(extraFromMonth = null, plusFromMonth = null, tipsFr
     state.retentionPercent = retentionPct;
     saveState();
 
-    // Si hay tarifas propias por turno distintas de la tarifa base, las respetamos al calcular el mes
     const usesCustomRates = normalH === currentSummary.normalHours;
     const gross = usesCustomRates
         ? currentSummary.grossMoney
@@ -910,7 +906,7 @@ function renderExercisesList() {
     });
 }
 
-// 7. MI CAJA, HUCHA Y GASTOS FIJOS
+// 7. MI CAJA, HUCHA, GASTOS FIJOS Y DEUDAS PENDIENTES
 function getWalletBalance() {
     let totalIn = 0;
     let totalOut = 0;
@@ -1682,6 +1678,7 @@ function bindEvents() {
         });
     });
 
+    // Eventos Deudas Pendientes
     document.getElementById('debtTabOwe').addEventListener('click', () => {
         state.debtTab = 'OWE';
         document.getElementById('debtTabOwe').classList.add('debt-tab-btn--active');
