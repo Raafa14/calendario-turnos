@@ -144,6 +144,11 @@ select option {
     letter-spacing: -0.3px;
 }
 
+.brand-pro {
+    color: var(--accent);
+    font-weight: 800;
+}
+
 .header__actions {
     display: flex;
     align-items: center;
@@ -462,7 +467,7 @@ select option {
 /* RESUMEN Y FILTROS DEL CALENDARIO */
 .cal-summary-strip {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 6px;
     margin-bottom: 8px;
 }
@@ -3078,17 +3083,22 @@ select option {
     }
 
     .month-bar {
-        padding: 14px 32px;
-        background: var(--bg-app);
-        border-bottom: 1px solid var(--border-color);
+        max-width: 1440px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 18px 32px 10px;
+        background: transparent;
+        border-bottom: none;
         justify-content: flex-start;
         gap: 14px;
     }
 
     .month-bar__title {
-        font-size: 1.15rem;
-        min-width: 190px;
+        font-size: 1.18rem;
+        font-weight: 800;
+        min-width: 200px;
         flex: 0 0 auto;
+        letter-spacing: 0.5px;
     }
 
     .month-bar__arrow:hover {
@@ -3096,7 +3106,7 @@ select option {
     }
 
     .view {
-        padding: 22px 32px;
+        padding: 12px 32px 36px;
         max-width: 1440px;
         width: 100%;
         margin: 0 auto;
@@ -3110,20 +3120,41 @@ select option {
 
     /* Calendario escritorio + Agenda lateral */
     .cal-summary-strip {
-        max-width: 720px;
-        gap: 10px;
-        margin-bottom: 12px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        max-width: 100%;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .cal-summary-pill {
+        padding: 10px 14px;
+        border-radius: 12px;
+    }
+
+    .cal-summary-pill__lbl {
+        font-size: 0.72rem;
+        letter-spacing: 0.4px;
     }
 
     .cal-summary-pill__val {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
+    }
+
+    .cal-toolbar {
+        margin-bottom: 14px;
     }
 
     .calendar-layout {
         display: grid;
-        grid-template-columns: 1fr 310px;
-        gap: 20px;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
         align-items: start;
+    }
+
+    .upcoming-card {
+        position: sticky;
+        top: 86px;
     }
 
     .calendar__weekdays {

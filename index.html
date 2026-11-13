@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=33">
+    <link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body>
     <div class="app">
@@ -18,7 +18,7 @@
             <div class="header__top">
                 <div class="header__brand">
                     <img src="icono.png" alt="ShifterPro" style="width: 34px; height: 34px; border-radius: 9px; object-fit: cover;">
-                    <h1 class="header__title">ShifterPro</h1>
+                    <h1 class="header__title">Shifter<span class="brand-pro">Pro</span></h1>
                 </div>
 
                 <div class="header__actions">
@@ -897,7 +897,7 @@
         <div class="auth-fullscreen__topbar">
             <div class="header__brand">
                 <img src="icono.png" alt="ShifterPro" style="width: 30px; height: 30px; border-radius: 8px; object-fit: cover;">
-                <span style="font-weight:800; font-size:1.05rem;">ShifterPro</span>
+                <span style="font-weight:800; font-size:1.05rem;">Shifter<span class="brand-pro">Pro</span></span>
             </div>
             <button type="button" id="btnCloseAuthScreen" class="btn btn--sm btn--outline">← Volver a la app</button>
         </div>
@@ -1408,6 +1408,12 @@
                 <div class="notice-box" style="margin-top: 8px; font-size: 0.73rem; color: var(--text-secondary); background: var(--bg-subtle); padding: 10px 12px; border-radius: 10px; border-left: 3px solid var(--accent); line-height: 1.4;">
                     💡 <em>Tus datos se guardan intactos aunque desactives un módulo; al volver a activarlo recuperarás todo al instante.</em>
                 </div>
+
+                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); text-align: center;">
+                    <a href="guia-estilo.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; color: var(--accent); text-decoration: none;">
+                        <span>📘</span> Abrir Guía de Estilo Oficial (PDF)
+                    </a>
+                </div>
             </div>
 
             <div class="modal__footer" style="margin-top: 18px;">
@@ -1422,6 +1428,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script type="module" src="js/main.js?v=34"></script>
+    <script type="module" src="js/main.js?v=35"></script>
 </body>
 </html>
