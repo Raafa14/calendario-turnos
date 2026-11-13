@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=25">
+    <link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body>
     <div class="app">
@@ -858,10 +858,10 @@
                 <button type="button" id="btnCloseAuthModal" class="modal__close">&times;</button>
             </div>
 
-            <!-- Vista cuando NO ha iniciado sesión -->
+            <!-- 1. Vista cuando NO ha iniciado sesión -->
             <div id="authLoggedOutView">
                 <p class="panel-card__desc" style="margin-bottom:12px;">
-                    Inicia sesión con la misma cuenta en tu ordenador y en tu iPhone para tener tus turnos, finanzas, gym y tareas siempre sincronizados.
+                    Crea una cuenta o inicia sesión en tu ordenador y en tu iPhone para guardar y sincronizar todo automáticamente.
                 </p>
 
                 <div class="debt-tabs" style="margin-bottom:12px;">
@@ -891,18 +891,42 @@
                 </button>
             </div>
 
-            <!-- Vista cuando YA ha iniciado sesión -->
+            <!-- 2. Vista pendiente de confirmar correo electrónico -->
+            <div id="authVerifyView" style="display:none;">
+                <div class="auth-verify-box">
+                    <div class="auth-verify-badge">⏳ Verificación pendiente</div>
+                    <h4 style="font-size:0.98rem; margin-bottom:6px;">Confirma tu correo electrónico</h4>
+                    <p class="panel-card__desc" style="line-height:1.45;">
+                        Hemos enviado un enlace de confirmación a <strong id="verifyTargetEmail" style="color:var(--text-primary);"></strong>.<br><br>
+                        Abre tu correo (revisa también la carpeta <strong>Spam</strong>), pulsa en el enlace para activar tu cuenta y luego pulsa el botón verde de abajo.
+                    </p>
+                </div>
+
+                <div id="verifyStatusMsg" class="auth-error-msg" style="display:none;"></div>
+
+                <button type="button" id="btnCheckVerified" class="btn btn--primary" style="width:100%; margin-bottom:8px;">
+                    Ya he aceptado el correo → Entrar
+                </button>
+                <button type="button" id="btnResendVerifyEmail" class="btn btn--outline" style="width:100%; margin-bottom:8px;">
+                    Reenviar correo de confirmación
+                </button>
+                <button type="button" id="btnCancelVerify" class="auth-link-btn" style="margin-top:4px;">
+                    Cancelar y usar otro correo
+                </button>
+            </div>
+
+            <!-- 3. Vista cuando YA está verificado y conectado -->
             <div id="authLoggedInView" style="display:none;">
                 <div class="auth-profile-box">
-                    <div class="auth-profile-badge">● Conectado y sincronizado</div>
+                    <div class="auth-profile-badge">● Cuenta verificada y sincronizada</div>
                     <strong id="authUserEmail" class="auth-user-email">usuario@correo.com</strong>
-                    <p class="panel-card__desc" style="margin-top:4px;">
-                        Todos tus cambios se guardan automáticamente en la nube en tiempo real.
+                    <p id="lastSyncTimeLabel" class="panel-card__desc" style="margin-top:6px;">
+                        Sincronización automática activa en tiempo real.
                     </p>
                 </div>
 
                 <button type="button" id="btnForceCloudPush" class="btn btn--outline" style="width:100%; margin-bottom:8px;">
-                    Subir datos de este dispositivo a la nube
+                    Forzar subida de este dispositivo ahora
                 </button>
                 <button type="button" id="btnAuthLogout" class="btn btn--danger" style="width:100%;">
                     Cerrar sesión
@@ -912,9 +936,9 @@
     </div>
 
     <!-- SDK DE FIREBASE (AUTH + FIRESTORE) -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>     
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>     
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>     
     <script type="module" src="js/main.js?v=1"></script>
 </body>
 </html>
