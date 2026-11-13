@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=31">
+    <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
     <div class="app">
@@ -354,68 +354,92 @@
                         <div id="prevMonthComparison" class="goal-card__compare">Mes anterior: 0.00 € registrados</div>
                     </div>
 
-                    <div class="stats-grid">
-                        <div class="stat-pill">
-                            <span class="stat-pill__label">Días trab.</span>
-                            <strong id="statDaysWorked" class="stat-pill__value">0</strong>
+                    <!-- TARJETA 1: CONFIGURACIÓN DE TARIFAS Y HORAS DEL MES -->
+                    <div class="sub-box rate-calculator-box" style="margin-top:12px;">
+                        <div class="sub-box__header" style="margin-bottom:8px;">
+                            <span class="sub-box__title">⚙️ Tarifas y Horas del Mes</span>
                         </div>
-                        <div class="stat-pill">
-                            <span class="stat-pill__label">Horas base</span>
-                            <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
+
+                        <div class="stats-grid">
+                            <div class="stat-pill">
+                                <span class="stat-pill__label">Días trab.</span>
+                                <strong id="statDaysWorked" class="stat-pill__value">0</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span class="stat-pill__label">Horas base</span>
+                                <strong id="statNormalHours" class="stat-pill__value">0 h</strong>
+                            </div>
+                            <div class="stat-pill">
+                                <span class="stat-pill__label">Horas extra</span>
+                                <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
+                            </div>
                         </div>
-                        <div class="stat-pill">
-                            <span class="stat-pill__label">Horas extra</span>
-                            <strong id="statExtraHours" class="stat-pill__value">0 h</strong>
+
+                        <div class="calc-box__row" style="margin-top:10px;">
+                            <div class="calc-box__field">
+                                <label>Horas base mes</label>
+                                <input type="number" id="calcTotalHoursInput" step="0.5" min="0">
+                            </div>
+                            <div class="calc-box__field">
+                                <label>Tarifa base (€/h)</label>
+                                <input type="number" id="hourlyRateInput" step="0.5" min="0">
+                            </div>
                         </div>
+
+                        <div class="calc-box__row" style="margin-top: 8px;">
+                            <div class="calc-box__field">
+                                <label>Tarifa extra (€/h)</label>
+                                <input type="number" id="extraRateInput" step="0.5" min="0">
+                            </div>
+                            <div class="calc-box__field">
+                                <label>Retención / IRPF (%)</label>
+                                <input type="number" id="retentionPercentInput" step="0.5" min="0" max="60">
+                            </div>
+                        </div>
+
+                        <!-- BOTÓN ARRIBA PARA APLICAR EL CAMBIO A TODAS LAS JORNADAS -->
+                        <button type="button" id="btnApplyRates" class="btn btn--primary" style="width:100%; margin-top:12px; font-weight:800; font-size:0.92rem; padding:11px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Aplicar tarifas a todas las jornadas</span>
+                        </button>
                     </div>
 
-                    <div class="calc-box__row">
-                        <div class="calc-box__field">
-                            <label>Horas base mes</label>
-                            <input type="number" id="calcTotalHoursInput" step="0.5" min="0">
+                    <!-- TARJETA 2 (APARTADO EN DIFERENTE DIV): RESUMEN DE LO GANADO Y DESGLOSE -->
+                    <div class="sub-box earnings-summary-box" style="margin-top:14px;">
+                        <div class="sub-box__header" style="margin-bottom:10px;">
+                            <span class="sub-box__title">💰 Nómina y Ganancias Calculadas</span>
                         </div>
-                        <div class="calc-box__field">
-                            <label>Tarifa base (€/h)</label>
-                            <input type="number" id="hourlyRateInput" step="0.5" min="0">
+
+                        <div class="payroll-breakdown">
+                            <div class="payroll-row">
+                                <span>Total Bruto (horas + pluses):</span>
+                                <strong id="statGrossMoney">0.00 €</strong>
+                            </div>
+                            <div class="payroll-row">
+                                <span>Sueldo Neto (tras retención):</span>
+                                <strong id="statNetMoney">0.00 €</strong>
+                            </div>
+                            <div class="payroll-row">
+                                <span>Bote / Propinas del mes:</span>
+                                <strong id="statMonthTips">0.00 €</strong>
+                            </div>
+                        </div>
+
+                        <div class="earned-banner" style="margin-top:12px;">
+                            <div>
+                                <span class="earned-banner__label">TOTAL REAL DEL MES</span>
+                                <span id="earnedFormulaText" class="earned-banner__sub">0h base + 0h extra</span>
+                            </div>
+                            <strong id="statTotalMoney" class="earned-banner__total">0.00 €</strong>
+                        </div>
+
+                        <div style="margin-top:14px;">
+                            <h4 class="panel-card__subtitle" style="margin-bottom:8px;">Desglose por jornadas</h4>
+                            <ul id="workedDaysList" class="worked-list"></ul>
                         </div>
                     </div>
-
-                    <div class="calc-box__row" style="margin-top: 8px;">
-                        <div class="calc-box__field">
-                            <label>Tarifa extra (€/h)</label>
-                            <input type="number" id="extraRateInput" step="0.5" min="0">
-                        </div>
-                        <div class="calc-box__field">
-                            <label>Retención / IRPF (%)</label>
-                            <input type="number" id="retentionPercentInput" step="0.5" min="0" max="60">
-                        </div>
-                    </div>
-
-                    <div class="payroll-breakdown">
-                        <div class="payroll-row">
-                            <span>Total Bruto (horas + pluses):</span>
-                            <strong id="statGrossMoney">0.00 €</strong>
-                        </div>
-                        <div class="payroll-row">
-                            <span>Sueldo Neto (tras retención):</span>
-                            <strong id="statNetMoney">0.00 €</strong>
-                        </div>
-                        <div class="payroll-row">
-                            <span>Bote / Propinas del mes:</span>
-                            <strong id="statMonthTips">0.00 €</strong>
-                        </div>
-                    </div>
-
-                    <div class="earned-banner">
-                        <div>
-                            <span class="earned-banner__label">TOTAL REAL DEL MES</span>
-                            <span id="earnedFormulaText" class="earned-banner__sub">0h base + 0h extra</span>
-                        </div>
-                        <strong id="statTotalMoney" class="earned-banner__total">0.00 €</strong>
-                    </div>
-
-                    <h4 class="panel-card__subtitle">Desglose por jornadas</h4>
-                    <ul id="workedDaysList" class="worked-list"></ul>
                 </div>
             </div>
         </section>
@@ -1327,6 +1351,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script type="module" src="js/main.js?v=2"></script>
+    <script type="module" src="js/main.js?v=33"></script>
 </body>
 </html>

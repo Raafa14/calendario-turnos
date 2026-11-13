@@ -9,8 +9,8 @@ export function getMonthPayrollSummary(year, month, overrideRate = null, overrid
     let totalPlus = 0;
     let totalTips = 0;
 
-    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? overrideRate : (Number(state.hourlyRate) || 0);
-    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? overrideExtraRate : (Number(state.extraRate) || 0);
+    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? Number(overrideRate) : (Number(state.hourlyRate) || 0);
+    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? Number(overrideExtraRate) : (Number(state.extraRate) || 0);
 
     Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
         const d = state.daysData[key];
@@ -19,9 +19,8 @@ export function getMonthPayrollSummary(year, month, overrideRate = null, overrid
         const plus = Number(d.shiftPlus) || 0;
         const tips = Number(d.tips) || 0;
 
-        const shift = state.shifts[d.shiftId];
-        // Si el tipo de turno tiene una tarifa propia explícita (customRate > 0), se respeta; si no, se usa la tarifa base indicada
-        const r = (shift && Number(shift.customRate) > 0) ? Number(shift.customRate) : baseRate;
+        // La tarifa de Ganancias rige directamente las horas del mes
+        const r = baseRate;
         const exR = extraRate;
 
         if (h > 0 || ex > 0 || plus > 0 || tips > 0) {
@@ -45,8 +44,8 @@ export function renderWorkedDaysList(overrideRate = null, overrideExtraRate = nu
     if (!listEl) return;
     listEl.innerHTML = '';
 
-    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? overrideRate : (Number(state.hourlyRate) || 0);
-    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? overrideExtraRate : (Number(state.extraRate) || 0);
+    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? Number(overrideRate) : (Number(state.hourlyRate) || 0);
+    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? Number(overrideExtraRate) : (Number(state.extraRate) || 0);
 
     let hasDays = false;
     Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
@@ -57,7 +56,7 @@ export function renderWorkedDaysList(overrideRate = null, overrideExtraRate = nu
         const tips = Number(d.tips) || 0;
 
         const shift = state.shifts[d.shiftId];
-        const r = (shift && Number(shift.customRate) > 0) ? Number(shift.customRate) : baseRate;
+        const r = baseRate;
         const exR = extraRate;
 
         if (h > 0 || ex > 0 || plus > 0 || tips > 0) {
@@ -102,6 +101,46 @@ export function renderStats() {
     recalculateEarnings(summary.extraHours, summary.totalPlus, summary.totalTips, false);
 }
 
+export function applyRatesToMonth() {
+    const rateInput = document.getElementById('hourlyRateInput');
+    const exRateInput = document.getElementById('extraRateInput');
+    const retInput = document.getElementById('retentionPercentInput');
+
+    const rate = parseFloat(rateInput?.value) || 0;
+    const exRate = parseFloat(exRateInput?.value) || 0;
+    const retentionPct = parseFloat(retInput?.value) || 0;
+
+    state.hourlyRate = rate;
+    state.extraRate = exRate;
+    state.retentionPercent = retentionPct;
+
+    // Actualizar todas las jornadas del mes actual en state.daysData
+    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    let count = 0;
+    Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(key => {
+        const d = state.daysData[key];
+        d.hourlyRate = rate;
+        d.extraRate = exRate;
+        count++;
+    });
+
+    saveState();
+    recalculateEarnings(null, null, null, false);
+    renderWorkedDaysList(rate, exRate);
+
+    // Feedback visual en el botón de aplicar
+    const btn = document.getElementById('btnApplyRates');
+    if (btn) {
+        const origHtml = btn.innerHTML;
+        btn.style.backgroundColor = '#059669';
+        btn.innerHTML = `<span>✓ ¡Tarifas aplicadas (${rate} €/h a ${count} jornadas)!</span>`;
+        setTimeout(() => {
+            btn.style.backgroundColor = '';
+            btn.innerHTML = origHtml;
+        }, 1800);
+    }
+}
+
 export function recalculateEarnings(extraFromMonth = null, plusFromMonth = null, tipsFromMonth = null, shouldSave = true) {
     const normalH = parseFloat(document.getElementById('calcTotalHoursInput').value) || 0;
     const rate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
@@ -113,14 +152,11 @@ export function recalculateEarnings(extraFromMonth = null, plusFromMonth = null,
         state.extraRate = exRate;
         state.retentionPercent = retentionPct;
 
-        // Actualizar las tarifas de las jornadas del mes actual para que coincidan con la nueva tarifa base y extra
+        // Actualizar las tarifas de las jornadas del mes actual
         const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
         Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(key => {
             const d = state.daysData[key];
-            const shift = state.shifts[d.shiftId];
-            if (!shift || !(Number(shift.customRate) > 0)) {
-                d.hourlyRate = rate;
-            }
+            d.hourlyRate = rate;
             d.extraRate = exRate;
         });
         saveState();
@@ -415,6 +451,11 @@ export function bindFinanceEvents() {
     ['calcTotalHoursInput', 'hourlyRateInput', 'extraRateInput', 'retentionPercentInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => recalculateEarnings());
     });
+
+    const btnApplyRates = document.getElementById('btnApplyRates');
+    if (btnApplyRates) {
+        btnApplyRates.addEventListener('click', applyRatesToMonth);
+    }
 
     document.getElementById('monthlyGoalInput').addEventListener('input', (e) => {
         state.monthlyGoal = parseFloat(e.target.value) || 0;

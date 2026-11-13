@@ -28,7 +28,7 @@ import {
     renderDebts,
     updatePinUI,
     bindFinanceEvents
-} from './finance.js';
+} from './finance.js?v=33';
 
 import { renderGymView, bindGymEvents } from './gym.js';
 import { renderCycleView, bindCycleEvents } from './cycle.js';

@@ -1964,6 +1964,11 @@ select option {
     padding: 13px;
 }
 
+.earnings-summary-box {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.04);
+}
+
 .sub-box__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .sub-box__title { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); }
 .sub-box .calc-box__field input { background: var(--bg-card); }
