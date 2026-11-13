@@ -32,6 +32,15 @@ export const state = {
     theme: 'dark',
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
+    calendarFilter: 'ALL',
+    profile: {
+        name: '',
+        role: '',
+        company: '',
+        bio: '',
+        avatar: '',
+        vacationDays: 30
+    },
     shifts: JSON.parse(JSON.stringify(DEFAULT_SHIFTS)),
     daysData: {},
     hourlyRate: 10,
@@ -55,6 +64,9 @@ export const state = {
     tasks: [],
     taskFilter: 'ALL',
     taskUrgentDraft: false,
+    notes: [],
+    selectedNoteColor: 'emerald',
+    notesSearch: '',
     quickNote: '',
     sendingTaskId: null,
     patternSequence: [],
@@ -65,7 +77,6 @@ export const state = {
     editingShiftId: null
 };
 
-// Hooks desacoplados para evitar dependencias circulares entre módulos
 let cloudSaveHook = null;
 let renderAllHook = null;
 let switchTabHook = null;
@@ -93,6 +104,7 @@ export function triggerSwitchTab(tabId) {
 export function getSerializableState() {
     return {
         theme: state.theme,
+        profile: state.profile,
         shifts: state.shifts,
         daysData: state.daysData,
         hourlyRate: state.hourlyRate,
@@ -111,6 +123,7 @@ export function getSerializableState() {
         exercises: state.exercises,
         weightLogs: state.weightLogs,
         tasks: state.tasks,
+        notes: state.notes,
         quickNote: state.quickNote,
         patternSequence: state.patternSequence
     };
@@ -119,6 +132,14 @@ export function getSerializableState() {
 export function applyParsedState(p) {
     if (!p) return;
     state.theme = p.theme || 'dark';
+    state.profile = {
+        name: p.profile?.name || '',
+        role: p.profile?.role || '',
+        company: p.profile?.company || '',
+        bio: p.profile?.bio || '',
+        avatar: p.profile?.avatar || '',
+        vacationDays: p.profile?.vacationDays ?? 30
+    };
     state.shifts = p.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
     Object.values(state.shifts).forEach(s => {
         s.customRate = s.customRate ?? 0;
@@ -141,7 +162,22 @@ export function applyParsedState(p) {
     state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
     state.weightLogs = p.weightLogs || [];
     state.tasks = p.tasks || [];
+    state.notes = Array.isArray(p.notes) ? p.notes : [];
     state.quickNote = p.quickNote || '';
+
+    // Migración automática si tenía texto en el bloc antiguo y aún no tenía notas Pro
+    if (state.notes.length === 0 && state.quickNote.trim() !== '') {
+        state.notes.push({
+            id: 'N_' + Date.now(),
+            title: 'Apuntes rápidos',
+            content: state.quickNote.trim(),
+            tag: 'General',
+            color: 'emerald',
+            pinned: true,
+            updatedAt: formatNowTime()
+        });
+    }
+
     state.patternSequence = p.patternSequence || [];
 
     document.getElementById('hourlyRateInput').value = state.hourlyRate;
@@ -151,7 +187,6 @@ export function applyParsedState(p) {
     document.getElementById('piggyTitleInput').value = state.piggyTitle;
     document.getElementById('piggyGoalInput').value = state.piggyGoal;
     document.getElementById('gymWeeklyGoalInput').value = state.gymWeeklyGoal;
-    document.getElementById('quickNoteTextarea').value = state.quickNote;
 }
 
 export function loadState() {
@@ -207,5 +242,5 @@ export function formatDateKey(year, month, day) {
 
 export function formatNowTime() {
     const d = new Date();
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
