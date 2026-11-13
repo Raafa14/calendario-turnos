@@ -1,6 +1,6 @@
 import { state, saveState, triggerRenderAll, triggerSwitchTab } from './state.js';
 
-export function getMonthPayrollSummary(year, month) {
+export function getMonthPayrollSummary(year, month, overrideRate = null, overrideExtraRate = null) {
     const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
     let daysWorked = 0;
     let normalHours = 0;
@@ -9,14 +9,20 @@ export function getMonthPayrollSummary(year, month) {
     let totalPlus = 0;
     let totalTips = 0;
 
+    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? overrideRate : (Number(state.hourlyRate) || 0);
+    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? overrideExtraRate : (Number(state.extraRate) || 0);
+
     Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
         const d = state.daysData[key];
         const h = Number(d.hours) || 0;
         const ex = Number(d.extraHours) || 0;
         const plus = Number(d.shiftPlus) || 0;
         const tips = Number(d.tips) || 0;
-        const r = d.hourlyRate ?? state.hourlyRate;
-        const exR = d.extraRate ?? state.extraRate;
+
+        const shift = state.shifts[d.shiftId];
+        // Si el tipo de turno tiene una tarifa propia explícita (customRate > 0), se respeta; si no, se usa la tarifa base indicada
+        const r = (shift && Number(shift.customRate) > 0) ? Number(shift.customRate) : baseRate;
+        const exR = extraRate;
 
         if (h > 0 || ex > 0 || plus > 0 || tips > 0) {
             daysWorked++;
@@ -33,23 +39,29 @@ export function getMonthPayrollSummary(year, month) {
     return { daysWorked, normalHours, extraHours, grossMoney, totalPlus, netMoney, totalTips, realTotal: netMoney + totalTips };
 }
 
-export function renderStats() {
+export function renderWorkedDaysList(overrideRate = null, overrideExtraRate = null) {
     const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
     const listEl = document.getElementById('workedDaysList');
+    if (!listEl) return;
     listEl.innerHTML = '';
 
-    const summary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
+    const baseRate = (overrideRate !== null && !isNaN(overrideRate)) ? overrideRate : (Number(state.hourlyRate) || 0);
+    const extraRate = (overrideExtraRate !== null && !isNaN(overrideExtraRate)) ? overrideExtraRate : (Number(state.extraRate) || 0);
 
+    let hasDays = false;
     Object.keys(state.daysData).filter(k => k.startsWith(prefix)).sort().forEach(key => {
         const d = state.daysData[key];
         const h = Number(d.hours) || 0;
         const ex = Number(d.extraHours) || 0;
         const plus = Number(d.shiftPlus) || 0;
         const tips = Number(d.tips) || 0;
-        const r = d.hourlyRate ?? state.hourlyRate;
-        const exR = d.extraRate ?? state.extraRate;
+
+        const shift = state.shifts[d.shiftId];
+        const r = (shift && Number(shift.customRate) > 0) ? Number(shift.customRate) : baseRate;
+        const exR = extraRate;
 
         if (h > 0 || ex > 0 || plus > 0 || tips > 0) {
+            hasDays = true;
             const dayNum = parseInt(key.split('-')[2], 10);
             const sName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Jornada';
             const dayPay = (h * r) + (ex * exR) + plus;
@@ -65,15 +77,28 @@ export function renderStats() {
         }
     });
 
-    if (summary.daysWorked === 0) {
+    if (!hasDays) {
         listEl.innerHTML = '<li class="worked-list__item">Aún no has registrado horas este mes.</li>';
     }
+}
+
+export function renderStats() {
+    const rateInput = document.getElementById('hourlyRateInput');
+    const exRateInput = document.getElementById('extraRateInput');
+    const retInput = document.getElementById('retentionPercentInput');
+
+    if (rateInput && document.activeElement !== rateInput) rateInput.value = state.hourlyRate;
+    if (exRateInput && document.activeElement !== exRateInput) exRateInput.value = state.extraRate;
+    if (retInput && document.activeElement !== retInput) retInput.value = state.retentionPercent || 0;
+
+    const summary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
 
     document.getElementById('statDaysWorked').textContent = summary.daysWorked;
     document.getElementById('statNormalHours').textContent = `${summary.normalHours} h`;
     document.getElementById('statExtraHours').textContent = `${summary.extraHours} h`;
     document.getElementById('calcTotalHoursInput').value = summary.normalHours;
 
+    renderWorkedDaysList();
     recalculateEarnings(summary.extraHours, summary.totalPlus, summary.totalTips, false);
 }
 
@@ -83,20 +108,31 @@ export function recalculateEarnings(extraFromMonth = null, plusFromMonth = null,
     const exRate = parseFloat(document.getElementById('extraRateInput').value) || 0;
     const retentionPct = parseFloat(document.getElementById('retentionPercentInput').value) || 0;
 
-    const currentSummary = getMonthPayrollSummary(state.currentYear, state.currentMonth);
-    const extraH = extraFromMonth !== null ? extraFromMonth : currentSummary.extraHours;
-    const plus = plusFromMonth !== null ? plusFromMonth : currentSummary.totalPlus;
-    const tips = tipsFromMonth !== null ? tipsFromMonth : currentSummary.totalTips;
-
     if (shouldSave) {
         state.hourlyRate = rate;
         state.extraRate = exRate;
         state.retentionPercent = retentionPct;
+
+        // Actualizar las tarifas de las jornadas del mes actual para que coincidan con la nueva tarifa base y extra
+        const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+        Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(key => {
+            const d = state.daysData[key];
+            const shift = state.shifts[d.shiftId];
+            if (!shift || !(Number(shift.customRate) > 0)) {
+                d.hourlyRate = rate;
+            }
+            d.extraRate = exRate;
+        });
         saveState();
     }
 
-    const usesCustomRates = normalH === currentSummary.normalHours;
-    const gross = usesCustomRates
+    const currentSummary = getMonthPayrollSummary(state.currentYear, state.currentMonth, rate, exRate);
+    const extraH = extraFromMonth !== null ? extraFromMonth : currentSummary.extraHours;
+    const plus = plusFromMonth !== null ? plusFromMonth : currentSummary.totalPlus;
+    const tips = tipsFromMonth !== null ? tipsFromMonth : currentSummary.totalTips;
+
+    const usesDayBreakdown = normalH === currentSummary.normalHours;
+    const gross = usesDayBreakdown
         ? currentSummary.grossMoney
         : (normalH * rate) + (extraH * exRate) + plus;
 
@@ -111,9 +147,10 @@ export function recalculateEarnings(extraFromMonth = null, plusFromMonth = null,
     const plusLabel = plus > 0 ? ` + ${plus.toFixed(2)}€ pluses` : '';
     document.getElementById('earnedFormulaText').textContent = retentionPct > 0
         ? `Bruto ${gross.toFixed(2)}€ (-${retentionPct}% ret.)${plusLabel}`
-        : `${normalH}h base + ${extraH}h extra${plusLabel}`;
+        : `${normalH}h base (${rate}€/h) + ${extraH}h extra (${exRate}€/h)${plusLabel}`;
 
     updateGoalAndComparison(totalReal);
+    renderWorkedDaysList(rate, exRate);
 }
 
 function updateGoalAndComparison(currentEarned) {
