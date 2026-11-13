@@ -30,13 +30,107 @@ export function renderCalendar() {
 
     for (let day = 1; day <= totalDays; day++) {
         const dateKey = formatDateKey(state.currentYear, state.currentMonth, day);
+        const info = state.daysData[dateKey];
         const cell = document.createElement('div');
         cell.className = 'day-cell';
         if (dateKey === todayKey) cell.classList.add('day-cell--today');
 
-        paintCell(cell, day, state.daysData[dateKey]);
-        cell.addEventListener('click', () => openDayModal(dateKey, day));
+        // Filtro visual rápido
+        if (state.calendarFilter !== 'ALL') {
+            let matches = false;
+            if (state.calendarFilter === 'WORK') {
+                matches = info && ((Number(info.hours) || 0) > 0 || (Number(info.extraHours) || 0) > 0 || ['M', 'A', 'N'].includes(info.shiftId));
+            } else if (state.calendarFilter === 'GYM') {
+                matches = info && Boolean(info.workoutGroup);
+            } else if (state.calendarFilter === 'NOTES') {
+                matches = info && Boolean(info.customText && info.customText.trim() !== '');
+            }
+            if (!matches) cell.classList.add('day-cell--dimmed');
+        }
+
+        paintCell(cell, day, info);
+        cell.addEventListener('click', () => openDayModal(dateKey));
         grid.appendChild(cell);
+    }
+
+    renderCalendarSummaryAndUpcoming();
+}
+
+function renderCalendarSummaryAndUpcoming() {
+    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    let workedDays = 0;
+    let totalHours = 0;
+    let gymSessions = 0;
+
+    Object.keys(state.daysData).filter(k => k.startsWith(prefix)).forEach(k => {
+        const d = state.daysData[k];
+        const h = (Number(d.hours) || 0) + (Number(d.extraHours) || 0);
+        if (h > 0 || (Number(d.shiftPlus) || 0) > 0) workedDays++;
+        totalHours += h;
+        if (d.workoutGroup) gymSessions++;
+    });
+
+    // Contador anual de vacaciones (turnos marcados con 'V' en el año actual)
+    const yearPrefix = `${state.currentYear}-`;
+    let usedVacations = 0;
+    Object.keys(state.daysData).filter(k => k.startsWith(yearPrefix)).forEach(k => {
+        if (state.daysData[k]?.shiftId === 'V') usedVacations++;
+    });
+    const totalVacations = Number(state.profile?.vacationDays) || 30;
+    const remainingVacations = Math.max(0, totalVacations - usedVacations);
+
+    document.getElementById('calSumDays').textContent = `${workedDays} d`;
+    document.getElementById('calSumHours').textContent = `${totalHours} h`;
+    document.getElementById('calSumGym').textContent = `${gymSessions}`;
+    document.getElementById('calSumVacations').textContent = `${remainingVacations} / ${totalVacations}`;
+
+    // Agenda Próximos 7 días
+    const listEl = document.getElementById('upcomingWeekList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const today = new Date();
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+        const key = formatDateKey(d.getFullYear(), d.getMonth(), d.getDate());
+        const info = state.daysData[key];
+        const shift = (info && state.shifts[info.shiftId]) ? state.shifts[info.shiftId] : state.shifts.NONE;
+
+        const row = document.createElement('div');
+        row.className = 'upcoming-row';
+
+        const dayLabel = i === 0 ? `Hoy · ${dayNames[d.getDay()]} ${d.getDate()}` : `${dayNames[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+        const hasShift = shift && shift.id !== 'NONE';
+        const badgeText = hasShift ? shift.short : '—';
+        const badgeStyle = hasShift
+            ? `background:${shift.color}; color:${shift.textColor || getContrastText(shift.color)}; border:none;`
+            : '';
+
+        const details = [];
+        if (hasShift) details.push(`${shift.name} (${info.startTime || shift.startTime})`);
+        if (info?.alarmEnabled && info?.alarmTime) details.push(`⏰ ${info.alarmTime}`);
+        if (info?.customText) details.push(info.customText);
+        const subText = details.length > 0 ? details.join(' · ') : 'Sin actividad programada';
+
+        const gymPill = info?.workoutGroup ? `<span class="gym-pill">${info.workoutGroup}</span>` : '';
+
+        row.innerHTML = `
+            <div class="upcoming-row__left">
+                <div class="upcoming-row__badge" style="${badgeStyle}">${badgeText}</div>
+                <div class="upcoming-row__info">
+                    <span class="upcoming-row__day">${dayLabel}</span>
+                    <span class="upcoming-row__sub">${subText}</span>
+                </div>
+            </div>
+            <div class="upcoming-row__right">
+                ${gymPill}
+            </div>
+        `;
+
+        row.addEventListener('click', () => openDayModal(key));
+        listEl.appendChild(row);
     }
 }
 
@@ -291,8 +385,10 @@ function applyRepeatToSelectedWeekDays(baseDateKey, dataToCopy) {
     });
 }
 
-function openDayModal(dateKey, dayNumber) {
+export function openDayModal(dateKey) {
     state.editingDateKey = dateKey;
+    const [y, m, dayNumber] = dateKey.split('-').map(Number);
+
     const saved = state.daysData[dateKey] || {
         shiftId: 'NONE',
         useCustomColor: false,
@@ -314,10 +410,10 @@ function openDayModal(dateKey, dayNumber) {
         sticker: ''
     };
 
-    const dateObj = new Date(state.currentYear, state.currentMonth, dayNumber);
+    const dateObj = new Date(y, m - 1, dayNumber);
     const weekdayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    document.getElementById('modalFullDateTitle').textContent = `${weekdayNames[dateObj.getDay()]}, ${dayNumber} de ${monthNames[state.currentMonth]}`;
+    document.getElementById('modalFullDateTitle').textContent = `${weekdayNames[dateObj.getDay()]}, ${dayNumber} de ${monthNames[m - 1]}`;
 
     state.modalSelectedShift = state.shifts[saved.shiftId] ? saved.shiftId : 'NONE';
     state.modalSelectedSticker = saved.sticker || '';
@@ -420,6 +516,15 @@ function triggerIphoneAlarmPrompt(dateKey, data) {
 }
 
 export function bindCalendarEvents() {
+    document.querySelectorAll('[data-cal-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.calendarFilter = btn.dataset.calFilter;
+            document.querySelectorAll('[data-cal-filter]').forEach(b => b.classList.remove('task-pill-btn--active'));
+            btn.classList.add('task-pill-btn--active');
+            renderCalendar();
+        });
+    });
+
     document.querySelectorAll('.stepper__btn[data-step-target]').forEach(btn => {
         btn.addEventListener('click', () => {
             const input = document.getElementById(btn.dataset.stepTarget);
