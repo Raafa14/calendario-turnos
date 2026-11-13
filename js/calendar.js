@@ -151,6 +151,16 @@ export function renderTomorrowBanner() {
     }
 }
 
+export function getAdaptedFontSize(customText, requestedSize) {
+    const base = Number(requestedSize) || 13;
+    const len = (customText || '').trim().length;
+    if (len === 0) return base;
+    if (len <= 4) return base;
+    if (len <= 8) return base > 15 ? 15 : base;
+    if (len <= 14) return Math.min(base, 13);
+    return Math.min(base, 11);
+}
+
 export function paintCell(cellEl, dayNumber, info) {
     cellEl.innerHTML = '';
     const shift = (info && state.shifts[info.shiftId]) ? state.shifts[info.shiftId] : state.shifts.NONE;
@@ -205,7 +215,8 @@ export function paintCell(cellEl, dayNumber, info) {
     if (hasText && (prioritize || !hasShiftLetter)) {
         const noteSpan = document.createElement('span');
         noteSpan.className = 'day-cell__note';
-        noteSpan.style.fontSize = `${info.fontSize || 13}px`;
+        const adaptedSize = getAdaptedFontSize(info.customText, info.fontSize);
+        noteSpan.style.setProperty('--note-font-size', `${adaptedSize}px`);
         noteSpan.textContent = info.customText;
         middle.appendChild(noteSpan);
     } else if (hasShiftLetter) {

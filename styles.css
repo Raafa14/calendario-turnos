@@ -517,21 +517,23 @@ select option {
 
 .calendar__grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
 }
 
 .day-cell {
-    height: 70px;
+    min-width: 0;
+    height: 74px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 3px 4px;
+    padding: 2px 3px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     cursor: pointer;
     overflow: hidden;
+    box-sizing: border-box;
     transition: opacity 0.15s ease;
 }
 
@@ -558,6 +560,8 @@ select option {
     font-weight: 800;
     line-height: 1;
     flex-shrink: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 .day-cell__top-left {
@@ -588,6 +592,10 @@ select option {
     text-align: center;
     overflow: hidden;
     padding: 1px 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .day-cell__letter {
@@ -597,13 +605,24 @@ select option {
 }
 
 .day-cell__note {
+    --user-fs: var(--note-font-size, 12px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 11px;
+    font-size: clamp(8px, calc(var(--user-fs) * 0.8), 13px);
     font-weight: 800;
-    line-height: 1.08;
+    line-height: 1.1;
+    text-align: center;
+    overflow-wrap: anywhere;
     word-break: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    padding: 0 1px;
 }
 
 .day-cell__bottom {
@@ -613,6 +632,16 @@ select option {
     gap: 2px;
     min-height: 13px;
     flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.day-cell__bottom:empty {
+    min-height: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    display: none;
 }
 
 .extra-pill {
@@ -1787,7 +1816,7 @@ select option {
 }
 
 .live-preview-box__label { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); }
-.day-cell--preview { width: 64px; height: 74px; cursor: default; }
+.day-cell--preview { width: 58px; height: 74px; cursor: default; flex-shrink: 0; }
 
 .repeat-week-box {
     background: var(--bg-subtle);
@@ -1881,6 +1910,12 @@ select option {
         height: 92px;
         padding: 5px 6px;
         border-radius: 12px;
+    }
+
+    .day-cell__note {
+        font-size: clamp(9.5px, calc(var(--user-fs) * 0.9), 15px);
+        -webkit-line-clamp: 4;
+        line-height: 1.15;
     }
 
     .day-cell__letter {
@@ -2157,6 +2192,12 @@ select option {
 
     .day-cell__letter {
         font-size: 1.7rem;
+    }
+
+    .day-cell__note {
+        font-size: var(--user-fs);
+        -webkit-line-clamp: 4;
+        line-height: 1.18;
     }
 
     .extra-pill,
