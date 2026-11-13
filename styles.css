@@ -1969,6 +1969,109 @@ select option {
     background: rgba(16, 185, 129, 0.04);
 }
 
+/* SWITCH TOGGLE */
+.switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+    border-radius: 999px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.switch-toggle input:checked + .switch-slider {
+    background-color: var(--accent);
+}
+
+.switch-toggle input:checked + .switch-slider:before {
+    transform: translateX(20px);
+}
+
+/* MODAL AJUSTES DE LA APLICACIÓN */
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-section__title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+}
+
+.settings-toggle-card {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.settings-toggle-card__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.settings-toggle-card__left strong {
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.settings-toggle-card__left p {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.3;
+}
+
 .sub-box__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .sub-box__title { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); }
 .sub-box .calc-box__field input { background: var(--bg-card); }

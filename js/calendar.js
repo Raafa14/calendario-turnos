@@ -83,7 +83,7 @@ function renderCalendarSummaryAndUpcoming() {
         const h = (Number(d.hours) || 0) + (Number(d.extraHours) || 0);
         if (h > 0 || (Number(d.shiftPlus) || 0) > 0) workedDays++;
         totalHours += h;
-        if (d.workoutGroup) gymSessions++;
+        if (state.gymEnabled !== false && d.workoutGroup) gymSessions++;
     });
 
     // Contador anual de vacaciones (turnos marcados con 'V' en el año actual)
@@ -130,7 +130,7 @@ function renderCalendarSummaryAndUpcoming() {
         if (info?.customText) details.push(info.customText);
         const subText = details.length > 0 ? details.join(' · ') : 'Sin actividad programada';
 
-        const gymPill = info?.workoutGroup ? `<span class="gym-pill">${info.workoutGroup}</span>` : '';
+        const gymPill = (state.gymEnabled !== false && info?.workoutGroup) ? `<span class="gym-pill">${info.workoutGroup}</span>` : '';
 
         row.innerHTML = `
             <div class="upcoming-row__left">
@@ -157,10 +157,10 @@ export function renderTomorrowBanner() {
     const info = state.daysData[key];
     const banner = document.getElementById('tomorrowBanner');
 
-    if (info && (info.shiftId !== 'NONE' || info.alarmEnabled || info.workoutGroup)) {
+    if (info && (info.shiftId !== 'NONE' || info.alarmEnabled || (state.gymEnabled !== false && info.workoutGroup))) {
         const shiftName = state.shifts[info.shiftId] ? state.shifts[info.shiftId].name : 'Jornada';
         const alarmTxt = info.alarmEnabled ? ` · Alarma ${info.alarmTime}` : '';
-        const gymTxt = info.workoutGroup ? ` · Gym: ${info.workoutGroup}` : '';
+        const gymTxt = (state.gymEnabled !== false && info.workoutGroup) ? ` · Gym: ${info.workoutGroup}` : '';
         banner.innerHTML = `<strong>Mañana (${shiftName}):</strong> Entrada ${info.startTime}${alarmTxt}${gymTxt}`;
     } else {
         banner.innerHTML = `<span>Mañana sin turno ni alarma programada</span>`;
@@ -285,7 +285,7 @@ export function paintCell(cellEl, dayNumber, info) {
         extraTag.className = 'extra-pill';
         extraTag.textContent = 'EXTRA';
         bottom.appendChild(extraTag);
-    } else if (info && info.workoutGroup) {
+    } else if (state.gymEnabled !== false && info && info.workoutGroup) {
         const gymTag = document.createElement('span');
         gymTag.className = 'gym-pill';
         gymTag.textContent = info.workoutGroup;
@@ -507,6 +507,12 @@ export function openDayModal(dateKey) {
     const isPeriodDay = Boolean(state.cycle?.logs?.[dateKey]?.isPeriod);
     const periodCheck = document.getElementById('dayPeriodRecorded');
     if (periodCheck) periodCheck.checked = isPeriodDay;
+
+    const dayPeriodRow = document.getElementById('dayPeriodRow');
+    if (dayPeriodRow) dayPeriodRow.style.display = (state.cycle?.enabled !== false) ? '' : 'none';
+
+    const dayGymSection = document.getElementById('dayGymSection');
+    if (dayGymSection) dayGymSection.style.display = (state.gymEnabled !== false) ? '' : 'none';
 
     syncPresetButtons(fSize);
     renderShiftCardsInModal();

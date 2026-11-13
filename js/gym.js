@@ -4,6 +4,7 @@ let timerInterval = null;
 let timerSecondsLeft = 90;
 
 export function renderGymView() {
+    if (state.gymEnabled === false) return;
     const now = new Date();
     const dow = now.getDay();
     const diffToMonday = (dow === 0) ? -6 : 1 - dow;

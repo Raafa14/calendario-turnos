@@ -46,6 +46,7 @@ export const state = {
     calendarFilter: 'ALL',
     isBatchMode: false,
     batchSelectedDates: [],
+    gymEnabled: true,
     profile: {
         name: '',
         role: '',
@@ -134,6 +135,7 @@ export function getSerializableState() {
         debts: state.debts,
         createdIphoneAlarms: state.createdIphoneAlarms,
         gymWeeklyGoal: state.gymWeeklyGoal,
+        gymEnabled: state.gymEnabled !== false,
         exercises: state.exercises,
         weightLogs: state.weightLogs,
         tasks: state.tasks,
@@ -174,6 +176,7 @@ export function applyParsedState(p) {
     state.debts = p.debts || [];
     state.createdIphoneAlarms = p.createdIphoneAlarms || [];
     state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
+    state.gymEnabled = p.gymEnabled !== false;
     state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
     state.weightLogs = p.weightLogs || [];
     state.tasks = p.tasks || [];

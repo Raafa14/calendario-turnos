@@ -41,7 +41,104 @@ import {
     bindShiftEvents
 } from './shifts.js';
 
+export function applyModuleVisibility() {
+    const isCycle = state.cycle?.enabled !== false;
+    const isGym = state.gymEnabled !== false;
+
+    // 1. Barra de navegación inferior
+    const cycleTab = document.querySelector('.bottom-nav__item[data-tab="cycleView"]');
+    if (cycleTab) cycleTab.style.display = isCycle ? '' : 'none';
+
+    const gymTab = document.querySelector('.bottom-nav__item[data-tab="gymView"]');
+    if (gymTab) gymTab.style.display = isGym ? '' : 'none';
+
+    // 2. Si la vista activa es de un módulo desactivado, volver a Calendario
+    const activeView = document.querySelector('.view.view--active');
+    if (activeView) {
+        if (!isCycle && activeView.id === 'cycleView') switchTab('calendarView');
+        if (!isGym && activeView.id === 'gymView') switchTab('calendarView');
+    }
+
+    // 3. Resumen y filtros del calendario
+    const calSumGymPill = document.getElementById('calSumGymPill');
+    if (calSumGymPill) calSumGymPill.style.display = isGym ? '' : 'none';
+
+    const gymFilterBtn = document.querySelector('.task-pill-btn[data-cal-filter="GYM"]');
+    if (gymFilterBtn) gymFilterBtn.style.display = isGym ? '' : 'none';
+
+    const dayGymSection = document.getElementById('dayGymSection');
+    if (dayGymSection) dayGymSection.style.display = isGym ? '' : 'none';
+
+    const dayPeriodRow = document.getElementById('dayPeriodRow');
+    if (dayPeriodRow) dayPeriodRow.style.display = isCycle ? '' : 'none';
+
+    if (!isGym && state.calendarFilter === 'GYM') {
+        state.calendarFilter = 'ALL';
+        document.querySelectorAll('#calendarFilterPills .task-pill-btn').forEach(b => {
+            b.classList.toggle('task-pill-btn--active', b.dataset.calFilter === 'ALL');
+        });
+    }
+}
+
+function initSettingsModal() {
+    const btnOpen = document.getElementById('btnOpenSettings');
+    const btnOpenFromProfile = document.getElementById('btnOpenSettingsFromProfile');
+    const modal = document.getElementById('settingsModal');
+    const btnClose = document.getElementById('btnCloseSettingsModal');
+    const btnSave = document.getElementById('btnSaveSettingsModal');
+    const toggleCycle = document.getElementById('settingToggleCycle');
+    const toggleGym = document.getElementById('settingToggleGym');
+
+    function syncCheckboxes() {
+        if (toggleCycle) toggleCycle.checked = state.cycle?.enabled !== false;
+        if (toggleGym) toggleGym.checked = state.gymEnabled !== false;
+    }
+
+    function openModal() {
+        syncCheckboxes();
+        if (modal) modal.classList.add('modal--open');
+    }
+
+    function closeModal() {
+        if (modal) modal.classList.remove('modal--open');
+    }
+
+    if (btnOpen) btnOpen.addEventListener('click', openModal);
+    if (btnOpenFromProfile) btnOpenFromProfile.addEventListener('click', openModal);
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    function saveAndApplySettings() {
+        if (toggleCycle) {
+            if (!state.cycle) state.cycle = {};
+            state.cycle.enabled = toggleCycle.checked;
+        }
+        if (toggleGym) {
+            state.gymEnabled = toggleGym.checked;
+        }
+        saveState();
+        applyModuleVisibility();
+        renderAll();
+    }
+
+    if (toggleCycle) toggleCycle.addEventListener('change', saveAndApplySettings);
+    if (toggleGym) toggleGym.addEventListener('change', saveAndApplySettings);
+
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            saveAndApplySettings();
+            closeModal();
+        });
+    }
+}
+
 function renderAll() {
+    applyModuleVisibility();
     renderCalendar();
     renderTomorrowBanner();
     renderStats();
@@ -192,6 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
     bindCycleEvents();
     bindTaskEvents();
     bindShiftEvents();
+    initSettingsModal();
+    applyModuleVisibility();
 
     initCloudSync();
     renderAll();

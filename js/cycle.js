@@ -223,6 +223,7 @@ export function getUpcomingShiftClashes() {
 
 // RENDERIZADO DE LA PANTALLA COMPLETA DE CICLO
 export function renderCycleView() {
+    if (state.cycle?.enabled === false) return;
     const cycle = calculateCycleInfo(new Date());
 
     // 1. Tarjeta dial principal
