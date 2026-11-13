@@ -1,3 +1,27 @@
+// CONFIGURACIÓN DE FIREBASE (SHIFTERPRO-RAFA)
+const firebaseConfig = {
+    apiKey: "AIzaSyD0scKnFJXER77flW5DURxxU4OyDW6o8uE",
+    authDomain: "shifterpro-rafa.firebaseapp.com",
+    projectId: "shifterpro-rafa",
+    storageBucket: "shifterpro-rafa.firebasestorage.app",
+    messagingSenderId: "1041726135541",
+    appId: "1:1041726135541:web:c0f72d48154d8f7729f9bc",
+    measurementId: "G-T9EWNNY049"
+};
+
+let fbAuth = null;
+let fbDb = null;
+let currentUser = null;
+let unsubscribeSnapshot = null;
+let isApplyingRemoteSnapshot = false;
+let authMode = 'LOGIN'; // 'LOGIN' | 'REGISTER'
+
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+    fbDb = firebase.firestore();
+}
+
 const STORAGE_KEY = 'shifterpro_v6_data';
 const LEGACY_KEYS = ['shifterpro_v5_data', 'shifterpro_v4_data'];
 
@@ -76,67 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initDayQuickPalette();
     initPatternDefaultDate();
     bindEvents();
+    initCloudSync();
     renderAll();
 });
 
-// 1. PERSISTENCIA Y TEMA
-function loadState() {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-        for (const k of LEGACY_KEYS) {
-            if (localStorage.getItem(k)) {
-                raw = localStorage.getItem(k);
-                break;
-            }
-        }
-    }
-
-    if (raw) {
-        try {
-            const p = JSON.parse(raw);
-            state.theme = p.theme || 'dark';
-            state.shifts = p.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
-            Object.values(state.shifts).forEach(s => {
-                s.customRate = s.customRate ?? 0;
-                s.shiftPlus = s.shiftPlus ?? 0;
-            });
-            state.daysData = p.daysData || {};
-            state.hourlyRate = p.hourlyRate ?? 10;
-            state.extraRate = p.extraRate ?? 12;
-            state.retentionPercent = p.retentionPercent ?? 0;
-            state.monthlyGoal = p.monthlyGoal ?? 1200;
-            state.statsPin = p.statsPin || null;
-            state.walletMovements = p.walletMovements || [];
-            state.piggyTitle = p.piggyTitle || 'Ahorro / Viaje';
-            state.piggyGoal = p.piggyGoal ?? 600;
-            state.piggySaved = p.piggySaved ?? 0;
-            state.fixedExpenses = p.fixedExpenses || [];
-            state.debts = p.debts || [];
-            state.createdIphoneAlarms = p.createdIphoneAlarms || [];
-            state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
-            state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
-            state.weightLogs = p.weightLogs || [];
-            state.tasks = p.tasks || [];
-            state.quickNote = p.quickNote || '';
-            state.patternSequence = p.patternSequence || [];
-        } catch (err) {
-            console.error('Error cargando datos:', err);
-        }
-    }
-
-    document.getElementById('hourlyRateInput').value = state.hourlyRate;
-    document.getElementById('extraRateInput').value = state.extraRate;
-    document.getElementById('retentionPercentInput').value = state.retentionPercent;
-    document.getElementById('monthlyGoalInput').value = state.monthlyGoal;
-    document.getElementById('piggyTitleInput').value = state.piggyTitle;
-    document.getElementById('piggyGoalInput').value = state.piggyGoal;
-    document.getElementById('gymWeeklyGoalInput').value = state.gymWeeklyGoal;
-    document.getElementById('quickNoteTextarea').value = state.quickNote;
-    updatePinUI();
-}
-
-function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+// 1. PERSISTENCIA LOCAL + SINCRONIZACIÓN CON FIREBASE
+function getSerializableState() {
+    return {
         theme: state.theme,
         shifts: state.shifts,
         daysData: state.daysData,
@@ -158,7 +128,188 @@ function saveState() {
         tasks: state.tasks,
         quickNote: state.quickNote,
         patternSequence: state.patternSequence
-    }));
+    };
+}
+
+function applyParsedState(p) {
+    if (!p) return;
+    state.theme = p.theme || 'dark';
+    state.shifts = p.shifts || JSON.parse(JSON.stringify(DEFAULT_SHIFTS));
+    Object.values(state.shifts).forEach(s => {
+        s.customRate = s.customRate ?? 0;
+        s.shiftPlus = s.shiftPlus ?? 0;
+    });
+    state.daysData = p.daysData || {};
+    state.hourlyRate = p.hourlyRate ?? 10;
+    state.extraRate = p.extraRate ?? 12;
+    state.retentionPercent = p.retentionPercent ?? 0;
+    state.monthlyGoal = p.monthlyGoal ?? 1200;
+    state.statsPin = p.statsPin || null;
+    state.walletMovements = p.walletMovements || [];
+    state.piggyTitle = p.piggyTitle || 'Ahorro / Viaje';
+    state.piggyGoal = p.piggyGoal ?? 600;
+    state.piggySaved = p.piggySaved ?? 0;
+    state.fixedExpenses = p.fixedExpenses || [];
+    state.debts = p.debts || [];
+    state.createdIphoneAlarms = p.createdIphoneAlarms || [];
+    state.gymWeeklyGoal = p.gymWeeklyGoal ?? 4;
+    state.exercises = p.exercises || JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+    state.weightLogs = p.weightLogs || [];
+    state.tasks = p.tasks || [];
+    state.quickNote = p.quickNote || '';
+    state.patternSequence = p.patternSequence || [];
+
+    document.getElementById('hourlyRateInput').value = state.hourlyRate;
+    document.getElementById('extraRateInput').value = state.extraRate;
+    document.getElementById('retentionPercentInput').value = state.retentionPercent;
+    document.getElementById('monthlyGoalInput').value = state.monthlyGoal;
+    document.getElementById('piggyTitleInput').value = state.piggyTitle;
+    document.getElementById('piggyGoalInput').value = state.piggyGoal;
+    document.getElementById('gymWeeklyGoalInput').value = state.gymWeeklyGoal;
+    document.getElementById('quickNoteTextarea').value = state.quickNote;
+    updatePinUI();
+}
+
+function loadState() {
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+        for (const k of LEGACY_KEYS) {
+            if (localStorage.getItem(k)) {
+                raw = localStorage.getItem(k);
+                break;
+            }
+        }
+    }
+
+    if (raw) {
+        try {
+            applyParsedState(JSON.parse(raw));
+        } catch (err) {
+            console.error('Error cargando datos locales:', err);
+        }
+    } else {
+        applyParsedState({});
+    }
+}
+
+function saveState() {
+    const payload = getSerializableState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+
+    if (fbDb && currentUser && !isApplyingRemoteSnapshot) {
+        fbDb.collection('users').doc(currentUser.uid).set({
+            ...payload,
+            updatedAt: Date.now()
+        }).catch(err => {
+            console.error('Error sincronizando con la nube:', err);
+        });
+    }
+}
+
+function hasLocalUserData() {
+    return Object.keys(state.daysData).length > 0 ||
+           state.walletMovements.length > 0 ||
+           state.tasks.length > 0 ||
+           state.weightLogs.length > 0 ||
+           state.fixedExpenses.length > 0 ||
+           state.debts.length > 0;
+}
+
+function initCloudSync() {
+    if (!fbAuth || !fbDb) return;
+
+    fbAuth.onAuthStateChanged(async (user) => {
+        const dot = document.getElementById('cloudStatusDot');
+        const loggedOutView = document.getElementById('authLoggedOutView');
+        const loggedInView = document.getElementById('authLoggedInView');
+
+        if (unsubscribeSnapshot) {
+            unsubscribeSnapshot();
+            unsubscribeSnapshot = null;
+        }
+
+        if (user) {
+            currentUser = user;
+            dot.classList.add('cloud-dot--online');
+            loggedOutView.style.display = 'none';
+            loggedInView.style.display = 'block';
+            document.getElementById('authUserEmail').textContent = user.email;
+
+            const userDocRef = fbDb.collection('users').doc(user.uid);
+            const alreadyLinkedUid = localStorage.getItem('shifterpro_synced_uid');
+
+            try {
+                const snap = await userDocRef.get();
+                if (!snap.exists) {
+                    // Cuenta nueva: subimos lo que tenga en este dispositivo
+                    await userDocRef.set({
+                        ...getSerializableState(),
+                        updatedAt: Date.now()
+                    });
+                } else if (alreadyLinkedUid !== user.uid && hasLocalUserData()) {
+                    // Primera vez que conecta este dispositivo y tiene datos locales previos
+                    const useCloud = confirm(
+                        'Hemos encontrado datos guardados en la nube para tu cuenta.\n\n' +
+                        '• Pulsa ACEPTAR para descargar tus datos de la nube a este dispositivo.\n' +
+                        '• Pulsa CANCELAR para subir los datos actuales de este dispositivo y sobrescribir la nube.'
+                    );
+                    if (useCloud) {
+                        isApplyingRemoteSnapshot = true;
+                        applyParsedState(snap.data());
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(getSerializableState()));
+                        applyTheme();
+                        renderAll();
+                        isApplyingRemoteSnapshot = false;
+                    } else {
+                        await userDocRef.set({
+                            ...getSerializableState(),
+                            updatedAt: Date.now()
+                        });
+                    }
+                } else {
+                    isApplyingRemoteSnapshot = true;
+                    applyParsedState(snap.data());
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(getSerializableState()));
+                    applyTheme();
+                    renderAll();
+                    isApplyingRemoteSnapshot = false;
+                }
+
+                localStorage.setItem('shifterpro_synced_uid', user.uid);
+            } catch (err) {
+                console.error('Error en sincronización inicial:', err);
+            }
+
+            // Escucha cambios en tiempo real desde cualquier dispositivo
+            unsubscribeSnapshot = userDocRef.onSnapshot((doc) => {
+                if (!doc.exists || doc.metadata.hasPendingWrites) return;
+                isApplyingRemoteSnapshot = true;
+                applyParsedState(doc.data());
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(getSerializableState()));
+                applyTheme();
+                renderAll();
+                isApplyingRemoteSnapshot = false;
+            });
+        } else {
+            currentUser = null;
+            dot.classList.remove('cloud-dot--online');
+            loggedOutView.style.display = 'block';
+            loggedInView.style.display = 'none';
+        }
+    });
+}
+
+function getSpanishAuthError(code) {
+    switch (code) {
+        case 'auth/invalid-email': return 'El formato del correo electrónico no es válido.';
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential': return 'Correo o contraseña incorrectos.';
+        case 'auth/email-already-in-use': return 'Este correo ya tiene una cuenta creada. Inicia sesión.';
+        case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.';
+        case 'auth/too-many-requests': return 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+        default: return 'No se pudo completar la operación (' + code + ').';
+    }
 }
 
 function applyTheme() {
@@ -555,10 +706,7 @@ function syncPresetButtons(size) {
 // 4. CREAR ALARMA EN LA APP RELOJ DEL IPHONE SIN DUPLICADOS (VÍA ATAJOS)
 function triggerIphoneAlarmPrompt(dateKey, data) {
     if (!data.alarmEnabled || !data.alarmTime) return;
-
-    if (state.createdIphoneAlarms.includes(data.alarmTime)) {
-        return;
-    }
+    if (state.createdIphoneAlarms.includes(data.alarmTime)) return;
 
     const [y, m, d] = dateKey.split('-');
     const shiftName = state.shifts[data.shiftId] && state.shifts[data.shiftId].id !== 'NONE'
@@ -668,10 +816,10 @@ function renderStats() {
     document.getElementById('statExtraHours').textContent = `${summary.extraHours} h`;
     document.getElementById('calcTotalHoursInput').value = summary.normalHours;
 
-    recalculateEarnings(summary.extraHours, summary.totalPlus, summary.totalTips);
+    recalculateEarnings(summary.extraHours, summary.totalPlus, summary.totalTips, false);
 }
 
-function recalculateEarnings(extraFromMonth = null, plusFromMonth = null, tipsFromMonth = null) {
+function recalculateEarnings(extraFromMonth = null, plusFromMonth = null, tipsFromMonth = null, shouldSave = true) {
     const normalH = parseFloat(document.getElementById('calcTotalHoursInput').value) || 0;
     const rate = parseFloat(document.getElementById('hourlyRateInput').value) || 0;
     const exRate = parseFloat(document.getElementById('extraRateInput').value) || 0;
@@ -682,10 +830,12 @@ function recalculateEarnings(extraFromMonth = null, plusFromMonth = null, tipsFr
     const plus = plusFromMonth !== null ? plusFromMonth : currentSummary.totalPlus;
     const tips = tipsFromMonth !== null ? tipsFromMonth : currentSummary.totalTips;
 
-    state.hourlyRate = rate;
-    state.extraRate = exRate;
-    state.retentionPercent = retentionPct;
-    saveState();
+    if (shouldSave) {
+        state.hourlyRate = rate;
+        state.extraRate = exRate;
+        state.retentionPercent = retentionPct;
+        saveState();
+    }
 
     const usesCustomRates = normalH === currentSummary.normalHours;
     const gross = usesCustomRates
@@ -1449,7 +1599,90 @@ function bindEvents() {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // Sub-pestañas dentro de Mi Caja (Mi Caja | Ganancias)
+    // Eventos Modal Cuenta y Sincronización
+    document.getElementById('btnAuthAccount').addEventListener('click', () => {
+        document.getElementById('authErrorMsg').style.display = 'none';
+        document.getElementById('authModal').classList.add('modal--open');
+    });
+
+    document.getElementById('btnCloseAuthModal').addEventListener('click', () => {
+        document.getElementById('authModal').classList.remove('modal--open');
+    });
+
+    document.getElementById('authTabLogin').addEventListener('click', () => {
+        authMode = 'LOGIN';
+        document.getElementById('authTabLogin').classList.add('debt-tab-btn--active');
+        document.getElementById('authTabRegister').classList.remove('debt-tab-btn--active');
+        document.getElementById('btnAuthSubmit').textContent = 'Entrar en mi cuenta';
+        document.getElementById('authErrorMsg').style.display = 'none';
+    });
+
+    document.getElementById('authTabRegister').addEventListener('click', () => {
+        authMode = 'REGISTER';
+        document.getElementById('authTabRegister').classList.add('debt-tab-btn--active');
+        document.getElementById('authTabLogin').classList.remove('debt-tab-btn--active');
+        document.getElementById('btnAuthSubmit').textContent = 'Crear mi cuenta y sincronizar';
+        document.getElementById('authErrorMsg').style.display = 'none';
+    });
+
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!fbAuth) return alert('Error cargando el servicio de cuentas.');
+
+        const email = document.getElementById('authEmailInput').value.trim();
+        const password = document.getElementById('authPasswordInput').value;
+        const errBox = document.getElementById('authErrorMsg');
+        const submitBtn = document.getElementById('btnAuthSubmit');
+
+        errBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Conectando...';
+
+        try {
+            if (authMode === 'LOGIN') {
+                await fbAuth.signInWithEmailAndPassword(email, password);
+            } else {
+                await fbAuth.createUserWithEmailAndPassword(email, password);
+            }
+            document.getElementById('authPasswordInput').value = '';
+            document.getElementById('authModal').classList.remove('modal--open');
+        } catch (err) {
+            errBox.textContent = getSpanishAuthError(err.code);
+            errBox.style.display = 'block';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = authMode === 'LOGIN' ? 'Entrar en mi cuenta' : 'Crear mi cuenta y sincronizar';
+        }
+    });
+
+    document.getElementById('btnAuthResetPass').addEventListener('click', async () => {
+        const email = document.getElementById('authEmailInput').value.trim();
+        if (!email) {
+            alert('Escribe primero tu correo electrónico arriba y luego pulsa recuperar contraseña.');
+            return;
+        }
+        try {
+            await fbAuth.sendPasswordResetEmail(email);
+            alert('Te hemos enviado un correo para restablecer tu contraseña.');
+        } catch (err) {
+            alert(getSpanishAuthError(err.code));
+        }
+    });
+
+    document.getElementById('btnForceCloudPush').addEventListener('click', () => {
+        if (!currentUser) return;
+        saveState();
+        alert('Datos subidos y actualizados en la nube.');
+    });
+
+    document.getElementById('btnAuthLogout').addEventListener('click', async () => {
+        if (!fbAuth) return;
+        await fbAuth.signOut();
+        localStorage.removeItem('shifterpro_synced_uid');
+        document.getElementById('authModal').classList.remove('modal--open');
+    });
+
+    // Sub-pestañas dentro de Mi Caja
     document.getElementById('walletSubTabCaja').addEventListener('click', () => {
         state.walletSubTab = 'CAJA';
         document.getElementById('walletSubTabCaja').classList.add('debt-tab-btn--active');
@@ -1510,8 +1743,8 @@ function bindEvents() {
             try {
                 const parsed = JSON.parse(ev.target.result);
                 if (!parsed.daysData) return alert('Archivo no válido.');
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-                loadState();
+                applyParsedState(parsed);
+                saveState();
                 applyTheme();
                 renderAll();
                 alert('Copia restaurada.');
