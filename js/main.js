@@ -1,0 +1,184 @@
+import {
+    state,
+    STORAGE_KEY,
+    loadState,
+    saveState,
+    applyParsedState,
+    applyTheme,
+    registerRenderAllHook,
+    registerSwitchTabHook
+} from './state.js';
+
+import { initCloudSync, bindCloudEvents } from './cloud.js';
+import {
+    renderCalendar,
+    renderTomorrowBanner,
+    initStickerSelector,
+    initDayQuickPalette,
+    bindCalendarEvents
+} from './calendar.js';
+
+import {
+    renderStats,
+    renderWallet,
+    renderPiggyBank,
+    renderFixedExpenses,
+    renderDebts,
+    updatePinUI,
+    bindFinanceEvents
+} from './finance.js';
+
+import { renderGymView, bindGymEvents } from './gym.js';
+import { renderTasksView, bindTaskEvents } from './tasks.js';
+import {
+    initPatternDefaultDate,
+    initColorPalette,
+    renderShiftsConfigList,
+    renderPatternGenerator,
+    bindShiftEvents
+} from './shifts.js';
+
+function renderAll() {
+    renderCalendar();
+    renderTomorrowBanner();
+    renderStats();
+    renderGymView();
+    renderWallet();
+    renderPiggyBank();
+    renderFixedExpenses();
+    renderDebts();
+    renderTasksView();
+    renderShiftsConfigList();
+    renderPatternGenerator();
+}
+
+function switchTab(targetTabId) {
+    if (targetTabId === 'walletView' && state.statsPin && !state.statsUnlocked) {
+        const entered = prompt('Introduce tu PIN de 4 dígitos:');
+        if (entered !== state.statsPin) {
+            if (entered !== null) alert('PIN incorrecto.');
+            return;
+        }
+        state.statsUnlocked = true;
+        updatePinUI();
+    }
+
+    document.querySelectorAll('.bottom-nav__item').forEach(b => {
+        b.classList.toggle('bottom-nav__item--active', b.dataset.tab === targetTabId);
+    });
+    document.querySelectorAll('.view').forEach(v => {
+        v.classList.toggle('view--active', v.id === targetTabId);
+    });
+}
+
+function bindGlobalEvents() {
+    document.querySelectorAll('.bottom-nav__item').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('btnThemeToggle').addEventListener('click', () => {
+        state.theme = state.theme === 'light' ? 'dark' : 'light';
+        applyTheme();
+        saveState();
+    });
+
+    document.getElementById('btnPrevMonth').addEventListener('click', () => {
+        state.currentMonth--;
+        if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
+        renderAll();
+    });
+
+    document.getElementById('btnNextMonth').addEventListener('click', () => {
+        state.currentMonth++;
+        if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
+        renderAll();
+    });
+
+    document.getElementById('btnClearMonth').addEventListener('click', () => {
+        if (!confirm('¿Vaciar todos los días de este mes?')) return;
+        const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+        Object.keys(state.daysData).forEach(k => { if (k.startsWith(prefix)) delete state.daysData[k]; });
+        state.createdIphoneAlarms = [];
+        saveState();
+        renderAll();
+    });
+
+    document.getElementById('btnExportBackup').addEventListener('click', () => {
+        const blob = new Blob([localStorage.getItem(STORAGE_KEY) || '{}'], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `shifterpro_backup_${state.currentYear}_${state.currentMonth + 1}.json`;
+        a.click();
+    });
+
+    document.getElementById('btnImportBackup').addEventListener('click', () => {
+        document.getElementById('inputImportBackup').click();
+    });
+
+    document.getElementById('inputImportBackup').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                if (!parsed.daysData) return alert('Archivo no válido.');
+                applyParsedState(parsed);
+                saveState();
+                applyTheme();
+                updatePinUI();
+                renderAll();
+                alert('Copia restaurada.');
+            } catch {
+                alert('Error leyendo archivo.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    });
+
+    document.getElementById('btnExportICS').addEventListener('click', () => {
+        const keys = Object.keys(state.daysData);
+        if (!keys.length) return alert('No hay turnos guardados.');
+        let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//ShifterPro//ES\r\n';
+        keys.forEach(k => {
+            const d = state.daysData[k];
+            if (!d || (d.shiftId === 'NONE' && !d.customText)) return;
+            const sName = state.shifts[d.shiftId] ? state.shifts[d.shiftId].name : 'Turno';
+            const cleanDate = k.replace(/-/g, '');
+            const timeStr = (d.alarmEnabled && d.alarmTime) ? d.alarmTime : (d.startTime || '08:00');
+            const dtStart = `${cleanDate}T${timeStr.replace(':', '')}00`;
+            ics += `BEGIN:VEVENT\r\nSUMMARY:${sName} ${d.customText || ''}\r\nDTSTART:${dtStart}\r\nEND:VEVENT\r\n`;
+        });
+        ics += 'END:VCALENDAR';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+        a.download = 'shifterpro_turnos.ics';
+        a.click();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    registerRenderAllHook(renderAll);
+    registerSwitchTabHook(switchTab);
+
+    loadState();
+    applyTheme();
+    updatePinUI();
+
+    initStickerSelector();
+    initDayQuickPalette();
+    initColorPalette();
+    initPatternDefaultDate();
+
+    bindGlobalEvents();
+    bindCloudEvents();
+    bindCalendarEvents();
+    bindFinanceEvents();
+    bindGymEvents();
+    bindTaskEvents();
+    bindShiftEvents();
+
+    initCloudSync();
+    renderAll();
+});
