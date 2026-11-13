@@ -9,7 +9,7 @@ import {
     registerSwitchTabHook
 } from './state.js';
 
-import { initCloudSync, bindCloudEvents } from './cloud.js';
+import { initCloudSync, bindCloudEvents, updateProfileUI } from './cloud.js';
 import {
     renderCalendar,
     renderTomorrowBanner,
@@ -94,6 +94,13 @@ function bindGlobalEvents() {
         renderAll();
     });
 
+    document.getElementById('btnTodayMonth').addEventListener('click', () => {
+        const now = new Date();
+        state.currentYear = now.getFullYear();
+        state.currentMonth = now.getMonth();
+        renderAll();
+    });
+
     document.getElementById('btnClearMonth').addEventListener('click', () => {
         if (!confirm('¿Vaciar todos los días de este mes?')) return;
         const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
@@ -127,6 +134,7 @@ function bindGlobalEvents() {
                 saveState();
                 applyTheme();
                 updatePinUI();
+                updateProfileUI();
                 renderAll();
                 alert('Copia restaurada.');
             } catch {
@@ -165,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     applyTheme();
     updatePinUI();
+    updateProfileUI();
 
     initStickerSelector();
     initDayQuickPalette();
