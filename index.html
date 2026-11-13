@@ -7,9 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ShifterPro">
     <title>ShifterPro</title>
-    <link rel="stylesheet" href="styles.css?v=24">
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
+    <link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body>
     <div class="app">
@@ -17,13 +17,19 @@
         <header class="header">
             <div class="header__top">
                 <div class="header__brand">
-                    <div class="header__brand">
-                        <img src="icono.png" alt="ShifterPro" style="width: 34px; height: 34px; border-radius: 9px; object-fit: cover;">
-                        <h1 class="header__title">ShifterPro</h1>
-                    </div>
+                    <img src="icono.png" alt="ShifterPro" style="width: 34px; height: 34px; border-radius: 9px; object-fit: cover;">
+                    <h1 class="header__title">ShifterPro</h1>
                 </div>
 
                 <div class="header__actions">
+                    <button type="button" id="btnAuthAccount" class="icon-btn account-btn" title="Cuenta y Sincronización en la Nube">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span id="cloudStatusDot" class="cloud-dot"></span>
+                    </button>
+
                     <button type="button" id="btnThemeToggle" class="icon-btn" title="Cambiar tema">
                         <svg id="iconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -113,13 +119,11 @@
                     </div>
                 </div>
 
-                <!-- SELECTOR DOBLE: MI CAJA | GANANCIAS -->
                 <div class="debt-tabs" style="margin-bottom: 10px;">
                     <button type="button" id="walletSubTabCaja" class="debt-tab-btn debt-tab-btn--active">Mi Caja</button>
                     <button type="button" id="walletSubTabGanancias" class="debt-tab-btn">Ganancias</button>
                 </div>
 
-                <!-- BARRA DE SEGURIDAD PIN -->
                 <div class="pin-security-bar">
                     <span id="pinStatusText">Sin PIN</span>
                     <div class="pin-security-bar__btns">
@@ -217,7 +221,7 @@
                         </button>
                     </div>
 
-                    <!-- Deudas Pendientes (Debo / Me deben) -->
+                    <!-- Deudas Pendientes -->
                     <div class="sub-box">
                         <div class="sub-box__header">
                             <span class="sub-box__title">Deudas Pendientes</span>
@@ -371,7 +375,6 @@
                     </div>
                 </div>
 
-                <!-- Temporizador de descanso -->
                 <div class="sub-box timer-box">
                     <div class="sub-box__header" style="margin-bottom:4px;">
                         <span class="sub-box__title">Temporizador de Descanso</span>
@@ -386,7 +389,6 @@
                     </div>
                 </div>
 
-                <!-- Control de Peso Corporal -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Peso Corporal (kg)</span>
@@ -399,7 +401,6 @@
                     <ul id="weightHistoryList" class="worked-list" style="max-height:110px; margin-top:8px;"></ul>
                 </div>
 
-                <!-- Marcas y Cargas por Ejercicio -->
                 <div class="sub-box">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Cargas por Ejercicio</span>
@@ -429,7 +430,6 @@
                     <div id="tasksProgressBar" class="goal-progress__bar" style="width:0%;"></div>
                 </div>
 
-                <!-- Añadir nueva tarea -->
                 <div class="piggy-controls" style="margin-top:0;">
                     <input type="text" id="taskTextInput" placeholder="Nueva tarea (Ej: Pedir día libre...)">
                     <button type="button" id="btnTaskUrgentToggle" class="task-urgent-toggle" title="Marcar urgente">!</button>
@@ -451,20 +451,17 @@
                     </div>
                 </div>
 
-                <!-- Pendientes -->
                 <div class="wallet-history-header" style="margin-top:14px;">
                     <h4 class="panel-card__subtitle" style="margin:0;">Pendientes (<span id="tasksPendingCount">0</span>)</h4>
                 </div>
                 <ul id="tasksPendingList" class="tasks-list"></ul>
 
-                <!-- Completadas -->
                 <div class="wallet-history-header" style="margin-top:14px;">
                     <h4 class="panel-card__subtitle" style="margin:0;">Completadas (<span id="tasksCompletedCount">0</span>)</h4>
                     <button type="button" id="btnClearCompletedTasks" class="wallet-clear-link">Limpiar hechas</button>
                 </div>
                 <ul id="tasksCompletedList" class="tasks-list tasks-list--completed"></ul>
 
-                <!-- Bloc de notas rápido -->
                 <div class="sub-box" style="margin-top:16px;">
                     <div class="sub-box__header" style="margin-bottom:6px;">
                         <span class="sub-box__title">Bloc de Notas Rápido</span>
@@ -488,7 +485,6 @@
 
                 <div id="shiftsConfigList" class="shifts-list"></div>
 
-                <!-- Generador de Patrones Rotativos -->
                 <div class="sub-box" style="margin-top:16px;">
                     <div class="sub-box__header">
                         <span class="sub-box__title">Generador de Patrones Rotativos</span>
@@ -532,7 +528,7 @@
             </div>
         </section>
 
-        <!-- BARRA INFERIOR FLOTANTE (5 ICONOS) -->
+        <!-- BARRA INFERIOR FLOTANTE (MÓVIL) / MENÚ LATERAL (PC) -->
         <nav class="bottom-nav">
             <button type="button" class="bottom-nav__item bottom-nav__item--active" data-tab="calendarView">
                 <div class="bottom-nav__icon-box">
@@ -608,7 +604,6 @@
                     <div id="modalShiftSelector" class="shift-cards-grid"></div>
                 </div>
 
-                <!-- Color personalizado -->
                 <div class="custom-color-box">
                     <div class="custom-color-box__top">
                         <label class="checkbox-row">
@@ -623,7 +618,6 @@
                     <div id="dayQuickPalette" class="day-quick-palette"></div>
                 </div>
 
-                <!-- Gym y Creatina del día -->
                 <div class="gym-day-box">
                     <div class="gym-day-box__top">
                         <span class="section-block__label" style="margin:0;">Entrenamiento del día</span>
@@ -647,7 +641,6 @@
                     </div>
                 </div>
 
-                <!-- Contadores de Horas -->
                 <div class="dual-counters">
                     <div class="counter-card">
                         <span class="counter-card__title">Horas Turno</span>
@@ -670,7 +663,6 @@
                     </div>
                 </div>
 
-                <!-- Tarifas, Plus y Bote del día -->
                 <div class="calc-box__row" style="margin-bottom:8px;">
                     <div class="calc-box__field">
                         <label>Tarifa base (€/h)</label>
@@ -698,7 +690,6 @@
                     <strong id="modalDayEarnedValue">0.00 €</strong>
                 </div>
 
-                <!-- Alarma -->
                 <div class="alarm-card">
                     <label class="alarm-card__check">
                         <input type="checkbox" id="dayAlarmEnabled">
@@ -719,7 +710,6 @@
                     </div>
                 </div>
 
-                <!-- Texto y Stickers -->
                 <div class="note-card">
                     <div class="note-card__top">
                         <span class="section-block__label" style="margin:0;">Nota en casilla</span>
@@ -751,7 +741,6 @@
                     </div>
                 </div>
 
-                <!-- Repetir en la misma semana -->
                 <div class="repeat-week-box">
                     <span class="repeat-week-box__title">Copiar también en esta semana:</span>
                     <div class="repeat-week-days" style="margin-top:6px;">
@@ -858,6 +847,74 @@
         </div>
     </div>
 
-    <script src="app.js?v=12"></script>
+    <!-- MODAL 4: CUENTA Y SINCRONIZACIÓN EN LA NUBE -->
+    <div id="authModal" class="modal">
+        <div class="modal__dialog" style="max-width: 400px;">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">SINCRONIZACIÓN EN LA NUBE</span>
+                    <h3 class="modal__title">Cuenta ShifterPro</h3>
+                </div>
+                <button type="button" id="btnCloseAuthModal" class="modal__close">&times;</button>
+            </div>
+
+            <!-- Vista cuando NO ha iniciado sesión -->
+            <div id="authLoggedOutView">
+                <p class="panel-card__desc" style="margin-bottom:12px;">
+                    Inicia sesión con la misma cuenta en tu ordenador y en tu iPhone para tener tus turnos, finanzas, gym y tareas siempre sincronizados.
+                </p>
+
+                <div class="debt-tabs" style="margin-bottom:12px;">
+                    <button type="button" id="authTabLogin" class="debt-tab-btn debt-tab-btn--active">Iniciar sesión</button>
+                    <button type="button" id="authTabRegister" class="debt-tab-btn">Crear cuenta</button>
+                </div>
+
+                <form id="authForm">
+                    <div class="calc-box__field" style="margin-bottom:10px;">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="authEmailInput" required placeholder="tu@correo.com">
+                    </div>
+                    <div class="calc-box__field" style="margin-bottom:10px;">
+                        <label>Contraseña (mínimo 6 caracteres)</label>
+                        <input type="password" id="authPasswordInput" required minlength="6" placeholder="••••••">
+                    </div>
+
+                    <div id="authErrorMsg" class="auth-error-msg" style="display:none;"></div>
+
+                    <button type="submit" id="btnAuthSubmit" class="btn btn--primary" style="width:100%; margin-top:4px;">
+                        Entrar en mi cuenta
+                    </button>
+                </form>
+
+                <button type="button" id="btnAuthResetPass" class="auth-link-btn">
+                    ¿Olvidaste tu contraseña? Enviar correo de recuperación
+                </button>
+            </div>
+
+            <!-- Vista cuando YA ha iniciado sesión -->
+            <div id="authLoggedInView" style="display:none;">
+                <div class="auth-profile-box">
+                    <div class="auth-profile-badge">● Conectado y sincronizado</div>
+                    <strong id="authUserEmail" class="auth-user-email">usuario@correo.com</strong>
+                    <p class="panel-card__desc" style="margin-top:4px;">
+                        Todos tus cambios se guardan automáticamente en la nube en tiempo real.
+                    </p>
+                </div>
+
+                <button type="button" id="btnForceCloudPush" class="btn btn--outline" style="width:100%; margin-bottom:8px;">
+                    Subir datos de este dispositivo a la nube
+                </button>
+                <button type="button" id="btnAuthLogout" class="btn btn--danger" style="width:100%;">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SDK DE FIREBASE (AUTH + FIRESTORE) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>
