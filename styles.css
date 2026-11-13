@@ -1315,3 +1315,41 @@ select option {
 .btn--primary { background: var(--accent); color: #fff; flex: 1; }
 .btn--danger { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
 .btn--outline { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+/* RESALTE VISUAL PARA TAREAS PENDIENTES VS COMPLETADAS */
+#tasksPendingList .task-item {
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.42);
+    border-left: 4px solid #f59e0b;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+}
+
+:root[data-theme="light"] #tasksPendingList .task-item {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    border-left: 4px solid #f59e0b;
+}
+
+#tasksPendingList .task-check-circle {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.12);
+}
+
+/* Las urgentes siguen destacando en rojo por encima */
+#tasksPendingList .task-item--urgent {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.45);
+    border-left: 4px solid var(--danger);
+}
+
+#tasksPendingList .task-item--urgent .task-check-circle {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.14);
+}
+
+/* Completadas en gris suave para que no compitan visualmente */
+#tasksCompletedList .task-item {
+    background: var(--bg-subtle);
+    border-color: var(--border-color);
+    opacity: 0.6;
+}
