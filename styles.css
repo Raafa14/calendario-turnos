@@ -103,7 +103,7 @@ select option {
     color: var(--text-primary);
 }
 
-/* CONTENEDOR PRINCIPAL MÓVIL (INTACTO) */
+/* CONTENEDOR PRINCIPAL MÓVIL */
 .app {
     width: 100%;
     max-width: 480px;
@@ -116,7 +116,7 @@ select option {
     flex-direction: column;
 }
 
-/* CABECERA E ICONOS */
+/* CABECERA LIMPIA */
 .header {
     background: var(--header-bg);
     color: #ffffff;
@@ -138,17 +138,6 @@ select option {
     gap: 9px;
 }
 
-.brand-squircle {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: #ffffff;
-    color: #111827;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .header__title {
     font-size: 1.15rem;
     font-weight: 800;
@@ -157,7 +146,8 @@ select option {
 
 .header__actions {
     display: flex;
-    gap: 5px;
+    align-items: center;
+    gap: 8px;
 }
 
 .icon-btn {
@@ -165,8 +155,8 @@ select option {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.16);
     color: #ffffff;
-    width: 33px;
-    height: 33px;
+    width: 35px;
+    height: 35px;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -181,16 +171,55 @@ select option {
     transform: scale(0.95);
 }
 
-/* Indicador de estado nube en botón de cuenta */
+/* Botón Registrarse / Perfil en la derecha */
+.header-auth-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 35px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.header-auth-btn:hover {
+    background: rgba(16, 185, 129, 0.28);
+}
+
+.header-auth-btn--logged {
+    padding-left: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.header-auth-btn__avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--accent);
+}
+
+.header-auth-btn__label {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .cloud-dot {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #64748b;
-    border: 2px solid var(--header-bg);
+    flex-shrink: 0;
     transition: background 0.2s ease, transform 0.2s ease;
 }
 
@@ -205,74 +234,8 @@ select option {
 }
 
 .cloud-dot--syncing {
-    transform: scale(1.4);
+    transform: scale(1.45);
     background: #34d399;
-}
-
-/* Estilos Modal Cuenta y Verificación */
-.auth-error-msg {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: var(--danger);
-    font-size: 0.76rem;
-    font-weight: 700;
-    padding: 8px 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-.auth-link-btn {
-    width: 100%;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 0.74rem;
-    font-weight: 700;
-    margin-top: 12px;
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.auth-profile-box,
-.auth-verify-box {
-    background: var(--bg-subtle);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 14px;
-    text-align: center;
-}
-
-.auth-verify-box {
-    border-color: rgba(245, 158, 11, 0.45);
-}
-
-.auth-verify-badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.16);
-    padding: 3px 10px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-}
-
-.auth-profile-badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--accent);
-    background: rgba(16, 185, 129, 0.14);
-    padding: 3px 10px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-}
-
-.auth-user-email {
-    display: block;
-    font-size: 0.95rem;
-    word-break: break-all;
 }
 
 .tomorrow-banner {
@@ -284,11 +247,175 @@ select option {
     color: #e2e8f0;
 }
 
+/* PANTALLA COMPLETA EXCLUSIVA DE REGISTRO / PERFIL */
+.auth-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.auth-fullscreen__topbar {
+    background: var(--header-bg);
+    color: #ffffff;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-fullscreen__body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px 40px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 22px;
+    padding: 24px 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.auth-card--profile {
+    max-width: 500px;
+}
+
+.auth-card__title {
+    font-size: 1.35rem;
+    font-weight: 900;
+    text-align: center;
+    margin: 4px 0 6px;
+}
+
+.auth-card__desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.45;
+}
+
+.avatar-picker-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.avatar-circle-box {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+    border: 2px dashed var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+
+.avatar-circle-box--lg {
+    width: 92px;
+    height: 92px;
+    border-style: solid;
+    border-color: var(--accent);
+    font-size: 1.6rem;
+    color: var(--text-primary);
+}
+
+.avatar-circle-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.auth-switch-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.auth-switch-link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-error-msg {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: var(--danger);
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.auth-link-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-verify-badge {
+    display: table;
+    margin: 0 auto 10px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.16);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.auth-profile-badge {
+    display: table;
+    margin: 0 auto 10px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(16, 185, 129, 0.14);
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
 /* BARRA DE MES */
 .month-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     padding: 10px 16px;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
@@ -298,6 +425,8 @@ select option {
     font-size: 0.95rem;
     font-weight: 800;
     letter-spacing: 0.5px;
+    flex: 1;
+    text-align: center;
 }
 
 .month-bar__arrow {
@@ -313,6 +442,12 @@ select option {
     cursor: pointer;
 }
 
+.month-today-btn {
+    height: 34px;
+    padding: 0 11px !important;
+    border-radius: 10px !important;
+}
+
 /* VISTAS */
 .view {
     display: none;
@@ -324,7 +459,52 @@ select option {
     display: block;
 }
 
-/* CALENDARIO */
+/* RESUMEN Y FILTROS DEL CALENDARIO */
+.cal-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.cal-summary-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 6px;
+    text-align: center;
+}
+
+.cal-summary-pill--vac {
+    border-color: rgba(139, 92, 246, 0.45);
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.cal-summary-pill__lbl {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.cal-summary-pill__val {
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.cal-filters-bar {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    margin-bottom: 10px;
+}
+
+.calendar-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
 .calendar__weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -352,6 +532,11 @@ select option {
     justify-content: space-between;
     cursor: pointer;
     overflow: hidden;
+    transition: opacity 0.15s ease;
+}
+
+.day-cell--dimmed {
+    opacity: 0.24;
 }
 
 .day-cell--empty {
@@ -468,9 +653,101 @@ select option {
 
 .helper-hint {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--text-secondary);
-    margin-top: 12px;
+    margin-top: 10px;
+}
+
+/* AGENDA PRÓXIMOS 7 DÍAS */
+.upcoming-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 13px;
+}
+
+.upcoming-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.upcoming-card__title {
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.upcoming-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.upcoming-row:hover {
+    border-color: var(--accent);
+}
+
+.upcoming-row__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.upcoming-row__badge {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.76rem;
+    font-weight: 900;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.upcoming-row__info {
+    min-width: 0;
+}
+
+.upcoming-row__day {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.upcoming-row__sub {
+    display: block;
+    font-size: 0.69rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.upcoming-row__right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
 }
 
 /* BARRA INFERIOR FLOTANTE TRANSLÚCIDA ESTILO IPHONE (LIQUID GLASS - 5 ICONOS) */
@@ -579,7 +856,13 @@ select option {
 .panel-card__desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
 .panel-card__subtitle { margin: 14px 0 8px; font-size: 0.82rem; color: var(--text-secondary); }
 
-/* TAREAS Y BLOC RÁPIDO */
+/* TAREAS Y NOTAS PRO */
+.tasks-pro-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
 .task-urgent-toggle {
     width: 40px;
     height: 41px;
@@ -615,7 +898,7 @@ select option {
 }
 
 .task-pill-btn {
-    padding: 5px 9px;
+    padding: 5px 10px;
     border-radius: 999px;
     border: 1px solid var(--border-color);
     background: var(--bg-subtle);
@@ -770,6 +1053,127 @@ select option {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+}
+
+/* BLOC DE NOTAS PRO */
+.note-composer {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.note-composer__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.note-color-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.note-color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+}
+
+.note-color-dot--active {
+    transform: scale(1.2);
+    border-color: var(--mono-invert-bg);
+}
+
+.pro-notes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.pro-note-card {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #10b981;
+    border-radius: 12px;
+    padding: 11px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pro-note-card--emerald { border-left-color: #10b981; }
+.pro-note-card--amber   { border-left-color: #f59e0b; }
+.pro-note-card--blue    { border-left-color: #3b82f6; }
+.pro-note-card--purple  { border-left-color: #8b5cf6; }
+.pro-note-card--rose    { border-left-color: #f43f5e; }
+
+.pro-note-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pro-note-card__title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.pro-note-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.note-mini-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 3px 6px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.note-mini-btn--pinned {
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.14);
+}
+
+.pro-note-card__body {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    line-height: 1.42;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.pro-note-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.tools-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
 .quick-note-area {
@@ -1554,16 +1958,30 @@ select option {
 
     .header__actions {
         order: 3;
-        gap: 8px;
+        gap: 10px;
     }
 
     .icon-btn {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
     }
 
     .icon-btn:hover {
         background: rgba(255, 255, 255, 0.2);
+    }
+
+    .header-auth-btn {
+        height: 38px;
+        padding: 0 14px;
+        font-size: 0.82rem;
+    }
+
+    .header-auth-btn--logged {
+        padding-left: 6px;
+    }
+
+    .header-auth-btn__label {
+        max-width: 140px;
     }
 
     .bottom-nav {
@@ -1657,13 +2075,13 @@ select option {
         background: var(--bg-app);
         border-bottom: 1px solid var(--border-color);
         justify-content: flex-start;
-        gap: 16px;
+        gap: 14px;
     }
 
     .month-bar__title {
         font-size: 1.15rem;
         min-width: 190px;
-        text-align: center;
+        flex: 0 0 auto;
     }
 
     .month-bar__arrow:hover {
@@ -1671,16 +2089,34 @@ select option {
     }
 
     .view {
-        padding: 24px 32px;
-        max-width: 1380px;
+        padding: 22px 32px;
+        max-width: 1440px;
         width: 100%;
         margin: 0 auto;
     }
 
     .panel-card {
-        padding: 22px;
+        padding: 20px;
         border-radius: 18px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Calendario escritorio + Agenda lateral */
+    .cal-summary-strip {
+        max-width: 720px;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .cal-summary-pill__val {
+        font-size: 0.95rem;
+    }
+
+    .calendar-layout {
+        display: grid;
+        grid-template-columns: 1fr 310px;
+        gap: 20px;
+        align-items: start;
     }
 
     .calendar__weekdays {
@@ -1694,10 +2130,10 @@ select option {
     }
 
     .day-cell {
-        height: 118px;
+        height: 112px;
         padding: 8px 10px;
         border-radius: 12px;
-        transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+        transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, opacity 0.15s ease;
     }
 
     .day-cell:not(.day-cell--empty):hover {
@@ -1720,7 +2156,7 @@ select option {
     }
 
     .day-cell__letter {
-        font-size: 1.75rem;
+        font-size: 1.7rem;
     }
 
     .extra-pill,
@@ -1735,28 +2171,25 @@ select option {
         font-size: 0.68rem;
     }
 
+    /* Vista Finanzas */
     #walletView .panel-card {
         max-width: 960px;
         margin: 0 auto;
     }
 
-    #tasksView .panel-card {
-        max-width: 1040px;
-        margin: 0 auto;
-    }
-
-    #tasksPendingList,
-    #tasksCompletedList {
+    /* Vista Tareas y Notas Pro a 2 columnas */
+    .tasks-pro-grid {
         display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .pro-notes-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
     }
 
-    #tasksPendingList .worked-list__item,
-    #tasksCompletedList .worked-list__item {
-        grid-column: 1 / -1;
-    }
-
+    /* Vista Gym a 2 columnas */
     #gymView .panel-card {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1782,6 +2215,7 @@ select option {
         gap: 10px;
     }
 
+    /* Vista Turnos a 2 columnas */
     #shiftsView .panel-card {
         display: grid;
         grid-template-columns: 1fr 1fr;
