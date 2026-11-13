@@ -1,6 +1,11 @@
-import { state, saveState, formatDateKey, triggerRenderAll, triggerSwitchTab } from './state.js';
+import { state, saveState, formatDateKey, formatNowTime, triggerRenderAll, triggerSwitchTab } from './state.js';
 
 export function renderTasksView() {
+    renderTasksLists();
+    renderProNotes();
+}
+
+function renderTasksLists() {
     const pendingList = document.getElementById('tasksPendingList');
     const completedList = document.getElementById('tasksCompletedList');
     if (!pendingList) return;
@@ -56,7 +61,7 @@ export function renderTasksView() {
         li.querySelector('.task-check-circle').addEventListener('click', () => {
             task.done = !task.done;
             saveState();
-            renderTasksView();
+            renderTasksLists();
         });
 
         li.querySelector('.task-item__text').addEventListener('click', () => {
@@ -64,7 +69,7 @@ export function renderTasksView() {
             if (edited !== null && edited.trim() !== '') {
                 task.text = edited.trim();
                 saveState();
-                renderTasksView();
+                renderTasksLists();
             }
         });
 
@@ -79,7 +84,7 @@ export function renderTasksView() {
         li.querySelector('.movement-delete-btn').addEventListener('click', () => {
             state.tasks = state.tasks.filter(t => t.id !== task.id);
             saveState();
-            renderTasksView();
+            renderTasksLists();
         });
 
         return li;
@@ -94,6 +99,79 @@ export function renderTasksView() {
     if (completed.length === 0) {
         completedList.innerHTML = '<li class="worked-list__item">Aún no hay tareas completadas.</li>';
     }
+}
+
+function renderProNotes() {
+    const grid = document.getElementById('proNotesGrid');
+    const countBadge = document.getElementById('notesCountBadge');
+    if (!grid) return;
+
+    countBadge.textContent = `${state.notes.length} ${state.notes.length === 1 ? 'nota' : 'notas'}`;
+    grid.innerHTML = '';
+
+    const query = (state.notesSearch || '').toLowerCase();
+    const sorted = [...state.notes]
+        .filter(n => !query || (n.title || '').toLowerCase().includes(query) || (n.content || '').toLowerCase().includes(query) || (n.tag || '').toLowerCase().includes(query))
+        .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+    if (sorted.length === 0) {
+        grid.innerHTML = '<div class="worked-list__item" style="grid-column: 1 / -1;">No hay notas guardadas. Crea arriba tu primera tarjeta de nota.</div>';
+        return;
+    }
+
+    sorted.forEach(note => {
+        const card = document.createElement('article');
+        card.className = `pro-note-card pro-note-card--${note.color || 'emerald'}`;
+
+        card.innerHTML = `
+            <div class="pro-note-card__top">
+                <strong class="pro-note-card__title">${note.title || 'Nota sin título'}</strong>
+                <div class="pro-note-card__actions">
+                    <button type="button" class="note-mini-btn ${note.pinned ? 'note-mini-btn--pinned' : ''}" data-act="pin" title="Fijar arriba">📌</button>
+                    <button type="button" class="note-mini-btn" data-act="copy" title="Copiar texto">Copiar</button>
+                    <button type="button" class="note-mini-btn" data-act="edit" title="Editar">Editar</button>
+                    <button type="button" class="note-mini-btn" data-act="del" title="Borrar">&times;</button>
+                </div>
+            </div>
+            <p class="pro-note-card__body">${note.content}</p>
+            <div class="pro-note-card__footer">
+                <span>${note.tag || 'General'}</span>
+                <span>${note.updatedAt || ''}</span>
+            </div>
+        `;
+
+        card.querySelector('[data-act="pin"]').addEventListener('click', () => {
+            note.pinned = !note.pinned;
+            saveState();
+            renderProNotes();
+        });
+
+        card.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
+            navigator.clipboard?.writeText(note.content);
+            e.target.textContent = 'Copiado ✓';
+            setTimeout(() => { e.target.textContent = 'Copiar'; }, 1200);
+        });
+
+        card.querySelector('[data-act="edit"]').addEventListener('click', () => {
+            const newTitle = prompt('Título de la nota:', note.title);
+            if (newTitle === null) return;
+            const newBody = prompt('Contenido de la nota:', note.content);
+            if (newBody === null) return;
+            note.title = newTitle.trim() || 'Nota sin título';
+            note.content = newBody.trim();
+            note.updatedAt = formatNowTime();
+            saveState();
+            renderProNotes();
+        });
+
+        card.querySelector('[data-act="del"]').addEventListener('click', () => {
+            state.notes = state.notes.filter(n => n.id !== note.id);
+            saveState();
+            renderProNotes();
+        });
+
+        grid.appendChild(card);
+    });
 }
 
 export function bindTaskEvents() {
@@ -121,7 +199,7 @@ export function bindTaskEvents() {
         state.taskUrgentDraft = false;
         urgentBtn.classList.remove('task-urgent-toggle--active');
         saveState();
-        renderTasksView();
+        renderTasksLists();
     }
 
     document.getElementById('btnAddTask').addEventListener('click', handleAddTask);
@@ -132,12 +210,12 @@ export function bindTaskEvents() {
         }
     });
 
-    document.querySelectorAll('.task-pill-btn').forEach(btn => {
+    document.querySelectorAll('.task-pill-btn[data-filter]').forEach(btn => {
         btn.addEventListener('click', () => {
             state.taskFilter = btn.dataset.filter;
-            document.querySelectorAll('.task-pill-btn').forEach(b => b.classList.remove('task-pill-btn--active'));
+            document.querySelectorAll('.task-pill-btn[data-filter]').forEach(b => b.classList.remove('task-pill-btn--active'));
             btn.classList.add('task-pill-btn--active');
-            renderTasksView();
+            renderTasksLists();
         });
     });
 
@@ -146,7 +224,7 @@ export function bindTaskEvents() {
         if (!hasDone) return;
         state.tasks = state.tasks.filter(t => !t.done);
         saveState();
-        renderTasksView();
+        renderTasksLists();
     });
 
     document.getElementById('btnCloseTaskCalModal').addEventListener('click', () => {
@@ -197,10 +275,45 @@ export function bindTaskEvents() {
         triggerSwitchTab('calendarView');
     });
 
-    document.getElementById('quickNoteTextarea').addEventListener('input', (e) => {
-        state.quickNote = e.target.value;
+    // Eventos Bloc de Notas Pro
+    document.querySelectorAll('.note-color-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            state.selectedNoteColor = dot.dataset.noteColor;
+            document.querySelectorAll('.note-color-dot').forEach(d => d.classList.remove('note-color-dot--active'));
+            dot.classList.add('note-color-dot--active');
+        });
+    });
+
+    document.getElementById('btnAddProNote').addEventListener('click', () => {
+        const titleEl = document.getElementById('noteTitleInput');
+        const bodyEl = document.getElementById('noteBodyInput');
+        const tag = document.getElementById('noteTagSelect').value;
+
+        const title = titleEl.value.trim();
+        const content = bodyEl.value.trim();
+        if (!content && !title) return alert('Escribe un título o contenido para la nota.');
+
+        const now = new Date();
+        const stamp = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')} · ${formatNowTime()}`;
+
+        state.notes.unshift({
+            id: 'N_' + Date.now(),
+            title: title || 'Nota rápida',
+            content: content || title,
+            tag,
+            color: state.selectedNoteColor || 'emerald',
+            pinned: false,
+            updatedAt: stamp
+        });
+
+        titleEl.value = '';
+        bodyEl.value = '';
         saveState();
-        const badge = document.getElementById('quickNoteSavedBadge');
-        badge.textContent = 'Guardado ✓';
+        renderProNotes();
+    });
+
+    document.getElementById('notesSearchInput').addEventListener('input', (e) => {
+        state.notesSearch = e.target.value;
+        renderProNotes();
     });
 }
