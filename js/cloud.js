@@ -248,13 +248,36 @@ function getSpanishAuthError(code) {
     }
 }
 
+const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 días (1 semana)
+const SESSION_TIME_KEY = 'shifterpro_login_timestamp';
+
+export function isSessionValid() {
+    const loginTime = parseInt(localStorage.getItem(SESSION_TIME_KEY) || '0', 10);
+    if (!loginTime) return false;
+    return (Date.now() - loginTime) < SESSION_DURATION_MS;
+}
+
+export function updateSessionTimestamp() {
+    localStorage.setItem(SESSION_TIME_KEY, String(Date.now()));
+}
+
+export function clearSessionTimestamp() {
+    localStorage.removeItem(SESSION_TIME_KEY);
+}
+
 export function initCloudSync() {
     registerCloudSaveHook(pushToCloud);
     updateProfileUI();
     if (!fbAuth || !fbDb) return;
 
-    // Obligar a iniciar sesión antes de acceder a la app si no hay sesión activa
-    if (!fbAuth.currentUser) {
+    try {
+        fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch (e) {
+        console.warn('Persistencia de autenticación:', e);
+    }
+
+    // Si no hay sesión válida registrada en la última semana, pedir login obligatorio
+    if (!isSessionValid()) {
         openAuthScreen('LOGIN');
     }
 
@@ -268,10 +291,28 @@ export function initCloudSync() {
 
         if (!user) {
             currentUser = null;
+            clearSessionTimestamp();
             dot.classList.remove('cloud-dot--online', 'cloud-dot--pending');
             updateProfileUI();
             openAuthScreen('LOGIN');
             return;
+        }
+
+        // Comprobar si la sesión de 1 semana ha caducado
+        if (!isSessionValid() && localStorage.getItem(SESSION_TIME_KEY)) {
+            console.log('Sesión caducada tras 1 semana. Solicitando nuevo inicio de sesión.');
+            await fbAuth.signOut();
+            currentUser = null;
+            clearSessionTimestamp();
+            dot.classList.remove('cloud-dot--online', 'cloud-dot--pending');
+            updateProfileUI();
+            openAuthScreen('LOGIN');
+            return;
+        }
+
+        currentUser = user;
+        if (!localStorage.getItem(SESSION_TIME_KEY)) {
+            updateSessionTimestamp();
         }
 
         try {
@@ -291,7 +332,8 @@ export function initCloudSync() {
             return;
         }
 
-        closeAuthScreen();
+        // Sesión válida y vigente durante 1 semana: acceder a la aplicación directamente
+        document.getElementById('authFullScreen').style.display = 'none';
         await handleVerifiedUserSession(user);
     });
 }
@@ -409,7 +451,10 @@ export function bindCloudEvents() {
             await cred.user.reload();
             if (cred.user.emailVerified) {
                 document.getElementById('loginPasswordInput').value = '';
-                closeAuthScreen();
+                currentUser = cred.user;
+                updateSessionTimestamp();
+                document.getElementById('authFullScreen').style.display = 'none';
+                await handleVerifiedUserSession(cred.user);
             }
         } catch (err) {
             errBox.textContent = getSpanishAuthError(err.code);
@@ -430,7 +475,9 @@ export function bindCloudEvents() {
         try {
             await user.reload();
             if (user.emailVerified) {
-                closeAuthScreen();
+                currentUser = user;
+                updateSessionTimestamp();
+                document.getElementById('authFullScreen').style.display = 'none';
                 await handleVerifiedUserSession(user);
             } else {
                 msgBox.style.color = 'var(--danger)';
@@ -532,6 +579,7 @@ export function bindCloudEvents() {
         if (!fbAuth) return;
         await fbAuth.signOut();
         localStorage.removeItem('shifterpro_synced_uid');
+        clearSessionTimestamp();
         currentUser = null;
         updateProfileUI();
         openAuthScreen('LOGIN');
