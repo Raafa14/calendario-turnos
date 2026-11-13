@@ -8,6 +8,8 @@ import {
     triggerRenderAll
 } from './state.js';
 
+import { getDayCycleStatus } from './cycle.js';
+
 export function renderCalendar() {
     const months = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
     document.getElementById('currentMonthLabel').textContent = `${months[state.currentMonth]} ${state.currentYear}`;
@@ -198,6 +200,25 @@ export function paintCell(cellEl, dayNumber, info) {
         topLeft.appendChild(alarmBadge);
     }
 
+    if (state.cycle && state.cycle.enabled && state.cycle.showOnCalendar) {
+        const dKey = formatDateKey(state.currentYear, state.currentMonth, dayNumber);
+        const cycleStatus = getDayCycleStatus(dKey);
+        if (cycleStatus) {
+            const cycleBadge = document.createElement('span');
+            cycleBadge.className = 'day-cell__cycle-dot';
+            if (cycleStatus.isRecordedPeriod) {
+                cycleBadge.textContent = state.cycle.discreetMode ? '🌸' : '🩸';
+                cycleBadge.title = 'Periodo registrado';
+                topLeft.appendChild(cycleBadge);
+            } else if (cycleStatus.isPredictedPeriod) {
+                cycleBadge.className += ' day-cell__cycle-dot--pred';
+                cycleBadge.textContent = state.cycle.discreetMode ? '·' : '🩸';
+                cycleBadge.title = 'Periodo previsto';
+                topLeft.appendChild(cycleBadge);
+            }
+        }
+    }
+
     top.appendChild(topLeft);
 
     const dayNumSpan = document.createElement('span');
@@ -222,7 +243,14 @@ export function paintCell(cellEl, dayNumber, info) {
     } else if (hasShiftLetter) {
         const letterSpan = document.createElement('span');
         letterSpan.className = 'day-cell__letter';
-        letterSpan.textContent = shift.short;
+        const txt = (shift.short || '').trim();
+        if (txt.length >= 3) {
+            letterSpan.style.fontSize = '0.90rem';
+            letterSpan.style.letterSpacing = '-0.4px';
+        } else if (txt.length === 2) {
+            letterSpan.style.fontSize = '1.08rem';
+        }
+        letterSpan.textContent = txt;
         middle.appendChild(letterSpan);
     }
     cellEl.appendChild(middle);
@@ -454,6 +482,10 @@ export function openDayModal(dateKey) {
     document.getElementById('fontSizeBadge').textContent = `${fSize} px`;
     document.getElementById('dayPrioritizeText').checked = saved.prioritizeText ?? true;
 
+    const isPeriodDay = Boolean(state.cycle?.logs?.[dateKey]?.isPeriod);
+    const periodCheck = document.getElementById('dayPeriodRecorded');
+    if (periodCheck) periodCheck.checked = isPeriodDay;
+
     syncPresetButtons(fSize);
     renderShiftCardsInModal();
     highlightSelectedSticker();
@@ -608,6 +640,22 @@ export function bindCalendarEvents() {
         } else {
             state.daysData[savedDateKey] = data;
             applyRepeatToSelectedWeekDays(savedDateKey, data);
+        }
+
+        const periodCheck = document.getElementById('dayPeriodRecorded');
+        if (periodCheck) {
+            if (!state.cycle.logs) state.cycle.logs = {};
+            if (periodCheck.checked) {
+                state.cycle.logs[savedDateKey] = {
+                    ...(state.cycle.logs[savedDateKey] || {}),
+                    isPeriod: true,
+                    flow: (state.cycle.logs[savedDateKey]?.flow && state.cycle.logs[savedDateKey]?.flow !== 'none') ? state.cycle.logs[savedDateKey].flow : 'medium'
+                };
+                if (!state.cycle.lastPeriodDate) state.cycle.lastPeriodDate = savedDateKey;
+            } else if (state.cycle.logs[savedDateKey]) {
+                state.cycle.logs[savedDateKey].isPeriod = false;
+                state.cycle.logs[savedDateKey].flow = 'none';
+            }
         }
 
         saveState();

@@ -28,6 +28,17 @@ export const COLOR_PALETTE = [
 
 export const STICKERS = ['', '🎂', '🏥', '🎉', '⚠️', '🏋️', '✈️', '🍻', '❤️', '⭐'];
 
+export const DEFAULT_CYCLE = {
+    enabled: true,
+    cycleLength: 28,
+    periodLength: 5,
+    lastPeriodDate: '',
+    showOnCalendar: true,
+    discreetMode: false,
+    selectedDate: '',
+    logs: {}
+};
+
 export const state = {
     theme: 'dark',
     currentYear: new Date().getFullYear(),
@@ -68,6 +79,7 @@ export const state = {
     selectedNoteColor: 'emerald',
     notesSearch: '',
     quickNote: '',
+    cycle: JSON.parse(JSON.stringify(DEFAULT_CYCLE)),
     sendingTaskId: null,
     patternSequence: [],
     editingDateKey: null,
@@ -125,6 +137,7 @@ export function getSerializableState() {
         tasks: state.tasks,
         notes: state.notes,
         quickNote: state.quickNote,
+        cycle: state.cycle,
         patternSequence: state.patternSequence
     };
 }
@@ -164,6 +177,7 @@ export function applyParsedState(p) {
     state.tasks = p.tasks || [];
     state.notes = Array.isArray(p.notes) ? p.notes : [];
     state.quickNote = p.quickNote || '';
+    state.cycle = Object.assign(JSON.parse(JSON.stringify(DEFAULT_CYCLE)), p.cycle || {});
 
     // Migración automática si tenía texto en el bloc antiguo y aún no tenía notas Pro
     if (state.notes.length === 0 && state.quickNote.trim() !== '') {

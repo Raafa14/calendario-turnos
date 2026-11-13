@@ -584,6 +584,16 @@ select option {
     font-weight: 700;
 }
 
+.day-cell__cycle-dot {
+    font-size: 0.68rem;
+    line-height: 1;
+}
+
+.day-cell__cycle-dot--pred {
+    opacity: 0.55;
+    filter: saturate(60%);
+}
+
 .day-cell__middle {
     flex: 1;
     display: flex;
@@ -1856,13 +1866,15 @@ select option {
 
 .shift-row-item__left { display: flex; align-items: center; gap: 10px; }
 .shift-color-swatch {
-    width: 36px;
+    width: 44px;
     height: 36px;
     border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
+    font-size: 0.85rem;
+    padding: 0 2px;
     flex-shrink: 0;
 }
 
@@ -1875,6 +1887,330 @@ select option {
 .btn--primary { background: var(--accent); color: #fff; flex: 1; }
 .btn--danger { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
 .btn--outline { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+/* MEJORAS DE PERSONALIZACIÓN Y VISTA PREVIA DE TURNOS */
+.shift-live-preview-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.shift-live-preview-box__swatch {
+    width: 48px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.shift-live-preview-box__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.shift-live-preview-box__info strong {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.shift-live-preview-box__info span {
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.shift-templates-box {
+    margin-bottom: 12px;
+}
+
+.shift-templates-box__lbl {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.shift-templates-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.shift-template-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.shift-template-pill:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.shift-template-pill__badge {
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 900;
+}
+
+/* VISTA CICLO / FLO */
+.cycle-dial-card {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(236, 72, 153, 0.04));
+    border: 1.5px solid rgba(244, 63, 94, 0.25);
+    border-radius: 18px;
+    padding: 16px 14px;
+    text-align: center;
+}
+
+.cycle-dial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.cycle-phase-tag {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cycle-fertility-badge {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.cycle-circle-dial {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    border: 5px solid #f43f5e;
+    margin: 16px auto 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+
+.cycle-circle-dial__day {
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.cycle-circle-dial__lbl {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.cycle-countdown-box {
+    margin-top: 8px;
+}
+
+.cycle-phase-desc {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    max-width: 420px;
+    margin: 8px auto 0;
+}
+
+/* Alertas de Coincidencia de Turnos */
+.cycle-clash-card--alert {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1.5px solid rgba(245, 158, 11, 0.35);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.cycle-clash-card--ok {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.cycle-clash-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.cycle-clashes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.cycle-clash-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    background: var(--bg-card);
+    border-radius: 9px;
+    border: 1px solid var(--border-color);
+    font-size: 0.78rem;
+}
+
+.cycle-clash-date {
+    font-weight: 800;
+    min-width: 68px;
+}
+
+.cycle-clash-info {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.cycle-clash-tip {
+    font-size: 0.72rem;
+    color: #d97706;
+    margin-top: 8px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+/* Registro de Síntomas */
+.cycle-sym-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cycle-sym-current-date {
+    font-size: 0.85rem;
+}
+
+.cycle-log-lbl {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.flow-pill-row,
+.symptom-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cycle-pill-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.14s ease;
+}
+
+.cycle-pill-btn--active {
+    background: #f43f5e;
+    color: #ffffff;
+    border-color: #f43f5e;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
+}
+
+.symptom-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.14s ease;
+}
+
+.symptom-chip--active {
+    background: rgba(244, 63, 94, 0.16);
+    border-color: #f43f5e;
+    color: #f43f5e;
+    font-weight: 800;
+}
+
+/* Previsión de Ciclos */
+.cycle-forecast-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.cycle-forecast-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 11px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cycle-forecast-card__title {
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: #ec4899;
+    text-transform: uppercase;
+}
+
+.cycle-forecast-card__dates {
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.cycle-forecast-card__sub {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
 
 /* =========================================================
    MODO TABLET (768px - 1023px)
@@ -2271,6 +2607,26 @@ select option {
     }
 
     #shiftsView .sub-box {
+        margin-top: 0;
+    }
+
+    /* Vista Ciclo a 2 columnas */
+    #cycleView .panel-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+        max-width: 1120px;
+        margin: 0 auto;
+    }
+
+    #cycleView .panel-card__header,
+    #cycleDialCard,
+    #cycleShiftClashCard {
+        grid-column: 1 / -1;
+    }
+
+    #cycleView .sub-box {
         margin-top: 0;
     }
 

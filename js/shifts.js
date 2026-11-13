@@ -8,25 +8,101 @@ import {
     triggerSwitchTab
 } from './state.js';
 
+// Plantillas predefinidas para crear turnos rápidamente con 1 toque
+export const SHIFT_TEMPLATES = [
+    { name: 'Mañana 7:00', short: '7AM', color: '#fef08a', hours: 8, start: '07:00', alarm: '05:30' },
+    { name: 'Tarde 15:00', short: '15T', color: '#fbcfe8', hours: 8, start: '15:00', alarm: '13:30' },
+    { name: 'Noche 23:00', short: '23N', color: '#a5f3fc', hours: 8, start: '23:00', alarm: '21:30' },
+    { name: 'Partida',     short: 'PAR', color: '#fed7aa', hours: 8, start: '09:00', alarm: '07:30' },
+    { name: 'Guardia 12h', short: 'G12', color: '#fca5a5', hours: 12, start: '08:00', alarm: '06:30' },
+    { name: 'Libre',       short: 'LIB', color: '#bbf7d0', hours: 0, start: '00:00', alarm: '09:00' }
+];
+
 export function initPatternDefaultDate() {
     const now = new Date();
-    document.getElementById('patternStartDate').value = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    const el = document.getElementById('patternStartDate');
+    if (el) el.value = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
 export function initColorPalette() {
     const grid = document.getElementById('colorPaletteGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     COLOR_PALETTE.forEach(hex => {
         const dot = document.createElement('div');
         dot.className = 'palette-dot';
         dot.style.backgroundColor = hex;
-        dot.addEventListener('click', () => { document.getElementById('cfgShiftColor').value = hex; });
+        dot.title = hex;
+        dot.addEventListener('click', () => {
+            document.getElementById('cfgShiftColor').value = hex;
+            updateShiftModalPreview();
+        });
         grid.appendChild(dot);
     });
 }
 
+export function renderShiftTemplates() {
+    const container = document.getElementById('shiftTemplatesRow');
+    if (!container) return;
+    container.innerHTML = '';
+
+    SHIFT_TEMPLATES.forEach(tpl => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'shift-template-pill';
+        btn.innerHTML = `
+            <span class="shift-template-pill__badge" style="background:${tpl.color}; color:${getContrastText(tpl.color)};">
+                ${tpl.short}
+            </span>
+            <span>${tpl.name}</span>
+        `;
+        btn.addEventListener('click', () => {
+            document.getElementById('cfgShiftName').value = tpl.name;
+            document.getElementById('cfgShiftShort').value = tpl.short;
+            document.getElementById('cfgShiftColor').value = tpl.color;
+            document.getElementById('cfgShiftHours').value = tpl.hours;
+            document.getElementById('cfgShiftStart').value = tpl.start;
+            document.getElementById('cfgShiftAlarm').value = tpl.alarm;
+            updateShiftModalPreview();
+        });
+        container.appendChild(btn);
+    });
+}
+
+export function updateShiftModalPreview() {
+    const swatch = document.getElementById('shiftPreviewSwatch');
+    const nameEl = document.getElementById('shiftPreviewName');
+    const detEl = document.getElementById('shiftPreviewDetails');
+    if (!swatch || !nameEl || !detEl) return;
+
+    let short = (document.getElementById('cfgShiftShort').value || '7AM').trim().toUpperCase();
+    if (short.length > 3) short = short.substring(0, 3);
+
+    const name = document.getElementById('cfgShiftName').value.trim() || 'Nombre del turno';
+    const color = document.getElementById('cfgShiftColor').value || '#fde047';
+    const hours = parseFloat(document.getElementById('cfgShiftHours').value) || 0;
+    const start = document.getElementById('cfgShiftStart').value || '08:00';
+    const alarm = document.getElementById('cfgShiftAlarm').value || '06:00';
+    const txtColor = getContrastText(color);
+
+    swatch.style.backgroundColor = color;
+    swatch.style.color = txtColor;
+    swatch.textContent = short;
+    if (short.length >= 3) {
+        swatch.style.fontSize = '0.86rem';
+        swatch.style.letterSpacing = '-0.5px';
+    } else {
+        swatch.style.fontSize = '1.1rem';
+        swatch.style.letterSpacing = 'normal';
+    }
+
+    nameEl.textContent = name;
+    detEl.textContent = `${hours}h · Entrada ${start} · Alarma ${alarm}`;
+}
+
 export function renderShiftsConfigList() {
     const container = document.getElementById('shiftsConfigList');
+    if (!container) return;
     container.innerHTML = '';
 
     Object.values(state.shifts).forEach(shift => {
@@ -46,7 +122,9 @@ export function renderShiftsConfigList() {
         row.className = 'shift-row-item';
         row.innerHTML = `
             <div class="shift-row-item__left">
-                <div class="shift-color-swatch" style="background:${shift.color}; color:${shift.textColor}">${shift.short}</div>
+                <div class="shift-color-swatch" style="background:${shift.color}; color:${shift.textColor || getContrastText(shift.color)};">
+                    ${shift.short}
+                </div>
                 <div>
                     <strong>${shift.name}</strong>
                     <div style="font-size:0.72rem; color:var(--text-secondary);">${shift.defaultHours}h · Entrada ${shift.startTime} · Alarma ${shift.alarmTime}</div>
@@ -64,6 +142,7 @@ export function renderPatternGenerator() {
     const btnsContainer = document.getElementById('patternShiftButtons');
     const seqContainer = document.getElementById('patternSequenceDisplay');
     const lenBadge = document.getElementById('patternLengthBadge');
+    if (!btnsContainer || !seqContainer || !lenBadge) return;
 
     btnsContainer.innerHTML = '';
     Object.values(state.shifts).forEach(shift => {
@@ -177,7 +256,7 @@ function applyPatternToCalendar() {
     triggerSwitchTab('calendarView');
 }
 
-function openShiftConfigModal(shiftId = null) {
+export function openShiftConfigModal(shiftId = null) {
     state.editingShiftId = shiftId;
     const isNew = !shiftId;
     const s = isNew
@@ -194,6 +273,9 @@ function openShiftConfigModal(shiftId = null) {
     document.getElementById('cfgShiftPlus').value = Number(s.shiftPlus) || 0;
     document.getElementById('cfgShiftAlarm').value = s.alarmTime;
     document.getElementById('btnDeleteShiftType').style.display = isNew ? 'none' : 'block';
+
+    renderShiftTemplates();
+    updateShiftModalPreview();
     document.getElementById('shiftConfigModal').classList.add('modal--open');
 }
 
@@ -203,14 +285,26 @@ export function bindShiftEvents() {
         document.getElementById('shiftConfigModal').classList.remove('modal--open');
     });
 
+    // Actualización en tiempo real de la vista previa del modal
+    ['cfgShiftName', 'cfgShiftShort', 'cfgShiftColor', 'cfgShiftHours', 'cfgShiftStart', 'cfgShiftAlarm'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', updateShiftModalPreview);
+            el.addEventListener('change', updateShiftModalPreview);
+        }
+    });
+
     document.getElementById('shiftConfigForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const id = state.editingShiftId || ('S_' + Date.now());
         const color = document.getElementById('cfgShiftColor').value;
+        let short = document.getElementById('cfgShiftShort').value.trim().toUpperCase();
+        if (short.length > 3) short = short.substring(0, 3);
+
         state.shifts[id] = {
             id,
             name: document.getElementById('cfgShiftName').value.trim(),
-            short: document.getElementById('cfgShiftShort').value.trim().toUpperCase(),
+            short,
             color,
             textColor: getContrastText(color),
             defaultHours: parseFloat(document.getElementById('cfgShiftHours').value) || 0,
@@ -226,6 +320,7 @@ export function bindShiftEvents() {
 
     document.getElementById('btnDeleteShiftType').addEventListener('click', () => {
         if (state.editingShiftId && state.editingShiftId !== 'NONE') {
+            if (!confirm(`¿Eliminar el turno "${state.shifts[state.editingShiftId]?.name}"?`)) return;
             delete state.shifts[state.editingShiftId];
             state.patternSequence = state.patternSequence.filter(pid => pid !== state.editingShiftId);
             saveState();

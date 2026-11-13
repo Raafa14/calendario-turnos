@@ -29,6 +29,7 @@ import {
 } from './finance.js';
 
 import { renderGymView, bindGymEvents } from './gym.js';
+import { renderCycleView, bindCycleEvents } from './cycle.js';
 import { renderTasksView, bindTaskEvents } from './tasks.js';
 import {
     initPatternDefaultDate,
@@ -43,6 +44,7 @@ function renderAll() {
     renderTomorrowBanner();
     renderStats();
     renderGymView();
+    renderCycleView();
     renderWallet();
     renderPiggyBank();
     renderFixedExpenses();
@@ -185,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bindCalendarEvents();
     bindFinanceEvents();
     bindGymEvents();
+    bindCycleEvents();
     bindTaskEvents();
     bindShiftEvents();
 
