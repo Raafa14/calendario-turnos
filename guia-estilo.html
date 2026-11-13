@@ -454,6 +454,186 @@
             color: var(--text-muted);
         }
 
+        /* MODAL DE SELECCIÓN: DESCARGAR PDF O IMPRIMIR */
+        .export-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.78);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .export-modal-backdrop.is-open {
+            display: flex;
+            animation: fadeInExportModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInExportModal {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .export-modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .export-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .export-modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .export-modal-close:hover {
+            color: var(--text-main);
+            background: var(--bg-subtle);
+        }
+
+        .export-modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .export-choice-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+            background: var(--bg-subtle);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            text-align: left;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .export-choice-card:hover {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .export-choice-card--primary {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .export-choice-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .export-choice-content {
+            flex: 1;
+        }
+
+        .export-choice-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-choice-badge {
+            background: var(--accent);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 999px;
+        }
+
+        .export-choice-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.35;
+        }
+
+        .export-choice-arrow {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .export-choice-card:hover .export-choice-arrow {
+            transform: translateX(4px);
+        }
+
+        .export-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 24px 16px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        /* RESPONSIVE BARRA SUPERIOR */
+        @media (max-width: 640px) {
+            .top-action-bar {
+                padding: 10px 14px;
+                flex-wrap: wrap;
+            }
+            .top-action-bar__left {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .btn-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+                padding: 8px 10px;
+                font-size: 0.78rem;
+            }
+        }
+
         /* REGLAS EXCLUSIVAS PARA IMPRESIÓN Y EXPORTACIÓN A PDF */
         @media print {
             @page {
@@ -469,7 +649,8 @@
                 print-color-adjust: exact !important;
             }
 
-            .top-action-bar {
+            .top-action-bar,
+            .export-modal-backdrop {
                 display: none !important;
             }
 
@@ -560,11 +741,63 @@
             <a href="index.html" class="btn btn--outline">
                 ← Volver a la App
             </a>
-            <button type="button" class="btn btn--primary" onclick="window.print()" title="Imprimir o guardar como archivo PDF">
-                📥 Exportar como PDF / Imprimir
+            <button type="button" class="btn btn--primary" id="btnOpenExportModal" title="Opciones para descargar archivo PDF o imprimir">
+                📥 Descargar / Imprimir
             </button>
         </div>
     </header>
+
+    <!-- MODAL DE ELECCIÓN: DESCARGAR ARCHIVO PDF O IMPRIMIR -->
+    <div id="exportChoiceModal" class="export-modal-backdrop" aria-hidden="true">
+        <div class="export-modal-card" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+            <div class="export-modal-header">
+                <div>
+                    <h3 id="exportModalTitle" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-main);">
+                        📄 Exportar Guía de Estilo
+                    </h3>
+                    <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                        ¿Cómo deseas obtener este documento?
+                    </p>
+                </div>
+                <button type="button" class="export-modal-close" id="btnCloseExportModal" aria-label="Cerrar modal">&times;</button>
+            </div>
+
+            <div class="export-modal-body">
+                <!-- OPCION 1: DESCARGAR ARCHIVO PDF OFICIAL -->
+                <a href="Guia_de_Estilo_ShifterPro.pdf" download="Guia_de_Estilo_ShifterPro.pdf" class="export-choice-card export-choice-card--primary" id="btnDownloadPdfChoice">
+                    <div class="export-choice-icon">📥</div>
+                    <div class="export-choice-content">
+                        <div class="export-choice-title">
+                            Descargar archivo PDF
+                            <span class="export-choice-badge">Recomendado</span>
+                        </div>
+                        <div class="export-choice-desc">
+                            Descarga directa del documento PDF oficial ya maquetado y con diseño de alta resolución (953 KB), listo para guardar o consultar offline.
+                        </div>
+                    </div>
+                    <div class="export-choice-arrow">➔</div>
+                </a>
+
+                <!-- OPCION 2: IMPRIMIR DOCUMENTO / DIALOGO NATIVO -->
+                <button type="button" class="export-choice-card" id="btnPrintChoice">
+                    <div class="export-choice-icon">🖨️</div>
+                    <div class="export-choice-content">
+                        <div class="export-choice-title">
+                            Imprimir documento
+                        </div>
+                        <div class="export-choice-desc">
+                            Abre la ventana de impresión de tu navegador para imprimir en papel físico o elegir tu propia impresora.
+                        </div>
+                    </div>
+                    <div class="export-choice-arrow">➔</div>
+                </button>
+            </div>
+
+            <div class="export-modal-footer">
+                <button type="button" class="btn btn--outline" id="btnCancelExportModal">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <div class="doc-container">
 
@@ -1106,6 +1339,73 @@
                 btnToggle.innerHTML = '<span>☀️</span> Modo Claro';
             }
         });
+
+        // Control del Modal de Exportación (Descargar PDF / Imprimir)
+        const modalBackdrop = document.getElementById('exportChoiceModal');
+        const btnOpenModal = document.getElementById('btnOpenExportModal');
+        const btnCloseModal = document.getElementById('btnCloseExportModal');
+        const btnCancelModal = document.getElementById('btnCancelExportModal');
+        const btnDownloadPdfChoice = document.getElementById('btnDownloadPdfChoice');
+        const btnPrintChoice = document.getElementById('btnPrintChoice');
+
+        function openExportModal() {
+            if (!modalBackdrop) return;
+            modalBackdrop.classList.add('is-open');
+            modalBackdrop.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExportModal() {
+            if (!modalBackdrop) return;
+            modalBackdrop.classList.remove('is-open');
+            modalBackdrop.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (btnOpenModal) {
+            btnOpenModal.addEventListener('click', openExportModal);
+        }
+
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener('click', closeExportModal);
+        }
+
+        if (btnCancelModal) {
+            btnCancelModal.addEventListener('click', closeExportModal);
+        }
+
+        // Cerrar al hacer clic en el fondo oscuro
+        if (modalBackdrop) {
+            modalBackdrop.addEventListener('click', (e) => {
+                if (e.target === modalBackdrop) {
+                    closeExportModal();
+                }
+            });
+        }
+
+        // Cerrar con tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalBackdrop && modalBackdrop.classList.contains('is-open')) {
+                closeExportModal();
+            }
+        });
+
+        // Al seleccionar descargar archivo PDF
+        if (btnDownloadPdfChoice) {
+            btnDownloadPdfChoice.addEventListener('click', () => {
+                setTimeout(closeExportModal, 350);
+            });
+        }
+
+        // Al seleccionar imprimir documento
+        if (btnPrintChoice) {
+            btnPrintChoice.addEventListener('click', () => {
+                closeExportModal();
+                setTimeout(() => {
+                    window.print();
+                }, 180);
+            });
+        }
     </script>
 </body>
 </html>
