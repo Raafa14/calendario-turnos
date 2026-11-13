@@ -558,7 +558,70 @@ function triggerIphoneAlarmPrompt(dateKey, data) {
     window.location.href = `shortcuts://run-shortcut?name=${shortcutName}&input=text&text=${alarmTimeParam}`;
 }
 
+export function changeMonth(delta) {
+    state.currentMonth += delta;
+    if (state.currentMonth < 0) {
+        state.currentMonth = 11;
+        state.currentYear--;
+    } else if (state.currentMonth > 11) {
+        state.currentMonth = 0;
+        state.currentYear++;
+    }
+    triggerRenderAll();
+
+    // Animación fluida de deslizamiento
+    const grid = document.getElementById('calendarGrid');
+    if (grid) {
+        const animClass = delta > 0 ? 'calendar-swipe-left' : 'calendar-swipe-right';
+        grid.classList.remove('calendar-swipe-left', 'calendar-swipe-right');
+        void grid.offsetWidth; // Forzar reflow
+        grid.classList.add(animClass);
+        setTimeout(() => grid.classList.remove(animClass), 220);
+    }
+}
+
+export function initCalendarSwipe() {
+    const calendarView = document.getElementById('calendarView');
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    if (!calendarView) return;
+
+    calendarView.addEventListener('touchstart', (e) => {
+        if (document.getElementById('dayModal')?.classList.contains('modal--open')) return;
+        if (e.touches && e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+        }
+    }, { passive: true });
+
+    calendarView.addEventListener('touchend', (e) => {
+        if (document.getElementById('dayModal')?.classList.contains('modal--open')) return;
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        const elapsed = Date.now() - touchStartTime;
+
+        // Requiere gesto deliberado (< 600ms), > 45px y predominantemente horizontal
+        if (elapsed < 600 && Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+            if (diffX < 0) {
+                // Deslizar izquierda (Swipe Left) -> Siguiente mes
+                changeMonth(1);
+            } else {
+                // Deslizar derecha (Swipe Right) -> Mes anterior
+                changeMonth(-1);
+            }
+        }
+    }, { passive: true });
+}
+
 export function bindCalendarEvents() {
+    initCalendarSwipe();
     document.querySelectorAll('[data-cal-filter]').forEach(btn => {
         btn.addEventListener('click', () => {
             state.calendarFilter = btn.dataset.calFilter;

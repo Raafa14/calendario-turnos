@@ -519,6 +519,37 @@ select option {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
+    will-change: transform, opacity;
+}
+
+.calendar-swipe-left {
+    animation: calendarSlideFromRight 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.calendar-swipe-right {
+    animation: calendarSlideFromLeft 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes calendarSlideFromRight {
+    0% {
+        opacity: 0.35;
+        transform: translateX(35px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes calendarSlideFromLeft {
+    0% {
+        opacity: 0.35;
+        transform: translateX(-35px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .day-cell {
@@ -1227,83 +1258,292 @@ select option {
     resize: vertical;
 }
 
-/* GENERADOR DE PATRONES ROTATIVOS */
+/* GENERADOR DE PATRONES ROTATIVOS MEJORADO */
+.pattern-builder-box {
+    background: var(--bg-card);
+}
+
+.pattern-step {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.pattern-step__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pattern-step__title strong {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.pattern-presets-box {
+    margin-bottom: 8px;
+}
+
+.pattern-presets-lbl {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.popular-patterns-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.popular-pattern-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.73rem;
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    transition: all 0.15s ease;
+}
+
+.popular-pattern-chip:hover {
+    border-color: var(--accent);
+    background: rgba(16, 185, 129, 0.08);
+    transform: translateY(-1px);
+}
+
+.popular-pattern-chip strong {
+    font-size: 0.76rem;
+    color: var(--text-primary);
+}
+
+.popular-pattern-chip span {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+
+.pattern-shifts-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pattern-group-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 4px;
+}
+
 .pattern-btns-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 8px;
 }
 
 .pattern-add-btn {
-    border: 1.5px solid var(--border-color);
+    border: 1px solid var(--border-color);
     border-radius: 9px;
-    padding: 7px 11px;
-    font-size: 0.78rem;
+    padding: 6px 10px;
+    font-size: 0.75rem;
     font-weight: 800;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: var(--bg-subtle);
-    color: var(--text-primary);
-    transition: transform 0.1s ease;
+    background: var(--bg-card);
+    transition: transform 0.12s ease;
 }
 
 .pattern-add-btn:active {
     transform: scale(0.95);
 }
 
-.pattern-sequence-box {
-    margin-top: 10px;
-    background: var(--bg-subtle);
+.pattern-add-plus {
+    font-weight: 900;
+    font-size: 0.9rem;
+    opacity: 0.75;
+}
+
+/* Línea temporal del ciclo */
+.pattern-timeline-container {
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.pattern-sequence-box__top {
+.pattern-timeline-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 48px;
+    flex-wrap: wrap;
+}
+
+.pattern-step-chip {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    position: relative;
+}
+
+.pattern-step-chip__day {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.pattern-step-chip__badge {
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pattern-step-chip__badge span {
+    font-size: 0.65rem;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+.pattern-step-chip__del {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #ffffff;
+    border: none;
+    font-size: 11px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.pattern-step-chip__del:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.pattern-step-arrow {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.pattern-loop-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px dashed var(--accent);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* Tarjeta de Resumen */
+.pattern-summary-card {
+    background: var(--bg-subtle);
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.pattern-summary-card--ready {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.pattern-sum-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
-.pattern-sequence-box__label {
-    font-size: 0.75rem;
+.pattern-sum-days-badge {
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.pattern-sum-desc {
+    font-size: 0.74rem;
     color: var(--text-secondary);
+    margin: 4px 0 8px;
+    line-height: 1.35;
 }
 
-.pattern-sequence-box__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.pattern-chips-row {
+.pattern-sum-pills-row {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    min-height: 30px;
-    align-items: center;
 }
 
-.pattern-empty-hint {
-    font-size: 0.74rem;
-    color: var(--text-secondary);
-    font-style: italic;
+.pattern-sum-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    color: var(--text-primary);
 }
 
-.pattern-chip {
-    min-width: 28px;
-    height: 28px;
-    padding: 0 7px;
-    border-radius: 7px;
-    font-size: 0.78rem;
-    font-weight: 900;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
 }
 
 .shift-rate-badge {

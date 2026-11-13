@@ -15,6 +15,7 @@ import {
     renderTomorrowBanner,
     initStickerSelector,
     initDayQuickPalette,
+    changeMonth,
     bindCalendarEvents
 } from './calendar.js';
 
@@ -85,15 +86,11 @@ function bindGlobalEvents() {
     });
 
     document.getElementById('btnPrevMonth').addEventListener('click', () => {
-        state.currentMonth--;
-        if (state.currentMonth < 0) { state.currentMonth = 11; state.currentYear--; }
-        renderAll();
+        changeMonth(-1);
     });
 
     document.getElementById('btnNextMonth').addEventListener('click', () => {
-        state.currentMonth++;
-        if (state.currentMonth > 11) { state.currentMonth = 0; state.currentYear++; }
-        renderAll();
+        changeMonth(1);
     });
 
     document.getElementById('btnTodayMonth').addEventListener('click', () => {

@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=29">
+    <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
     <div class="app">
@@ -555,45 +555,113 @@
 
                 <div id="shiftsConfigList" class="shifts-list"></div>
 
-                <div class="sub-box" style="margin-top:16px;">
+                <div class="sub-box pattern-builder-box" style="margin-top:16px;">
                     <div class="sub-box__header">
-                        <span class="sub-box__title">Generador de Patrones Rotativos</span>
+                        <span class="sub-box__title">🔄 Generador de Patrones Rotativos</span>
                     </div>
-                    <p class="panel-card__desc" style="margin-bottom:8px;">Crea tu secuencia (Ej: M, M, A, A, N, N, L, L) y rellena semanas o el mes completo en un toque.</p>
+                    <p class="panel-card__desc" style="margin-bottom:12px;">
+                        ¿Tienes turnos repetitivos (ej. Mañanas, Tardes, Noches y Libres)? Define tu ciclo de días y el calendario se rellenará solo automáticamente.
+                    </p>
 
-                    <div id="patternShiftButtons" class="pattern-btns-grid"></div>
+                    <!-- PASO 1 -->
+                    <div class="pattern-step">
+                        <div class="pattern-step__title">
+                            <span class="step-num">1</span>
+                            <strong>Elige un patrón popular o añade días a tu ciclo:</strong>
+                        </div>
 
-                    <div class="pattern-sequence-box">
-                        <div class="pattern-sequence-box__top">
-                            <span class="pattern-sequence-box__label">Secuencia (<strong id="patternLengthBadge">0</strong> días):</span>
-                            <div class="pattern-sequence-box__actions">
-                                <button type="button" id="btnPatternUndo" class="btn btn--sm btn--outline">Deshacer</button>
-                                <button type="button" id="btnPatternClear" class="btn btn--sm btn--danger">Limpiar</button>
+                        <!-- Plantillas rápidas de 1 toque -->
+                        <div class="pattern-presets-box">
+                            <span class="pattern-presets-lbl">⚡ Plantillas rápidas comunes:</span>
+                            <div class="popular-patterns-row">
+                                <button type="button" class="popular-pattern-chip" data-pattern-preset="5x2">
+                                    <strong>5x2 Estándar</strong>
+                                    <small>5 Mañana + 2 Libres</small>
+                                </button>
+                                <button type="button" class="popular-pattern-chip" data-pattern-preset="6x4">
+                                    <strong>6x4 Rotativo</strong>
+                                    <small>2M + 2T + 2N + 4L</small>
+                                </button>
+                                <button type="button" class="popular-pattern-chip" data-pattern-preset="MTNL">
+                                    <strong>M - T - N - L</strong>
+                                    <small>4 días ciclo continuo</small>
+                                </button>
+                                <button type="button" class="popular-pattern-chip" data-pattern-preset="4x2">
+                                    <strong>4x2 Rotativo</strong>
+                                    <small>4 Trabajo + 2 Libres</small>
+                                </button>
+                                <button type="button" class="popular-pattern-chip" data-pattern-preset="7x7">
+                                    <strong>7x7 Noches</strong>
+                                    <small>7 Noche + 7 Libres</small>
+                                </button>
                             </div>
                         </div>
-                        <div id="patternSequenceDisplay" class="pattern-chips-row"></div>
-                    </div>
 
-                    <div class="calc-box__row" style="margin-top:10px;">
-                        <div class="calc-box__field">
-                            <label>Fecha de inicio</label>
-                            <input type="date" id="patternStartDate">
-                        </div>
-                        <div class="calc-box__field">
-                            <label>Duración</label>
-                            <select id="patternDurationSelect" class="form-select">
-                                <option value="7">7 días (1 semana)</option>
-                                <option value="14" selected>14 días (2 semanas)</option>
-                                <option value="21">21 días (3 semanas)</option>
-                                <option value="28">28 días (4 semanas)</option>
-                                <option value="month">Resto del mes</option>
-                            </select>
+                        <!-- Botones de turnos individuales -->
+                        <div class="pattern-manual-add-box" style="margin-top:10px;">
+                            <span class="pattern-presets-lbl">O añade turnos paso a paso:</span>
+                            <div id="patternShiftButtons" class="pattern-btns-grid"></div>
                         </div>
                     </div>
 
-                    <button type="button" id="btnApplyPattern" class="btn btn--primary" style="width:100%; margin-top:10px;">
-                        Aplicar ciclo al calendario
-                    </button>
+                    <!-- PASO 2 -->
+                    <div class="pattern-step" style="margin-top:12px;">
+                        <div class="pattern-step__title">
+                            <span class="step-num">2</span>
+                            <strong>Tu secuencia del ciclo (<span id="patternLengthBadge">0</span> días):</strong>
+                            <div style="margin-left:auto; display:flex; gap:6px;">
+                                <button type="button" id="btnPatternUndo" class="btn btn--sm btn--outline" title="Quitar el último">Deshacer</button>
+                                <button type="button" id="btnPatternClear" class="btn btn--sm btn--danger" title="Borrar todo">Limpiar</button>
+                            </div>
+                        </div>
+
+                        <div class="pattern-timeline-container">
+                            <div id="patternSequenceDisplay" class="pattern-timeline-row"></div>
+                        </div>
+                        <p class="panel-card__desc" style="font-size:0.72rem; margin-top:6px; margin-bottom:0;">
+                            💡 <em>Tip: Al terminar el último día, el ciclo vuelve a empezar desde el Día 1 en bucle continuo.</em>
+                        </p>
+                    </div>
+
+                    <!-- PASO 3 -->
+                    <div class="pattern-step" style="margin-top:12px;">
+                        <div class="pattern-step__title">
+                            <span class="step-num">3</span>
+                            <strong>¿Desde qué día y durante cuánto tiempo?</strong>
+                        </div>
+
+                        <div class="calc-box__row">
+                            <div class="calc-box__field">
+                                <label style="display:flex; justify-content:space-between;">
+                                    <span>Fecha de inicio</span>
+                                    <button type="button" id="btnPatternToday" class="link-btn">Hoy</button>
+                                </label>
+                                <input type="date" id="patternStartDate">
+                            </div>
+                            <div class="calc-box__field">
+                                <label>Duración a rellenar</label>
+                                <select id="patternDurationSelect" class="form-select">
+                                    <option value="7">7 días (1 semana)</option>
+                                    <option value="14" selected>14 días (2 semanas)</option>
+                                    <option value="21">21 días (3 semanas)</option>
+                                    <option value="28">28 días (4 semanas)</option>
+                                    <option value="30">30 días (1 mes aprox.)</option>
+                                    <option value="60">60 días (2 meses)</option>
+                                    <option value="90">90 días (3 meses)</option>
+                                    <option value="180">180 días (Medio año)</option>
+                                    <option value="365">365 días (1 año completo)</option>
+                                    <option value="month">Resto del mes actual</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Resumen en vivo -->
+                        <div id="patternLiveSummary" class="pattern-summary-card" style="margin-top:10px;"></div>
+
+                        <button type="button" id="btnApplyPattern" class="btn btn--primary" style="width:100%; margin-top:12px; font-weight:800; font-size:0.95rem; padding:12px;">
+                            🚀 Aplicar ciclo al calendario
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>

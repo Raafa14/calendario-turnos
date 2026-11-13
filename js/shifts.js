@@ -138,6 +138,150 @@ export function renderShiftsConfigList() {
     });
 }
 
+const POPULAR_CYCLES = {
+    '5x2': {
+        name: '5x2 Estándar',
+        keys: ['M', 'M', 'M', 'M', 'M', 'L', 'L']
+    },
+    '6x4': {
+        name: '6x4 Rotativo',
+        keys: ['M', 'M', 'T', 'T', 'N', 'N', 'L', 'L', 'L', 'L']
+    },
+    'MTNL': {
+        name: 'M - T - N - L',
+        keys: ['M', 'T', 'N', 'L']
+    },
+    '4x2': {
+        name: '4x2 Rotativo',
+        keys: ['M', 'M', 'T', 'T', 'L', 'L']
+    },
+    '7x7': {
+        name: '7x7 Noches',
+        keys: ['N', 'N', 'N', 'N', 'N', 'N', 'N', 'L', 'L', 'L', 'L', 'L', 'L', 'L']
+    }
+};
+
+function resolveShiftIdFromKey(key) {
+    const shifts = state.shifts;
+    if (shifts[key]) return key;
+    const matchByShort = Object.values(shifts).find(s => s.short && s.short.toUpperCase() === key.toUpperCase());
+    if (matchByShort) return matchByShort.id;
+    if (key === 'M') {
+        const found = Object.values(shifts).find(s => s.name.toLowerCase().includes('mañana'));
+        if (found) return found.id;
+    }
+    if (key === 'T' || key === 'A') {
+        const found = Object.values(shifts).find(s => s.name.toLowerCase().includes('tarde'));
+        if (found) return found.id;
+    }
+    if (key === 'N') {
+        const found = Object.values(shifts).find(s => s.name.toLowerCase().includes('noche'));
+        if (found) return found.id;
+    }
+    if (key === 'L') {
+        const found = Object.values(shifts).find(s => s.name.toLowerCase().includes('libre') || s.name.toLowerCase().includes('descanso'));
+        if (found) return found.id;
+    }
+    return 'NONE';
+}
+
+function applyPopularCycle(presetKey) {
+    const cycle = POPULAR_CYCLES[presetKey];
+    if (!cycle) return;
+    state.patternSequence = cycle.keys.map(k => resolveShiftIdFromKey(k));
+    saveState();
+    renderPatternGenerator();
+}
+
+function deletePatternDay(index) {
+    state.patternSequence.splice(index, 1);
+    saveState();
+    renderPatternGenerator();
+}
+
+function updatePatternSummary() {
+    const summaryEl = document.getElementById('patternLiveSummary');
+    if (!summaryEl) return;
+
+    if (state.patternSequence.length === 0) {
+        summaryEl.className = 'pattern-summary-card';
+        summaryEl.innerHTML = `
+            <div style="font-size:0.75rem; color:var(--text-secondary); text-align:center; padding:4px 0;">
+                Elige una plantilla o añade días a tu ciclo para ver aquí el resumen en tiempo real.
+            </div>
+        `;
+        return;
+    }
+
+    const startVal = document.getElementById('patternStartDate')?.value;
+    if (!startVal) {
+        summaryEl.className = 'pattern-summary-card';
+        summaryEl.innerHTML = `<div style="font-size:0.75rem; color:var(--text-secondary);">Selecciona una fecha de inicio arriba.</div>`;
+        return;
+    }
+
+    const [sy, sm, sd] = startVal.split('-').map(Number);
+    const startDate = new Date(sy, sm - 1, sd);
+    const durationVal = document.getElementById('patternDurationSelect')?.value || '14';
+
+    let totalDaysToFill = 0;
+    if (durationVal === 'month') {
+        const lastDayOfMonth = new Date(sy, sm, 0).getDate();
+        totalDaysToFill = Math.max(1, (lastDayOfMonth - sd) + 1);
+    } else {
+        totalDaysToFill = parseInt(durationVal, 10) || 14;
+    }
+
+    const endDate = new Date(sy, sm - 1, sd + totalDaysToFill - 1);
+    const endStr = `${String(endDate.getDate()).padStart(2, '0')}/${String(endDate.getMonth() + 1).padStart(2, '0')}/${endDate.getFullYear()}`;
+    const startStr = `${String(sd).padStart(2, '0')}/${String(sm).padStart(2, '0')}/${sy}`;
+
+    const cycleLen = state.patternSequence.length;
+    const repetitions = (totalDaysToFill / cycleLen).toFixed(1).replace('.0', '');
+
+    const shiftCounts = {};
+    let totalEstHours = 0;
+    let workDaysCount = 0;
+
+    for (let i = 0; i < totalDaysToFill; i++) {
+        const shiftId = state.patternSequence[i % cycleLen];
+        const s = state.shifts[shiftId] || state.shifts.NONE;
+        shiftCounts[s.id] = (shiftCounts[s.id] || 0) + 1;
+        const h = Number(s.defaultHours) || 0;
+        totalEstHours += h;
+        if (h > 0 || ['M', 'A', 'N', 'T'].includes(s.short)) {
+            workDaysCount++;
+        }
+    }
+
+    const pillsHtml = Object.entries(shiftCounts).map(([sId, count]) => {
+        const s = state.shifts[sId] || state.shifts.NONE;
+        const color = s.id !== 'NONE' ? s.color : 'transparent';
+        return `<span class="pattern-sum-pill" style="border-left: 4px solid ${color};">
+            <strong>${count}x</strong> ${s.name}
+        </span>`;
+    }).join('');
+
+    summaryEl.className = 'pattern-summary-card pattern-summary-card--ready';
+    summaryEl.innerHTML = `
+        <div class="pattern-sum-top">
+            <strong style="font-size:0.8rem; color:var(--text-primary);">Resumen de aplicación:</strong>
+            <span class="pattern-sum-days-badge">${totalDaysToFill} días</span>
+        </div>
+        <p class="pattern-sum-desc">
+            Se rellenarán desde el <strong>${startStr}</strong> hasta el <strong>${endStr}</strong>.<br>
+            Tu ciclo de ${cycleLen} días se repetirá <strong>${repetitions} veces</strong> en bucle.
+        </p>
+        <div class="pattern-sum-pills-row" style="margin-bottom:6px;">
+            ${pillsHtml}
+        </div>
+        <div style="font-size:0.72rem; color:var(--text-secondary); display:flex; justify-content:space-between; border-top:1px dashed var(--border-color); padding-top:5px; margin-top:5px;">
+            <span>💼 <strong>${workDaysCount}</strong> jornadas de trabajo</span>
+            <span>⏱️ <strong>${totalEstHours}h</strong> estimadas</span>
+        </div>
+    `;
+}
+
 export function renderPatternGenerator() {
     const btnsContainer = document.getElementById('patternShiftButtons');
     const seqContainer = document.getElementById('patternSequenceDisplay');
@@ -152,9 +296,11 @@ export function renderPatternGenerator() {
         if (shift.id !== 'NONE') {
             btn.style.backgroundColor = shift.color;
             btn.style.color = shift.textColor || getContrastText(shift.color);
-            btn.style.borderColor = 'rgba(0,0,0,0.12)';
+        } else {
+            btn.style.backgroundColor = 'var(--bg-card)';
+            btn.style.color = 'var(--text-secondary)';
         }
-        btn.innerHTML = `<strong>${shift.short}</strong> <span>${shift.id === 'NONE' ? 'Vacío' : shift.name}</span>`;
+        btn.innerHTML = `<span class="pattern-add-plus">+</span><strong>${shift.short}</strong> <span>${shift.id === 'NONE' ? 'Vacío' : shift.name}</span>`;
         btn.addEventListener('click', () => {
             state.patternSequence.push(shift.id);
             saveState();
@@ -167,36 +313,64 @@ export function renderPatternGenerator() {
     seqContainer.innerHTML = '';
 
     if (state.patternSequence.length === 0) {
-        seqContainer.innerHTML = '<span class="pattern-empty-hint">Pulsa los turnos de arriba para crear tu ciclo...</span>';
+        seqContainer.innerHTML = `
+            <div style="text-align:center; width:100%; padding:14px 6px; color:var(--text-secondary); font-size:0.75rem;">
+                👉 <strong>Ciclo vacío:</strong> Selecciona una plantilla rápida (ej. <em>5x2</em> o <em>6x4</em>) o pulsa en los turnos de arriba para armar tu ciclo día a día.
+            </div>
+        `;
+        updatePatternSummary();
         return;
     }
 
     state.patternSequence.forEach((shiftId, idx) => {
         const s = state.shifts[shiftId] || state.shifts.NONE;
-        const chip = document.createElement('span');
-        chip.className = 'pattern-chip';
-        chip.textContent = s.short;
-        if (s.id !== 'NONE') {
-            chip.style.backgroundColor = s.color;
-            chip.style.color = s.textColor || getContrastText(s.color);
-        } else {
-            chip.style.backgroundColor = 'var(--bg-card)';
-            chip.style.color = 'var(--text-secondary)';
-        }
-        chip.title = `Día ${idx + 1}: ${s.name}`;
+        const chip = document.createElement('div');
+        chip.className = 'pattern-step-chip';
+
+        const bg = s.id !== 'NONE' ? s.color : 'var(--bg-card)';
+        const fg = s.id !== 'NONE' ? (s.textColor || getContrastText(s.color)) : 'var(--text-secondary)';
+
+        chip.innerHTML = `
+            <span class="pattern-step-chip__day">Día ${idx + 1}</span>
+            <div class="pattern-step-chip__badge" style="background:${bg}; color:${fg};">
+                <strong>${s.short}</strong>
+                <span>${s.id === 'NONE' ? 'Vacío' : s.name}</span>
+            </div>
+            <button type="button" class="pattern-step-chip__del" title="Eliminar este día">&times;</button>
+        `;
+
+        chip.querySelector('.pattern-step-chip__del').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deletePatternDay(idx);
+        });
+
         seqContainer.appendChild(chip);
+
+        if (idx < state.patternSequence.length - 1) {
+            const arrow = document.createElement('span');
+            arrow.className = 'pattern-step-arrow';
+            arrow.innerHTML = '➔';
+            seqContainer.appendChild(arrow);
+        } else {
+            const loop = document.createElement('span');
+            loop.className = 'pattern-loop-tag';
+            loop.innerHTML = '🔁 En bucle';
+            seqContainer.appendChild(loop);
+        }
     });
+
+    updatePatternSummary();
 }
 
 function applyPatternToCalendar() {
     if (state.patternSequence.length === 0) {
-        alert('Añade al menos un turno a la secuencia pulsando los botones de arriba.');
+        alert('Añade al menos un turno a tu ciclo o selecciona una plantilla rápida.');
         return;
     }
 
     const startVal = document.getElementById('patternStartDate').value;
     if (!startVal) {
-        alert('Selecciona una fecha de inicio.');
+        alert('Por favor selecciona una fecha de inicio.');
         return;
     }
 
@@ -212,14 +386,19 @@ function applyPatternToCalendar() {
         totalDaysToFill = parseInt(durationVal, 10) || 14;
     }
 
-    if (!confirm(`Se aplicará tu ciclo de ${state.patternSequence.length} días durante ${totalDaysToFill} jornadas a partir del ${sd}/${sm}/${sy}. ¿Continuar?`)) {
+    const cycleLen = state.patternSequence.length;
+    const endDate = new Date(sy, sm - 1, sd + totalDaysToFill - 1);
+    const startStr = `${String(sd).padStart(2, '0')}/${String(sm).padStart(2, '0')}/${sy}`;
+    const endStr = `${String(endDate.getDate()).padStart(2, '0')}/${String(endDate.getMonth() + 1).padStart(2, '0')}/${endDate.getFullYear()}`;
+
+    if (!confirm(`¿Aplicar este ciclo de ${cycleLen} días durante ${totalDaysToFill} jornadas?\n\n📅 Del ${startStr} al ${endStr}\n\nLos turnos de esos días en el calendario se actualizarán automáticamente.`)) {
         return;
     }
 
     for (let i = 0; i < totalDaysToFill; i++) {
         const targetDate = new Date(sy, sm - 1, sd + i);
         const key = formatDateKey(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-        const shiftId = state.patternSequence[i % state.patternSequence.length];
+        const shiftId = state.patternSequence[i % cycleLen];
         const shift = state.shifts[shiftId] || state.shifts.NONE;
 
         if (shift.id === 'NONE') {
@@ -342,4 +521,37 @@ export function bindShiftEvents() {
     });
 
     document.getElementById('btnApplyPattern').addEventListener('click', applyPatternToCalendar);
+
+    // Eventos del generador intuitivo de patrones
+    document.querySelectorAll('[data-pattern-preset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            applyPopularCycle(btn.dataset.patternPreset);
+        });
+    });
+
+    const btnToday = document.getElementById('btnPatternToday');
+    if (btnToday) {
+        btnToday.addEventListener('click', () => {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const dateInput = document.getElementById('patternStartDate');
+            if (dateInput) {
+                dateInput.value = `${y}-${m}-${d}`;
+                updatePatternSummary();
+            }
+        });
+    }
+
+    const dateInput = document.getElementById('patternStartDate');
+    if (dateInput) {
+        dateInput.addEventListener('change', updatePatternSummary);
+        dateInput.addEventListener('input', updatePatternSummary);
+    }
+
+    const durSelect = document.getElementById('patternDurationSelect');
+    if (durSelect) {
+        durSelect.addEventListener('change', updatePatternSummary);
+    }
 }
