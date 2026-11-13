@@ -157,15 +157,16 @@ select option {
 
 .header__actions {
     display: flex;
-    gap: 6px;
+    gap: 5px;
 }
 
 .icon-btn {
+    position: relative;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.16);
     color: #ffffff;
-    width: 34px;
-    height: 34px;
+    width: 33px;
+    height: 33px;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -178,6 +179,73 @@ select option {
     background: #ffffff;
     color: #111827;
     transform: scale(0.95);
+}
+
+/* Indicador de estado nube en botón de cuenta */
+.cloud-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #64748b;
+    border: 2px solid var(--header-bg);
+}
+
+.cloud-dot--online {
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+}
+
+/* Estilos Modal Cuenta */
+.auth-error-msg {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: var(--danger);
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.auth-link-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-top: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-profile-box {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+.auth-profile-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--accent);
+    background: rgba(16, 185, 129, 0.14);
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.auth-user-email {
+    display: block;
+    font-size: 0.95rem;
+    word-break: break-all;
 }
 
 .tomorrow-banner {
@@ -555,7 +623,6 @@ select option {
     padding: 9px 10px;
 }
 
-/* RESALTE VISUAL PARA TAREAS PENDIENTES VS COMPLETADAS */
 #tasksPendingList .task-item {
     background: rgba(245, 158, 11, 0.14);
     border: 1px solid rgba(245, 158, 11, 0.42);
@@ -1417,7 +1484,6 @@ select option {
         padding-bottom: 40px;
     }
 
-    /* Barra superior web fija a todo lo ancho */
     .header {
         position: fixed;
         top: 0;
@@ -1473,7 +1539,6 @@ select option {
         background: rgba(255, 255, 255, 0.2);
     }
 
-    /* Menú lateral izquierdo fijo tipo Web App */
     .bottom-nav {
         position: fixed;
         top: 66px;
@@ -1560,7 +1625,6 @@ select option {
         color: #ffffff;
     }
 
-    /* Barra de selección de mes integrada en el área de trabajo */
     .month-bar {
         padding: 14px 32px;
         background: var(--bg-app);
@@ -1579,7 +1643,6 @@ select option {
         background: var(--bg-subtle);
     }
 
-    /* Contenedor de vistas amplio */
     .view {
         padding: 24px 32px;
         max-width: 1380px;
@@ -1593,7 +1656,6 @@ select option {
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
-    /* Calendario de escritorio */
     .calendar__weekdays {
         font-size: 0.78rem;
         padding-bottom: 10px;
@@ -1646,13 +1708,11 @@ select option {
         font-size: 0.68rem;
     }
 
-    /* Vista Finanzas (Mi Caja + Ganancias) */
     #walletView .panel-card {
         max-width: 960px;
         margin: 0 auto;
     }
 
-    /* Vista Tareas y Notas */
     #tasksView .panel-card {
         max-width: 1040px;
         margin: 0 auto;
@@ -1670,7 +1730,6 @@ select option {
         grid-column: 1 / -1;
     }
 
-    /* Vista Gym a 2 columnas */
     #gymView .panel-card {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1696,7 +1755,6 @@ select option {
         gap: 10px;
     }
 
-    /* Vista Turnos a 2 columnas */
     #shiftsView .panel-card {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1714,7 +1772,6 @@ select option {
         margin-top: 0;
     }
 
-    /* Modales amplios en escritorio */
     .modal__dialog {
         max-width: 560px;
         padding: 24px;
