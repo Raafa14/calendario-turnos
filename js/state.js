@@ -1,3 +1,4 @@
+export const APP_VERSION = 'v0.9.0 Beta';
 export const STORAGE_KEY = 'shifterpro_v6_data';
 export const LEGACY_KEYS = ['shifterpro_v5_data', 'shifterpro_v4_data'];
 

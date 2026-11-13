@@ -1,5 +1,6 @@
 import {
     state,
+    APP_VERSION,
     STORAGE_KEY,
     loadState,
     saveState,
@@ -323,6 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initSettingsModal();
     initLegalModal();
     applyModuleVisibility();
+
+    document.querySelectorAll('.app-version-text').forEach(el => {
+        el.textContent = APP_VERSION;
+    });
 
     initCloudSync();
     renderAll();
