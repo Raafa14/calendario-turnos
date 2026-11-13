@@ -138,6 +138,16 @@ select option {
     gap: 9px;
 }
 
+.header__logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: width 0.2s ease, height 0.2s ease, transform 0.2s ease;
+}
+
 .header__title {
     font-size: 1.15rem;
     font-weight: 800;
@@ -3019,6 +3029,20 @@ select option {
         padding: 18px 24px 14px;
     }
 
+    .header__brand {
+        gap: 11px;
+    }
+
+    .header__logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+    }
+
+    .header__title {
+        font-size: 1.3rem;
+    }
+
     .month-bar {
         padding: 12px 24px;
     }
@@ -3070,7 +3094,7 @@ select option {
         margin: 0;
         border-radius: 0;
         box-shadow: none;
-        padding-top: 66px;
+        padding-top: 70px;
         padding-left: 236px;
         padding-bottom: 40px;
     }
@@ -3080,7 +3104,7 @@ select option {
         top: 0;
         left: 0;
         right: 0;
-        height: 66px;
+        height: 70px;
         z-index: 170;
         border-radius: 0;
         padding: 0 28px;
@@ -3097,11 +3121,20 @@ select option {
 
     .header__brand {
         order: 1;
-        min-width: 208px;
+        min-width: 220px;
+        gap: 13px;
+    }
+
+    .header__logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     }
 
     .header__title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        letter-spacing: -0.4px;
     }
 
     .tomorrow-banner {
@@ -3146,7 +3179,7 @@ select option {
 
     .bottom-nav {
         position: fixed;
-        top: 66px;
+        top: 70px;
         left: 0;
         right: auto;
         bottom: 0;
@@ -3454,5 +3487,42 @@ select option {
 
     .shift-cards-grid {
         grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* =========================================================
+   PANTALLAS GRANDES Y MONITORES ANCHOS (1440px+)
+   ========================================================= */
+@media (min-width: 1440px) {
+    .app {
+        padding-top: 74px;
+        padding-left: 244px;
+    }
+
+    .header {
+        height: 74px;
+        padding: 0 36px 0 30px;
+    }
+
+    .bottom-nav {
+        top: 74px;
+        width: 244px;
+    }
+
+    .header__brand {
+        min-width: 228px;
+        gap: 15px;
+    }
+
+    .header__logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 13px;
+        box-shadow: 0 5px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .header__title {
+        font-size: 1.65rem;
+        letter-spacing: -0.5px;
     }
 }
