@@ -16,6 +16,7 @@ import {
     initStickerSelector,
     initDayQuickPalette,
     changeMonth,
+    toggleBatchMode,
     bindCalendarEvents
 } from './calendar.js';
 
@@ -64,6 +65,10 @@ function switchTab(targetTabId) {
         }
         state.statsUnlocked = true;
         updatePinUI();
+    }
+
+    if (targetTabId !== 'calendarView' && state.isBatchMode) {
+        toggleBatchMode(false);
     }
 
     document.querySelectorAll('.bottom-nav__item').forEach(b => {

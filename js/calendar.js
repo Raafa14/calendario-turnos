@@ -37,6 +37,14 @@ export function renderCalendar() {
         cell.className = 'day-cell';
         if (dateKey === todayKey) cell.classList.add('day-cell--today');
 
+        // Modo Selección Múltiple
+        if (state.isBatchMode) {
+            cell.classList.add('day-cell--batch-mode');
+            if (state.batchSelectedDates.includes(dateKey)) {
+                cell.classList.add('day-cell--batch-selected');
+            }
+        }
+
         // Filtro visual rápido
         if (state.calendarFilter !== 'ALL') {
             let matches = false;
@@ -51,7 +59,13 @@ export function renderCalendar() {
         }
 
         paintCell(cell, day, info);
-        cell.addEventListener('click', () => openDayModal(dateKey));
+        cell.addEventListener('click', () => {
+            if (state.isBatchMode) {
+                toggleBatchDate(dateKey, cell);
+            } else {
+                openDayModal(dateKey);
+            }
+        });
         grid.appendChild(cell);
     }
 
@@ -224,6 +238,14 @@ export function paintCell(cellEl, dayNumber, info) {
     const dayNumSpan = document.createElement('span');
     dayNumSpan.textContent = dayNumber;
     top.appendChild(dayNumSpan);
+
+    if (state.isBatchMode && state.batchSelectedDates.includes(formatDateKey(state.currentYear, state.currentMonth, dayNumber))) {
+        const checkBadge = document.createElement('span');
+        checkBadge.className = 'batch-cell-check';
+        checkBadge.textContent = '✓';
+        top.appendChild(checkBadge);
+    }
+
     cellEl.appendChild(top);
 
     const middle = document.createElement('div');
@@ -620,8 +642,238 @@ export function initCalendarSwipe() {
     }, { passive: true });
 }
 
+export function toggleBatchMode(forceState = null) {
+    state.isBatchMode = (forceState !== null) ? forceState : !state.isBatchMode;
+    const panel = document.getElementById('batchPanel');
+    const toggleBtn = document.getElementById('btnToggleBatchMode');
+    const hintEl = document.querySelector('.helper-hint');
+
+    if (state.isBatchMode) {
+        if (panel) panel.style.display = 'block';
+        if (toggleBtn) {
+            toggleBtn.classList.add('btn-batch-mode--active');
+            const span = toggleBtn.querySelector('span');
+            if (span) span.textContent = 'Finalizar selección';
+        }
+        if (hintEl) {
+            if (!hintEl.dataset.origText) hintEl.dataset.origText = hintEl.textContent;
+            hintEl.innerHTML = '👆 <strong>Modo Selección:</strong> Toca las casillas que quieras y usa las acciones de arriba.';
+            hintEl.style.color = 'var(--accent)';
+        }
+        renderBatchShiftButtons();
+    } else {
+        if (panel) panel.style.display = 'none';
+        if (toggleBtn) {
+            toggleBtn.classList.remove('btn-batch-mode--active');
+            const span = toggleBtn.querySelector('span');
+            if (span) span.textContent = 'Seleccionar varios';
+        }
+        if (hintEl && hintEl.dataset.origText) {
+            hintEl.textContent = hintEl.dataset.origText;
+            hintEl.style.color = '';
+        }
+        state.batchSelectedDates = [];
+    }
+    renderCalendar();
+    updateBatchCountUI();
+}
+
+function toggleBatchDate(dateKey, cellEl) {
+    const idx = state.batchSelectedDates.indexOf(dateKey);
+    if (idx >= 0) {
+        state.batchSelectedDates.splice(idx, 1);
+        if (cellEl) {
+            cellEl.classList.remove('day-cell--batch-selected');
+            const chk = cellEl.querySelector('.batch-cell-check');
+            if (chk) chk.remove();
+        }
+    } else {
+        state.batchSelectedDates.push(dateKey);
+        if (cellEl) {
+            cellEl.classList.add('day-cell--batch-selected');
+            const top = cellEl.querySelector('.day-cell__top');
+            if (top && !top.querySelector('.batch-cell-check')) {
+                const checkBadge = document.createElement('span');
+                checkBadge.className = 'batch-cell-check';
+                checkBadge.textContent = '✓';
+                top.appendChild(checkBadge);
+            }
+        }
+    }
+    updateBatchCountUI();
+}
+
+function updateBatchCountUI() {
+    const badge = document.getElementById('batchCountBadge');
+    if (badge) badge.textContent = state.batchSelectedDates.length;
+    const delBtn = document.getElementById('btnBatchDeleteShifts');
+    if (delBtn) {
+        delBtn.disabled = state.batchSelectedDates.length === 0;
+        delBtn.style.opacity = state.batchSelectedDates.length === 0 ? '0.5' : '1';
+    }
+}
+
+function renderBatchShiftButtons() {
+    const container = document.getElementById('batchShiftButtons');
+    if (!container) return;
+    container.innerHTML = '';
+
+    Object.values(state.shifts).forEach(shift => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'batch-shift-btn';
+        if (shift.id !== 'NONE') {
+            btn.style.backgroundColor = shift.color;
+            btn.style.color = shift.textColor || getContrastText(shift.color);
+        } else {
+            btn.style.backgroundColor = 'var(--bg-card)';
+            btn.style.color = 'var(--text-secondary)';
+        }
+        btn.innerHTML = `<strong>${shift.short}</strong> <span>${shift.id === 'NONE' ? 'Vacío' : shift.name}</span>`;
+        btn.title = `Asignar ${shift.name} a los días seleccionados`;
+        btn.addEventListener('click', () => {
+            batchApplyShift(shift.id);
+        });
+        container.appendChild(btn);
+    });
+}
+
+function batchApplyShift(shiftId) {
+    if (state.batchSelectedDates.length === 0) {
+        alert('Por favor selecciona primero los días en el calendario pulsando sobre las casillas.');
+        return;
+    }
+    const shift = state.shifts[shiftId] || state.shifts.NONE;
+    const count = state.batchSelectedDates.length;
+
+    state.batchSelectedDates.forEach(dateKey => {
+        if (shift.id === 'NONE') {
+            delete state.daysData[dateKey];
+        } else {
+            const existing = state.daysData[dateKey] || {};
+            state.daysData[dateKey] = {
+                shiftId: shift.id,
+                useCustomColor: false,
+                customBgColor: '#ffe082',
+                workoutGroup: existing.workoutGroup || '',
+                creatineTaken: existing.creatineTaken || false,
+                hours: Number(shift.defaultHours) || 0,
+                extraHours: 0,
+                hourlyRate: (Number(shift.customRate) > 0) ? Number(shift.customRate) : state.hourlyRate,
+                extraRate: state.extraRate,
+                shiftPlus: Number(shift.shiftPlus) || 0,
+                tips: existing.tips || 0,
+                alarmEnabled: false,
+                startTime: shift.startTime || '08:00',
+                alarmTime: shift.alarmTime || '06:00',
+                customText: existing.customText || '',
+                fontSize: existing.fontSize || 13,
+                prioritizeText: existing.prioritizeText ?? true,
+                sticker: existing.sticker || ''
+            };
+        }
+    });
+
+    saveState();
+    triggerRenderAll();
+    state.batchSelectedDates = [];
+    updateBatchCountUI();
+    showBatchToast(`✓ Turno "${shift.name}" aplicado a ${count} días`);
+}
+
+function batchDeleteShifts() {
+    if (state.batchSelectedDates.length === 0) {
+        alert('Por favor selecciona primero los días en el calendario que quieras borrar.');
+        return;
+    }
+    const count = state.batchSelectedDates.length;
+    if (!confirm(`¿Vaciar y borrar todos los turnos y notas de los ${count} días seleccionados?`)) {
+        return;
+    }
+
+    state.batchSelectedDates.forEach(dateKey => {
+        delete state.daysData[dateKey];
+    });
+
+    saveState();
+    triggerRenderAll();
+    state.batchSelectedDates = [];
+    updateBatchCountUI();
+    showBatchToast(`🗑️ ${count} días vaciados correctamente`);
+}
+
+function batchSelectAllMonth() {
+    const totalDays = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+    state.batchSelectedDates = [];
+    for (let day = 1; day <= totalDays; day++) {
+        state.batchSelectedDates.push(formatDateKey(state.currentYear, state.currentMonth, day));
+    }
+    renderCalendar();
+    updateBatchCountUI();
+}
+
+function batchSelectWorkdays() {
+    const totalDays = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+    state.batchSelectedDates = [];
+    for (let day = 1; day <= totalDays; day++) {
+        const d = new Date(state.currentYear, state.currentMonth, day).getDay();
+        if (d >= 1 && d <= 5) {
+            state.batchSelectedDates.push(formatDateKey(state.currentYear, state.currentMonth, day));
+        }
+    }
+    renderCalendar();
+    updateBatchCountUI();
+}
+
+function batchClearSelection() {
+    state.batchSelectedDates = [];
+    renderCalendar();
+    updateBatchCountUI();
+}
+
+function showBatchToast(msg) {
+    let toast = document.getElementById('batchToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'batchToast';
+        toast.className = 'batch-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('batch-toast--visible');
+    setTimeout(() => {
+        toast.classList.remove('batch-toast--visible');
+    }, 2400);
+}
+
 export function bindCalendarEvents() {
     initCalendarSwipe();
+
+    // Eventos Modo Selección Múltiple
+    const toggleBtn = document.getElementById('btnToggleBatchMode');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => toggleBatchMode());
+    }
+    const closeBtn = document.getElementById('btnCloseBatchMode');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => toggleBatchMode(false));
+    }
+    const allBtn = document.getElementById('btnBatchSelectAllMonth');
+    if (allBtn) {
+        allBtn.addEventListener('click', batchSelectAllMonth);
+    }
+    const workdaysBtn = document.getElementById('btnBatchSelectWorkdays');
+    if (workdaysBtn) {
+        workdaysBtn.addEventListener('click', batchSelectWorkdays);
+    }
+    const clearSelBtn = document.getElementById('btnBatchClearSelection');
+    if (clearSelBtn) {
+        clearSelBtn.addEventListener('click', batchClearSelection);
+    }
+    const delShiftsBtn = document.getElementById('btnBatchDeleteShifts');
+    if (delShiftsBtn) {
+        delShiftsBtn.addEventListener('click', batchDeleteShifts);
+    }
     document.querySelectorAll('[data-cal-filter]').forEach(btn => {
         btn.addEventListener('click', () => {
             state.calendarFilter = btn.dataset.calFilter;

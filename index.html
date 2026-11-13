@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=30">
+    <link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
     <div class="app">
@@ -94,12 +94,72 @@
                 </div>
             </div>
 
-            <!-- Filtros visuales del calendario -->
-            <div class="cal-filters-bar" id="calendarFilterPills">
-                <button type="button" class="task-pill-btn task-pill-btn--active" data-cal-filter="ALL">Todos</button>
-                <button type="button" class="task-pill-btn" data-cal-filter="WORK">Solo Trabajo</button>
-                <button type="button" class="task-pill-btn" data-cal-filter="GYM">Solo Gym</button>
-                <button type="button" class="task-pill-btn" data-cal-filter="NOTES">Con Notas</button>
+            <!-- Barra de herramientas del calendario: Filtros + Modo Selección Múltiple -->
+            <div class="cal-toolbar">
+                <div class="cal-filters-bar" id="calendarFilterPills">
+                    <button type="button" class="task-pill-btn task-pill-btn--active" data-cal-filter="ALL">Todos</button>
+                    <button type="button" class="task-pill-btn" data-cal-filter="WORK">Trabajo</button>
+                    <button type="button" class="task-pill-btn" data-cal-filter="GYM">Gym</button>
+                    <button type="button" class="task-pill-btn" data-cal-filter="NOTES">Notas</button>
+                </div>
+                <button type="button" id="btnToggleBatchMode" class="btn-batch-mode" title="Seleccionar varios días para crear o borrar turnos">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Seleccionar varios</span>
+                </button>
+            </div>
+
+            <!-- PANEL DE EDICIÓN MÚLTIPLE (SELECCIONAR VARIOS DÍAS) -->
+            <div id="batchPanel" class="batch-panel" style="display:none;">
+                <div class="batch-panel__top">
+                    <div class="batch-panel__status">
+                        <span class="batch-panel__icon">👆</span>
+                        <div>
+                            <strong class="batch-panel__title">Modo Selección Múltiple</strong>
+                            <p class="batch-panel__hint">Toca las casillas que quieras para editarlas juntas</p>
+                        </div>
+                    </div>
+                    <button type="button" id="btnCloseBatchMode" class="btn btn--sm btn--outline batch-panel__exit-btn">
+                        ✕ Salir
+                    </button>
+                </div>
+
+                <!-- Barra de selección rápida y contador -->
+                <div class="batch-panel__selection-bar">
+                    <div class="batch-counter-box">
+                        <span id="batchCountBadge" class="batch-counter-badge">0</span>
+                        <span>días seleccionados</span>
+                    </div>
+                    <div class="batch-quick-picks">
+                        <button type="button" id="btnBatchSelectAllMonth" class="batch-quick-btn">Todo el mes</button>
+                        <button type="button" id="btnBatchSelectWorkdays" class="batch-quick-btn">Lun a Vie</button>
+                        <button type="button" id="btnBatchClearSelection" class="batch-quick-btn batch-quick-btn--warn">Deseleccionar</button>
+                    </div>
+                </div>
+
+                <!-- Acciones masivas -->
+                <div class="batch-actions-card">
+                    <!-- 1. Asignar turno -->
+                    <div class="batch-action-section">
+                        <span class="batch-section-lbl">✨ Asignar turno a los días seleccionados:</span>
+                        <div id="batchShiftButtons" class="batch-shifts-grid"></div>
+                    </div>
+
+                    <!-- 2. Borrar turnos -->
+                    <div class="batch-action-section" style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--border-color);">
+                        <div class="batch-delete-row">
+                            <div>
+                                <span class="batch-section-lbl" style="color:#ef4444; margin-bottom:2px;">🗑️ Vaciar / Borrar días:</span>
+                                <small style="color:var(--text-secondary); font-size:0.72rem;">Elimina los turnos de todos los días marcados</small>
+                            </div>
+                            <button type="button" id="btnBatchDeleteShifts" class="btn btn--sm btn--danger">
+                                Borrar seleccionados
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="calendar-layout">

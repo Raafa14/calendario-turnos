@@ -492,6 +492,294 @@ select option {
     font-weight: 900;
 }
 
+.cal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.cal-toolbar .cal-filters-bar {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
+    scrollbar-width: none;
+}
+
+.cal-toolbar .cal-filters-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.btn-batch-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-batch-mode:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-batch-mode--active {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+/* PANEL DE SELECCIÓN MÚLTIPLE */
+.batch-panel {
+    background: var(--bg-card);
+    border: 1.5px solid var(--accent);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.12);
+    animation: batchSlideDown 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes batchSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.batch-panel__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.batch-panel__status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.batch-panel__icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.batch-panel__title {
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    display: block;
+}
+
+.batch-panel__hint {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin: 2px 0 0;
+}
+
+.batch-panel__exit-btn {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+.batch-panel__selection-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: var(--bg-subtle);
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+.batch-counter-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.batch-counter-badge {
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 900;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+}
+
+.batch-quick-picks {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.batch-quick-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.12s ease;
+}
+
+.batch-quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.batch-quick-btn--warn {
+    color: #ef4444;
+}
+
+.batch-quick-btn--warn:hover {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.batch-actions-card {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.batch-action-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.batch-section-lbl {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+
+.batch-shifts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.batch-shift-btn {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.1s ease;
+}
+
+.batch-shift-btn:active {
+    transform: scale(0.95);
+}
+
+.batch-delete-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Casillas en modo selección */
+.day-cell--batch-mode {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.day-cell--batch-selected {
+    box-shadow: 0 0 0 2.5px var(--accent) inset, 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    border-color: var(--accent) !important;
+    transform: scale(0.96);
+    position: relative;
+    z-index: 2;
+}
+
+.batch-cell-check {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Toast flotante de confirmación */
+.batch-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e293b;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.batch-toast--visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 .cal-filters-bar {
     display: flex;
     gap: 5px;

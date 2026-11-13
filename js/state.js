@@ -44,6 +44,8 @@ export const state = {
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     calendarFilter: 'ALL',
+    isBatchMode: false,
+    batchSelectedDates: [],
     profile: {
         name: '',
         role: '',
