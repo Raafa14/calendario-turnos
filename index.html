@@ -416,7 +416,14 @@
                     <!-- TARJETA 2 (APARTADO EN DIFERENTE DIV): RESUMEN DE LO GANADO Y DESGLOSE -->
                     <div class="sub-box earnings-summary-box" style="margin-top:14px;">
                         <div class="sub-box__header" style="margin-bottom:10px;">
-                            <span class="sub-box__title">💰 Nómina y Ganancias Calculadas</span>
+                            <span class="sub-box__title" style="display:inline-flex; align-items:center; gap:8px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent); flex-shrink:0;">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M6 12h.01M18 12h.01"></path>
+                                </svg>
+                                <span>Nómina y Ganancias Calculadas</span>
+                            </span>
                         </div>
 
                         <div class="payroll-breakdown">
@@ -443,7 +450,12 @@
                         </div>
 
                         <div style="margin-top:14px;">
-                            <h4 class="panel-card__subtitle" style="margin-bottom:8px;">Desglose por jornadas</h4>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <h4 class="panel-card__subtitle" style="margin:0;">Desglose por jornadas</h4>
+                                <button type="button" id="btnClearWorkedDaysMonth" class="wallet-clear-link" style="font-size:0.73rem; color:var(--text-secondary); background:transparent; border:none; cursor:pointer; text-decoration:underline; display:none;" title="Vaciar todos los turnos y horas trabajadas de este mes">
+                                    Vaciar jornadas
+                                </button>
+                            </div>
                             <ul id="workedDaysList" class="worked-list"></ul>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import { state, saveState, triggerRenderAll, triggerSwitchTab } from './state.js';
+import { openDayModal } from './calendar.js';
 
 export function getMonthPayrollSummary(year, month, overrideRate = null, overrideExtraRate = null) {
     const prefix = `${year}-${String(month + 1).padStart(2, '0')}-`;
@@ -41,6 +42,7 @@ export function getMonthPayrollSummary(year, month, overrideRate = null, overrid
 export function renderWorkedDaysList(overrideRate = null, overrideExtraRate = null) {
     const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
     const listEl = document.getElementById('workedDaysList');
+    const clearBtn = document.getElementById('btnClearWorkedDaysMonth');
     if (!listEl) return;
     listEl.innerHTML = '';
 
@@ -69,16 +71,106 @@ export function renderWorkedDaysList(overrideRate = null, overrideExtraRate = nu
             const li = document.createElement('li');
             li.className = 'worked-list__item';
             li.innerHTML = `
-                <span>Día ${dayNum} · <strong>${sName}</strong> ${d.customText ? '(' + d.customText + ')' : ''}</span>
-                <strong>${h + ex}h → ${dayPay.toFixed(2)} €${plusTxt}${tips > 0 ? ' + ' + tips.toFixed(2) + '€ bote' : ''}</strong>
+                <div class="worked-list__info" data-date="${key}" title="Toca para ver o editar este día en el calendario">
+                    <span class="worked-list__day-tag">Día ${dayNum}</span>
+                    <span class="worked-list__shift-name">· <strong>${sName}</strong> ${d.customText ? '(' + d.customText + ')' : ''}</span>
+                </div>
+                <div class="worked-list__actions">
+                    <strong class="worked-list__pay">${h + ex}h → ${dayPay.toFixed(2)} €${plusTxt}${tips > 0 ? ' + ' + tips.toFixed(2) + '€ bote' : ''}</strong>
+                    <button type="button" class="worked-list__btn-delete" data-date="${key}" data-day="${dayNum}" data-shift="${sName}" title="Eliminar este día de la nómina (no trabajado)" aria-label="Eliminar día ${dayNum} de la nómina">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
             `;
             listEl.appendChild(li);
         }
     });
 
     if (!hasDays) {
-        listEl.innerHTML = '<li class="worked-list__item">Aún no has registrado horas este mes.</li>';
+        listEl.innerHTML = '<li class="worked-list__item" style="color:var(--text-secondary); justify-content:center; border-bottom:none;">Aún no has registrado horas este mes.</li>';
+        if (clearBtn) clearBtn.style.display = 'none';
+    } else {
+        if (clearBtn) clearBtn.style.display = 'inline-block';
     }
+}
+
+export function removeWorkedDay(dateKey) {
+    if (!state.daysData[dateKey]) return;
+    const parts = dateKey.split('-');
+    const dayNum = parseInt(parts[2], 10);
+    const d = state.daysData[dateKey];
+    const sName = state.shifts[d.shiftId]?.name || 'Jornada';
+
+    if (!confirm(`¿Eliminar el Día ${dayNum} (${sName}) de la nómina y ganancias?\n\nEste día no se contará como trabajado y se restarán sus horas y sueldo del mes.`)) {
+        return;
+    }
+
+    d.shiftId = 'NONE';
+    d.hours = 0;
+    d.extraHours = 0;
+    d.shiftPlus = 0;
+    d.tips = 0;
+
+    const hasOtherData = Boolean(
+        d.workoutGroup ||
+        d.creatineTaken ||
+        d.customText ||
+        d.sticker ||
+        d.alarmEnabled ||
+        d.useCustomColor
+    );
+
+    if (!hasOtherData) {
+        delete state.daysData[dateKey];
+    }
+
+    saveState();
+    triggerRenderAll();
+}
+
+export function clearAllWorkedDaysMonth() {
+    const prefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    const keys = Object.keys(state.daysData).filter(k => {
+        if (!k.startsWith(prefix)) return false;
+        const d = state.daysData[k];
+        return (Number(d.hours) || 0) > 0 || (Number(d.extraHours) || 0) > 0 || (Number(d.shiftPlus) || 0) > 0 || (Number(d.tips) || 0) > 0;
+    });
+
+    if (keys.length === 0) return;
+
+    if (!confirm(`¿Vaciar las ${keys.length} jornadas trabajadas registradas este mes en la nómina?\n\nSe pondrán a 0 horas y se desmarcarán los turnos trabajados.`)) {
+        return;
+    }
+
+    keys.forEach(k => {
+        const d = state.daysData[k];
+        d.shiftId = 'NONE';
+        d.hours = 0;
+        d.extraHours = 0;
+        d.shiftPlus = 0;
+        d.tips = 0;
+
+        const hasOtherData = Boolean(
+            d.workoutGroup ||
+            d.creatineTaken ||
+            d.customText ||
+            d.sticker ||
+            d.alarmEnabled ||
+            d.useCustomColor
+        );
+
+        if (!hasOtherData) {
+            delete state.daysData[k];
+        }
+    });
+
+    saveState();
+    triggerRenderAll();
 }
 
 export function renderStats() {
@@ -455,6 +547,30 @@ export function bindFinanceEvents() {
     const btnApplyRates = document.getElementById('btnApplyRates');
     if (btnApplyRates) {
         btnApplyRates.addEventListener('click', applyRatesToMonth);
+    }
+
+    const workedDaysList = document.getElementById('workedDaysList');
+    if (workedDaysList) {
+        workedDaysList.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.worked-list__btn-delete');
+            if (deleteBtn) {
+                e.stopPropagation();
+                const dateKey = deleteBtn.dataset.date;
+                if (dateKey) removeWorkedDay(dateKey);
+                return;
+            }
+
+            const infoEl = e.target.closest('.worked-list__info');
+            if (infoEl) {
+                const dateKey = infoEl.dataset.date;
+                if (dateKey) openDayModal(dateKey);
+            }
+        });
+    }
+
+    const btnClearWorkedDaysMonth = document.getElementById('btnClearWorkedDaysMonth');
+    if (btnClearWorkedDaysMonth) {
+        btnClearWorkedDaysMonth.addEventListener('click', clearAllWorkedDaysMonth);
     }
 
     document.getElementById('monthlyGoalInput').addEventListener('input', (e) => {
