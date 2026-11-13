@@ -137,6 +137,37 @@ function initSettingsModal() {
     }
 }
 
+function initLegalModal() {
+    const legalModal = document.getElementById('legalModal');
+    const btnOpen = document.getElementById('btnOpenLegalModal');
+    const btnClose = document.getElementById('btnCloseLegalModal');
+    const btnConfirm = document.getElementById('btnConfirmCloseLegal');
+
+    if (btnOpen && legalModal) {
+        btnOpen.addEventListener('click', () => {
+            legalModal.classList.add('modal--open');
+        });
+    }
+
+    if (btnClose && legalModal) {
+        btnClose.addEventListener('click', () => {
+            legalModal.classList.remove('modal--open');
+        });
+    }
+
+    if (btnConfirm && legalModal) {
+        btnConfirm.addEventListener('click', () => {
+            legalModal.classList.remove('modal--open');
+        });
+    }
+
+    if (legalModal) {
+        legalModal.addEventListener('click', (e) => {
+            if (e.target === legalModal) legalModal.classList.remove('modal--open');
+        });
+    }
+}
+
 function renderAll() {
     applyModuleVisibility();
     renderCalendar();
@@ -290,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bindTaskEvents();
     bindShiftEvents();
     initSettingsModal();
+    initLegalModal();
     applyModuleVisibility();
 
     initCloudSync();

@@ -9,7 +9,7 @@
     <title>ShifterPro</title>
     <link rel="icon" type="image/png" href="icono.png?v=1">
     <link rel="apple-touch-icon" href="icono.png?v=1">
-    <link rel="stylesheet" href="styles.css?v=34">
+    <link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
     <div class="app">
@@ -893,18 +893,18 @@
     </div>
 
     <!-- PANTALLA COMPLETA EXCLUSIVA: REGISTRO, INICIO DE SESIÓN Y PERFIL DE USUARIO -->
-    <div id="authFullScreen" class="auth-fullscreen" style="display:none;">
+    <div id="authFullScreen" class="auth-fullscreen">
         <div class="auth-fullscreen__topbar">
             <div class="header__brand">
                 <img src="icono.png" alt="ShifterPro" style="width: 30px; height: 30px; border-radius: 8px; object-fit: cover;">
                 <span style="font-weight:800; font-size:1.05rem;">Shifter<span class="brand-pro">Pro</span></span>
             </div>
-            <button type="button" id="btnCloseAuthScreen" class="btn btn--sm btn--outline">← Volver a la app</button>
+            <button type="button" id="btnCloseAuthScreen" class="btn btn--sm btn--outline" style="display:none;">← Volver a la app</button>
         </div>
 
         <div class="auth-fullscreen__body">
             <!-- A. VISTA EXCLUSIVA DE REGISTRO -->
-            <div id="registerOnlyView" class="auth-card">
+            <div id="registerOnlyView" class="auth-card" style="display:none;">
                 <span class="modal__eyebrow" style="text-align:center;">NUEVA CUENTA SHIFTERPRO</span>
                 <h2 class="auth-card__title">Crear cuenta</h2>
                 <p class="auth-card__desc">Regístrate para sincronizar tus turnos, finanzas, gym y notas entre ordenador y móvil.</p>
@@ -946,6 +946,10 @@
                         </div>
                     </div>
 
+                    <p style="font-size:0.72rem; color:var(--text-secondary); text-align:center; margin-bottom:10px;">
+                        Al registrarte aceptas el <button type="button" class="btn-open-legal-action auth-switch-link" style="font-size:inherit;">Aviso de Privacidad y Condiciones</button>
+                    </p>
+
                     <div id="regErrorMsg" class="auth-error-msg" style="display:none;"></div>
 
                     <button type="submit" id="btnRegisterSubmit" class="btn btn--primary" style="width:100%; padding:12px;">
@@ -960,7 +964,7 @@
             </div>
 
             <!-- B. VISTA EXCLUSIVA DE INICIO DE SESIÓN -->
-            <div id="loginOnlyView" class="auth-card" style="display:none;">
+            <div id="loginOnlyView" class="auth-card" style="display:block;">
                 <span class="modal__eyebrow" style="text-align:center;">ACCESO A TU NUBE</span>
                 <h2 class="auth-card__title">Iniciar sesión</h2>
                 <p class="auth-card__desc">Introduce tu correo y contraseña para cargar tu perfil y calendario sincronizado.</p>
@@ -990,6 +994,12 @@
                 <div class="auth-switch-footer">
                     <span>¿Todavía no tienes cuenta?</span>
                     <button type="button" id="btnGoToRegisterView" class="auth-switch-link">Crear cuenta nueva</button>
+                </div>
+
+                <div style="text-align:center; margin-top:14px; font-size:0.74rem;">
+                    <button type="button" class="btn-open-legal-action auth-switch-link" style="font-size:inherit;">
+                        ⚖️ Ver Aviso de Privacidad, Copyright y Condiciones
+                    </button>
                 </div>
             </div>
 
@@ -1409,10 +1419,10 @@
                     💡 <em>Tus datos se guardan intactos aunque desactives un módulo; al volver a activarlo recuperarás todo al instante.</em>
                 </div>
 
-                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); text-align: center;">
-                    <a href="guia-estilo.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; color: var(--accent); text-decoration: none;">
-                        <span>📘</span> Abrir Guía de Estilo Oficial (PDF)
-                    </a>
+                <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); text-align: center;">
+                    <button type="button" id="btnOpenLegalModal" class="legal-link-btn">
+                        <span>⚖️</span> Aviso de Privacidad, Copyright y Condiciones
+                    </button>
                 </div>
             </div>
 
@@ -1424,10 +1434,74 @@
         </div>
     </div>
 
+    <!-- MODAL 5: AVISO LEGAL, PRIVACIDAD, COPYRIGHT & CONDICIONES -->
+    <div id="legalModal" class="modal">
+        <div class="modal__dialog" style="max-width: 620px;">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">TRANSPARENCIA & SEGURIDAD</span>
+                    <h3 class="modal__title">⚖️ Aviso Legal, Privacidad & Términos</h3>
+                </div>
+                <button type="button" id="btnCloseLegalModal" class="modal__close">&times;</button>
+            </div>
+
+            <div class="legal-content-box">
+                <!-- 1. PRIVACIDAD -->
+                <div class="legal-section-block">
+                    <h4><span>🔒</span> 1. Aviso de Privacidad y Protección de Datos (RGPD)</h4>
+                    <p>En <strong>ShifterPro</strong> tus horarios, vida laboral y notas personales son de tu exclusiva propiedad. Cumplimos con la normativa europea y española de protección de datos (RGPD / LOPDGDD):</p>
+                    <ul>
+                        <li><strong>Datos tratados:</strong> Horarios de turnos, horas computadas, notas en días, horas de alarma, sesiones de gym, ciclo femenino (si está activo) y credenciales de acceso.</li>
+                        <li><strong>Almacenamiento:</strong> Localmente en el almacenamiento de tu navegador (LocalStorage) y sincronizado de forma cifrada mediante Firebase (Google Cloud) solo si te autenticas.</li>
+                        <li><strong>Sin cesión comercial:</strong> Jamás vendemos, compartimos ni cedemos tus datos a anunciantes ni a empresas externas.</li>
+                        <li><strong>Tus derechos:</strong> Puedes exportar una copia completa de tus datos en JSON desde Ajustes o solicitar la baja y eliminación total de tu cuenta en cualquier momento.</li>
+                    </ul>
+                </div>
+
+                <!-- 2. COPYRIGHT -->
+                <div class="legal-section-block">
+                    <h4><span>©️</span> 2. Copyright y Propiedad Intelectual</h4>
+                    <p>© 2026 ShifterPro. Todos los derechos reservados.</p>
+                    <ul>
+                        <li>El código fuente, arquitectura técnica, algoritmos de cálculo rotativo, diseño de interfaces (UI/UX), hoja de estilos, marca y logotipo de <strong>ShifterPro</strong> son propiedad exclusiva de sus desarrolladores.</li>
+                        <li>Queda prohibida su reproducción, ingeniería inversa, distribución o explotación no autorizada.</li>
+                    </ul>
+                </div>
+
+                <!-- 3. CONDICIONES DE USO -->
+                <div class="legal-section-block">
+                    <h4><span>📋</span> 3. Condiciones de Uso</h4>
+                    <ul>
+                        <li><strong>Herramienta estimativa:</strong> ShifterPro es una aplicación de ayuda a la organización personal. Los cálculos de ganancias, horas extras y nómina son orientativos; la cuantía legal oficial corresponde siempre a los recibos de salarios emitidos por tu empresa y tu convenio laboral.</li>
+                        <li><strong>Custodia de claves:</strong> El usuario es responsable de mantener la seguridad y confidencialidad de su contraseña.</li>
+                    </ul>
+                </div>
+
+                <!-- 4. CONDICIONES DE VENTA -->
+                <div class="legal-section-block">
+                    <h4><span>💳</span> 4. Condiciones de Venta y Transparencia</h4>
+                    <p>Compromiso de claridad económica: cualquier funcionalidad premium se informa siempre de forma previa y transparente. Sin cargos sorpresa, sin cobros ocultos y con derecho legal de desistimiento y cancelación.</p>
+                </div>
+
+                <div style="margin-top: 14px; text-align: center;">
+                    <a href="legal.html" target="_blank" style="font-size: 0.78rem; font-weight: 700; color: var(--accent); text-decoration: none;">
+                        Abrir versión completa en página web ↗
+                    </a>
+                </div>
+            </div>
+
+            <div class="modal__footer" style="margin-top: 16px;">
+                <button type="button" id="btnConfirmCloseLegal" class="btn btn--primary" style="width: 100%;">
+                    Entendido y Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- SDK DE FIREBASE (AUTH + FIRESTORE) -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script type="module" src="js/main.js?v=35"></script>
+    <script type="module" src="js/main.js?v=36"></script>
 </body>
 </html>

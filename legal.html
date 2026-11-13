@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Aviso de Privacidad, Copyright y Condiciones · ShifterPro</title>
+    <link rel="icon" type="image/png" href="icono.png">
+    <style>
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --bg-base: #060913;
+            --bg-surface: #0f172a;
+            --bg-card: #1e293b;
+            --bg-subtle: #334155;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --accent-hover: #059669;
+        }
+
+        :root[data-theme="light"] {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-card: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #10b981;
+            --accent-hover: #047857;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.65;
+            padding-bottom: 60px;
+        }
+
+        .legal-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.9);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        :root[data-theme="light"] .legal-header {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .legal-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legal-brand__title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .legal-brand__title span {
+            color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            transition: all 0.15s ease;
+        }
+
+        .btn-link:hover {
+            background: var(--bg-subtle);
+        }
+
+        .btn-link--primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+
+        .btn-link--primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .legal-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 36px 20px;
+        }
+
+        .hero-banner {
+            text-align: center;
+            padding: 30px 10px 40px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 36px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.14);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: var(--accent);
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .hero-title {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .hero-title span {
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .legal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .legal-card__header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .legal-card__icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .legal-card__title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .legal-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .legal-card ul {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            padding-left: 20px;
+            margin-bottom: 14px;
+        }
+
+        .legal-card li {
+            margin-bottom: 6px;
+        }
+
+        .legal-card strong {
+            color: var(--text-main);
+        }
+
+        .highlight-box {
+            background: var(--bg-subtle);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            margin-top: 14px;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 600px) {
+            .legal-header { padding: 12px 16px; }
+            .hero-title { font-size: 1.65rem; }
+            .legal-card { padding: 18px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="legal-header">
+        <div class="legal-brand">
+            <img src="icono.png" alt="ShifterPro" style="width: 30px; height: 30px; border-radius: 8px; object-fit: cover;">
+            <div class="legal-brand__title">Shifter<span>Pro</span></div>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn-link" id="btnToggleTheme">
+                <span id="themeIcon">☀️</span> Tema
+            </button>
+            <a href="index.html" class="btn-link btn-link--primary">
+                ← Volver a ShifterPro
+            </a>
+        </div>
+    </header>
+
+    <main class="legal-container">
+        <div class="hero-banner">
+            <span class="hero-badge">Marco Legal y Transparencia</span>
+            <h1 class="hero-title">Aviso de Privacidad, Copyright y Condiciones</h1>
+            <p class="hero-desc">
+                Información clara, directa y transparente sobre cómo protegemos tus datos, la propiedad de ShifterPro y nuestras condiciones de servicio.
+            </p>
+        </div>
+
+        <!-- 1. AVISO DE PRIVACIDAD -->
+        <article class="legal-card">
+            <div class="legal-card__header">
+                <span class="legal-card__icon">🔒</span>
+                <h2 class="legal-card__title">1. Aviso de Privacidad y Protección de Datos</h2>
+            </div>
+            <p>
+                En <strong>ShifterPro</strong> creemos firmemente que los horarios de trabajo y la vida personal de un usuario le pertenecen únicamente a él. Cumplimos con el Reglamento General de Protección de Datos (RGPD / GDPR) y la normativa aplicable en materia de privacidad digital.
+            </p>
+            <ul>
+                <li><strong>¿Qué datos se registran?</strong> Únicamente los datos necesarios para tu planificación: turnos laborales, horas trabajadas, notas personales en casillas, horas de despertador, metas de entrenamiento, registro del ciclo femenino (si decides activarlo) y tus credenciales de inicio de sesión.</li>
+                <li><strong>¿Dónde se guardan?</strong> Los datos se almacenan de manera local en el almacenamiento seguro de tu propio navegador. Si decides registrarte, se sincronizan mediante los servidores seguros de Firebase (Google Cloud Platform) con cifrado SSL/TLS.</li>
+                <li><strong>Cero venta de datos:</strong> ShifterPro no vende, no alquila ni comercializa jamás tus datos personales con terceros, anunciantes o empresas externas.</li>
+                <li><strong>Derechos del usuario:</strong> En cualquier momento puedes solicitar la exportación de todos tus datos en formato JSON desde la sección de ajustes, así como solicitar el borrado total de tu cuenta y registros asociados.</li>
+            </ul>
+            <div class="highlight-box">
+                🛡️ <em>Tus datos están protegidos y solo son accesibles mediante tu contraseña personal cifrada.</em>
+            </div>
+        </article>
+
+        <!-- 2. COPYRIGHT Y PROPIEDAD INTELECTUAL -->
+        <article class="legal-card">
+            <div class="legal-card__header">
+                <span class="legal-card__icon">©️</span>
+                <h2 class="legal-card__title">2. Copyright y Propiedad Intelectual</h2>
+            </div>
+            <p>
+                Todos los derechos de propiedad intelectual e industrial sobre la aplicación web y móvil <strong>ShifterPro</strong>, así como sus elementos constitutivos, pertenecen de forma exclusiva a sus desarrolladores y creadores legítimos.
+            </p>
+            <ul>
+                <li><strong>Elementos protegidos:</strong> El código fuente, código objeto, algoritmos de cálculo rotativo de patrones, diseño de interfaces de usuario (UI/UX), hoja de estilos, iconos corporativos, logotipo oficial y denominación <strong>ShifterPro</strong> están protegidos por las leyes de propiedad intelectual internacionales.</li>
+                <li><strong>Prohibición de copia no autorizada:</strong> Queda terminantemente prohibida la reproducción, distribución, comunicación pública, ingeniería inversa, descompilación o explotación comercial total o parcial de esta plataforma sin la previa autorización por escrito de los titulares.</li>
+            </ul>
+            <div class="highlight-box">
+                ⚖️ <em>© 2026 ShifterPro. Todos los derechos reservados.</em>
+            </div>
+        </article>
+
+        <!-- 3. CONDICIONES DE USO -->
+        <article class="legal-card">
+            <div class="legal-card__header">
+                <span class="legal-card__icon">📋</span>
+                <h2 class="legal-card__title">3. Condiciones Generales de Uso</h2>
+            </div>
+            <p>
+                El acceso y utilización de ShifterPro le atribuye la condición de usuario e implica la aceptación plena de las siguientes condiciones:
+            </p>
+            <ul>
+                <li><strong>Uso lícito y personal:</strong> El usuario se compromete a hacer un uso diligente y adecuado de la aplicación, manteniendo en custodia sus credenciales de acceso.</li>
+                <li><strong>Herramienta estimativa de apoyo:</strong> ShifterPro es una aplicación de ayuda a la organización personal. Los cálculos de ganancias, horas extras, pluses y retenciones de nómina son herramientas de estimación y previsión orientativa para el usuario. El importe oficial y definitivo siempre corresponderá a los recibos de nómina expedidos por la empresa y el convenio colectivo de trabajo aplicable.</li>
+                <li><strong>Disponibilidad del servicio:</strong> Nos esforzamos por mantener la plataforma disponible de forma continua 24/7, garantizando funcionamiento sin conexión en local.</li>
+            </ul>
+        </article>
+
+        <!-- 4. CONDICIONES DE VENTA Y SUSCRIPCIONES -->
+        <article class="legal-card">
+            <div class="legal-card__header">
+                <span class="legal-card__icon">💳</span>
+                <h2 class="legal-card__title">4. Condiciones de Venta y Transparencia Económica</h2>
+            </div>
+            <p>
+                En caso de contratación de funcionalidades avanzadas o futuras modalidades premium, ShifterPro se rige por los siguientes principios de máxima transparencia:
+            </p>
+            <ul>
+                <li><strong>Precios claros y sin sorpresas:</strong> Cualquier tarifa o cuota se mostrará con los impuestos aplicables desglosados con anterioridad al pago. No existen cargos ocultos ni renovaciones engañosas.</li>
+                <li><strong>Garantía de desistimiento:</strong> El usuario cuenta con el derecho legal de cancelación y desistimiento según la normativa de protección a consumidores y usuarios.</li>
+                <li><strong>Pasarelas seguras:</strong> Cualquier transacción monetaria se realiza mediante proveedores de pago acreditados y con estándares PCI-DSS de máxima seguridad bancaria.</li>
+            </ul>
+        </article>
+
+        <footer class="footer-note">
+            <p>
+                <strong>ShifterPro</strong> · Documento legal actualizado en Noviembre de 2026.<br>
+                Para cualquier consulta sobre privacidad o soporte: ponte en contacto desde tu perfil de usuario.
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        const btnToggleTheme = document.getElementById('btnToggleTheme');
+        const themeIcon = document.getElementById('themeIcon');
+        btnToggleTheme.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            themeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
+</body>
+</html>

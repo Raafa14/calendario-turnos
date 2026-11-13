@@ -74,9 +74,19 @@ function openAuthScreen(subViewName) {
     document.getElementById('loginOnlyView').style.display = subViewName === 'LOGIN' ? 'block' : 'none';
     document.getElementById('authVerifyView').style.display = subViewName === 'VERIFY' ? 'block' : 'none';
     document.getElementById('authProfileView').style.display = subViewName === 'PROFILE' ? 'block' : 'none';
+
+    // El botón de volver solo se muestra si el usuario ya está autenticado y está viendo su perfil
+    const closeBtn = document.getElementById('btnCloseAuthScreen');
+    if (closeBtn) {
+        closeBtn.style.display = (currentUser && currentUser.emailVerified && subViewName === 'PROFILE') ? 'inline-flex' : 'none';
+    }
 }
 
 function closeAuthScreen() {
+    if (!currentUser || !currentUser.emailVerified) {
+        openAuthScreen('LOGIN');
+        return;
+    }
     document.getElementById('authFullScreen').style.display = 'none';
 }
 
@@ -243,6 +253,11 @@ export function initCloudSync() {
     updateProfileUI();
     if (!fbAuth || !fbDb) return;
 
+    // Obligar a iniciar sesión antes de acceder a la app si no hay sesión activa
+    if (!fbAuth.currentUser) {
+        openAuthScreen('LOGIN');
+    }
+
     fbAuth.onAuthStateChanged(async (user) => {
         const dot = document.getElementById('cloudStatusDot');
 
@@ -255,6 +270,7 @@ export function initCloudSync() {
             currentUser = null;
             dot.classList.remove('cloud-dot--online', 'cloud-dot--pending');
             updateProfileUI();
+            openAuthScreen('LOGIN');
             return;
         }
 
@@ -275,6 +291,7 @@ export function initCloudSync() {
             return;
         }
 
+        closeAuthScreen();
         await handleVerifiedUserSession(user);
     });
 }
@@ -502,11 +519,21 @@ export function bindCloudEvents() {
         alert('Perfil guardado y sincronizado en todos tus dispositivos.');
     });
 
+    document.querySelectorAll('.btn-open-legal-action').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const legalModal = document.getElementById('legalModal');
+            if (legalModal) legalModal.classList.add('modal--open');
+        });
+    });
+
     document.getElementById('btnAuthLogout').addEventListener('click', async () => {
+        if (!confirm('¿Seguro que deseas cerrar sesión?')) return;
         if (!fbAuth) return;
         await fbAuth.signOut();
         localStorage.removeItem('shifterpro_synced_uid');
+        currentUser = null;
         updateProfileUI();
-        closeAuthScreen();
+        openAuthScreen('LOGIN');
     });
 }
