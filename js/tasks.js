@@ -204,7 +204,12 @@ function openEditTaskModal(task) {
 
     document.getElementById('editTaskTextInput').value = task.text || '';
     document.getElementById('editTaskCategorySelect').value = task.category || 'Personal';
-    document.getElementById('editTaskDueDateInput').value = task.dueDate || '';
+    
+    const dueDateInput = document.getElementById('editTaskDueDateInput');
+    if (dueDateInput) {
+        dueDateInput.value = task.dueDate || '';
+        updateEditDueDateClearBtn();
+    }
 
     // Sincronizar chips de prioridad en el modal de edición
     syncEditPriorityChips(editDraftPriority);
@@ -217,6 +222,13 @@ function closeEditTaskModal() {
     editingTaskId = null;
     const modal = document.getElementById('editTaskModal');
     if (modal) modal.classList.remove('modal--open');
+}
+
+function updateEditDueDateClearBtn() {
+    const input = document.getElementById('editTaskDueDateInput');
+    const clearBtn = document.getElementById('btnClearEditTaskDueDate');
+    const hasVal = Boolean(input && input.value);
+    if (clearBtn) clearBtn.style.display = hasVal ? 'inline-flex' : 'none';
 }
 
 function syncEditPriorityChips(priority) {
@@ -236,7 +248,7 @@ function updateComposerDueDateClearBtn() {
     const clearBtn = document.getElementById('btnClearTaskDueDate');
     const quickClearBtn = document.getElementById('btnQuickClearDate');
     const hasVal = Boolean(input && input.value);
-    if (clearBtn) clearBtn.style.display = hasVal ? 'block' : 'none';
+    if (clearBtn) clearBtn.style.display = hasVal ? 'inline-flex' : 'none';
     if (quickClearBtn) quickClearBtn.style.display = hasVal ? 'inline-block' : 'none';
 }
 
@@ -331,6 +343,7 @@ export function bindTaskEvents() {
     const dueDateInput = document.getElementById('taskDueDateInput');
     if (dueDateInput) {
         dueDateInput.addEventListener('input', updateComposerDueDateClearBtn);
+        dueDateInput.addEventListener('change', updateComposerDueDateClearBtn);
     }
 
     const clearDateBtn = document.getElementById('btnClearTaskDueDate');
@@ -473,11 +486,17 @@ export function bindTaskEvents() {
     const cancelEditBtn = document.getElementById('btnCancelEditTask');
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditTaskModal);
 
+    const editDueDateInput = document.getElementById('editTaskDueDateInput');
+    if (editDueDateInput) {
+        editDueDateInput.addEventListener('input', updateEditDueDateClearBtn);
+        editDueDateInput.addEventListener('change', updateEditDueDateClearBtn);
+    }
+
     const clearEditDateBtn = document.getElementById('btnClearEditTaskDueDate');
     if (clearEditDateBtn) {
         clearEditDateBtn.addEventListener('click', () => {
-            const el = document.getElementById('editTaskDueDateInput');
-            if (el) el.value = '';
+            if (editDueDateInput) editDueDateInput.value = '';
+            updateEditDueDateClearBtn();
         });
     }
 

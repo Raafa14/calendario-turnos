@@ -1450,38 +1450,66 @@ select option {
 }
 
 .task-date-input-wrap {
-    position: relative;
     display: flex;
     align-items: center;
+    gap: 6px;
+    width: 100%;
 }
 
-.task-composer__date-input {
-    width: 100%;
-    height: 36px;
-    padding: 4px 8px;
+.task-date-input-wrap input[type="date"],
+.task-composer__date-input,
+.task-date-input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 6px 10px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--bg-subtle);
     color: var(--text-primary);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 700;
 }
 
-.task-date-clear-btn {
-    position: absolute;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.16);
-    color: var(--text-primary);
-    font-size: 0.88rem;
+.task-date-input-wrap input[type="date"]:focus,
+.task-composer__date-input:focus,
+.task-date-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
     cursor: pointer;
-    display: flex;
+}
+
+:root[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.task-date-clear-btn {
+    position: static;
+    flex-shrink: 0;
+    width: 36px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
+    transition: all 0.14s ease;
+}
+
+.task-date-clear-btn:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: var(--danger);
+    color: var(--danger);
 }
 
 .task-quick-dates {
