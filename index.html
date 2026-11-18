@@ -548,24 +548,77 @@
                         <div id="tasksProgressBar" class="goal-progress__bar" style="width:0%;"></div>
                     </div>
 
-                    <div class="piggy-controls" style="margin-top:0;">
-                        <input type="text" id="taskTextInput" placeholder="Nueva tarea (Ej: Pedir día libre...)">
-                        <button type="button" id="btnTaskUrgentToggle" class="task-urgent-toggle" title="Marcar urgente">!</button>
-                        <button type="button" id="btnAddTask" class="btn btn--sm btn--primary">+</button>
+                    <!-- Creador de Tareas Moderno & Adaptado a Móvil -->
+                    <div class="task-composer">
+                        <div class="task-composer__input-row">
+                            <input type="text" id="taskTextInput" class="task-composer__input" placeholder="Nueva tarea (Ej: Pedir día libre, Estudiar...)" autocomplete="off">
+                            <button type="button" id="btnAddTask" class="btn btn--primary task-composer__add-btn">
+                                <span>+ Añadir</span>
+                            </button>
+                        </div>
+
+                        <!-- Selector de Prioridad con los 3 colores: No urgente (Verde), Fecha límite (Naranja), Urgente (Rojo) -->
+                        <div class="task-composer__options">
+                            <div class="task-priority-group">
+                                <span class="task-option-lbl">Prioridad:</span>
+                                <div class="task-priority-chips" id="taskPriorityChips">
+                                    <button type="button" class="task-priority-chip task-priority-chip--low" data-priority="low" title="No urgente (Verde)">
+                                        <span class="chip-color-dot chip-color-dot--low"></span>
+                                        <span>No urgente</span>
+                                    </button>
+                                    <button type="button" class="task-priority-chip task-priority-chip--medium task-priority-chip--active" data-priority="medium" title="Hasta fecha límite (Naranja)">
+                                        <span class="chip-color-dot chip-color-dot--medium"></span>
+                                        <span>Fecha límite</span>
+                                    </button>
+                                    <button type="button" class="task-priority-chip task-priority-chip--high" data-priority="high" title="Urgente / Importante (Rojo)">
+                                        <span class="chip-color-dot chip-color-dot--high"></span>
+                                        <span>Urgente</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Opciones: Categoría y Fecha límite de entrega -->
+                            <div class="task-composer__meta-row">
+                                <div class="task-composer__field">
+                                    <label for="taskCategorySelect" class="task-option-lbl">Categoría:</label>
+                                    <select id="taskCategorySelect" class="form-select task-composer__select">
+                                        <option value="Personal">Personal</option>
+                                        <option value="Trabajo">Trabajo</option>
+                                        <option value="Gym">Gym</option>
+                                        <option value="Estudios">Estudios</option>
+                                        <option value="Compras">Compras</option>
+                                    </select>
+                                </div>
+                                <div class="task-composer__field task-composer__field--date">
+                                    <label for="taskDueDateInput" class="task-option-lbl">📅 Fecha límite:</label>
+                                    <div class="task-date-input-wrap">
+                                        <input type="date" id="taskDueDateInput" class="task-composer__date-input" title="Fecha límite de entrega">
+                                        <button type="button" id="btnClearTaskDueDate" class="task-date-clear-btn" title="Quitar fecha" style="display:none;">&times;</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones rápidos de fecha límite -->
+                            <div class="task-quick-dates">
+                                <span class="task-quick-dates__label">Atajos fecha:</span>
+                                <button type="button" class="task-quick-date-btn" data-days="0">Hoy</button>
+                                <button type="button" class="task-quick-date-btn" data-days="1">Mañana</button>
+                                <button type="button" class="task-quick-date-btn" data-days="7">+7 días</button>
+                                <button type="button" class="task-quick-date-btn task-quick-date-btn--clear" id="btnQuickClearDate" style="display:none;">Sin fecha</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="task-filters-row">
-                        <select id="taskCategorySelect" class="form-select" style="max-width:122px; height:34px; font-size:0.76rem !important; padding:4px 26px 4px 8px;">
-                            <option value="Personal">Personal</option>
-                            <option value="Trabajo">Trabajo</option>
-                            <option value="Gym">Gym</option>
-                            <option value="Compras">Compras</option>
-                        </select>
+                    <!-- Filtros por categoría -->
+                    <div class="task-filters-section">
+                        <span class="task-filters-label">Filtrar:</span>
                         <div class="task-filter-pills" id="taskFilterPills">
                             <button type="button" class="task-pill-btn task-pill-btn--active" data-filter="ALL">Todas</button>
                             <button type="button" class="task-pill-btn" data-filter="Trabajo">Trabajo</button>
                             <button type="button" class="task-pill-btn" data-filter="Gym">Gym</button>
                             <button type="button" class="task-pill-btn" data-filter="Personal">Personal</button>
+                            <button type="button" class="task-pill-btn" data-filter="Estudios">Estudios</button>
+                            <button type="button" class="task-pill-btn" data-filter="Compras">Compras</button>
                         </div>
                     </div>
 
@@ -1261,8 +1314,23 @@
                     </label>
 
                     <div class="sticker-bar">
-                        <span class="sticker-bar__label">Icono rápido:</span>
+                        <div class="sticker-bar__top">
+                            <span class="sticker-bar__label">Icono de la casilla:</span>
+                            <span id="activeStickerBadge" class="active-sticker-badge" style="display:none;"></span>
+                        </div>
                         <div id="stickerList" class="sticker-list"></div>
+
+                        <!-- Selector libre: Cualquier icono/emoji -->
+                        <div class="sticker-custom-box">
+                            <div class="sticker-custom-row">
+                                <input type="text" id="customEmojiInput" class="custom-emoji-input" placeholder="O escribe/pega cualquier emoji..." maxlength="8" title="Escribe o pega cualquier icono/emoji">
+                                <button type="button" id="btnOpenEmojiCatalog" class="btn btn--sm btn--primary sticker-catalog-btn" title="Ver todos los iconos disponibles">
+                                    <span>🎨 Todos los iconos</span>
+                                </button>
+                                <button type="button" id="btnClearCustomSticker" class="btn btn--sm btn--ghost" title="Quitar icono">Quitar</button>
+                            </div>
+                            <small class="sticker-hint-text">Elige un icono rápido, pulsa en "Todos los iconos" para ver cientos de emojis, o escribe/pega el que quieras.</small>
+                        </div>
                     </div>
 
                     <div class="live-preview-box">
@@ -1387,6 +1455,97 @@
             </div>
             <div class="modal__footer">
                 <button type="button" id="btnConfirmTaskToCal" class="btn btn--primary">Apuntar en casilla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR TAREA -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal__dialog" style="max-width: 440px;">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">GESTIÓN DE TAREA</span>
+                    <h3 class="modal__title">Editar Tarea</h3>
+                </div>
+                <button type="button" id="btnCloseEditTaskModal" class="modal__close">&times;</button>
+            </div>
+            <div class="modal__body" style="padding: 14px 16px;">
+                <div class="calc-box__field" style="margin-bottom: 12px;">
+                    <label>Título o texto de la tarea:</label>
+                    <input type="text" id="editTaskTextInput" class="text-input" placeholder="Nombre de la tarea...">
+                </div>
+
+                <div class="calc-box__field" style="margin-bottom: 12px;">
+                    <label class="task-option-lbl" style="margin-bottom:6px;">Prioridad:</label>
+                    <div class="task-priority-chips" id="editTaskPriorityChips">
+                        <button type="button" class="task-priority-chip task-priority-chip--low" data-priority="low" title="No urgente (Verde)">
+                            <span class="chip-color-dot chip-color-dot--low"></span> No urgente
+                        </button>
+                        <button type="button" class="task-priority-chip task-priority-chip--medium" data-priority="medium" title="Hasta fecha límite (Naranja)">
+                            <span class="chip-color-dot chip-color-dot--medium"></span> Fecha límite
+                        </button>
+                        <button type="button" class="task-priority-chip task-priority-chip--high" data-priority="high" title="Urgente / Importante (Rojo)">
+                            <span class="chip-color-dot chip-color-dot--high"></span> Urgente
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calc-box__row" style="margin-bottom: 8px;">
+                    <div class="calc-box__field">
+                        <label>Categoría:</label>
+                        <select id="editTaskCategorySelect" class="form-select">
+                            <option value="Personal">Personal</option>
+                            <option value="Trabajo">Trabajo</option>
+                            <option value="Gym">Gym</option>
+                            <option value="Estudios">Estudios</option>
+                            <option value="Compras">Compras</option>
+                        </select>
+                    </div>
+                    <div class="calc-box__field">
+                        <label>📅 Fecha límite entrega:</label>
+                        <div class="task-date-input-wrap">
+                            <input type="date" id="editTaskDueDateInput" class="form-select" style="height: 38px;">
+                            <button type="button" id="btnClearEditTaskDueDate" class="task-date-clear-btn" title="Quitar fecha">&times;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal__footer" style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" id="btnCancelEditTask" class="btn btn--outline">Cancelar</button>
+                <button type="button" id="btnSaveEditTask" class="btn btn--primary">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CATÁLOGO COMPLETO DE ICONOS / EMOJIS -->
+    <div id="emojiCatalogModal" class="modal">
+        <div class="modal__dialog emoji-catalog-dialog">
+            <div class="modal__header">
+                <div>
+                    <span class="modal__eyebrow">PERSONALIZACIÓN DE CASILLA</span>
+                    <h3 class="modal__title">🎨 Elige cualquier icono</h3>
+                </div>
+                <button type="button" id="btnCloseEmojiCatalog" class="modal__close">&times;</button>
+            </div>
+            <div class="emoji-catalog-toolbar">
+                <input type="search" id="emojiSearchInput" class="emoji-search-input" placeholder="🔍 Buscar icono (ej: médico, coche, gym, fiesta, cena, viaje...)" autocomplete="off">
+                <div class="emoji-category-tabs" id="emojiCategoryTabs">
+                    <button type="button" class="emoji-tab-btn emoji-tab-btn--active" data-cat="all">Todos</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="work">💼 Trabajo</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="health">🏥 Salud</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="sport">🏋️ Gym</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="fun">🎉 Ocio</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="travel">✈️ Viajes</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="alert">⚠️ Avisos</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="feel">⭐ Emociones</button>
+                    <button type="button" class="emoji-tab-btn" data-cat="food">🍕 Comida</button>
+                </div>
+            </div>
+            <div class="emoji-catalog-scroll" id="emojiCatalogGrid"></div>
+            <div class="modal__footer emoji-catalog-footer">
+                <button type="button" id="btnRemoveStickerFromCatalog" class="btn btn--sm btn--danger">Quitar icono (—)</button>
+                <span id="emojiCatalogCount" class="emoji-catalog-count">Cargando iconos...</span>
+                <button type="button" id="btnCloseEmojiCatalogBottom" class="btn btn--sm btn--outline">Cerrar</button>
             </div>
         </div>
     </div>

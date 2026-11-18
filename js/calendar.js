@@ -24,12 +24,36 @@ export function renderCalendar() {
     const now = new Date();
     const todayKey = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
 
+    // 1. Días del mes anterior (visibles con claridad y clickeables para crear en ese mes)
+    const prevMonthLastDate = new Date(state.currentYear, state.currentMonth, 0);
+    const prevYear = prevMonthLastDate.getFullYear();
+    const prevMonth = prevMonthLastDate.getMonth();
+    const prevTotalDays = prevMonthLastDate.getDate();
+
     for (let i = 0; i < offset; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'day-cell day-cell--empty';
-        grid.appendChild(empty);
+        const prevDay = prevTotalDays - offset + 1 + i;
+        const prevDateKey = formatDateKey(prevYear, prevMonth, prevDay);
+        const prevInfo = state.daysData[prevDateKey];
+        const cell = document.createElement('div');
+        cell.className = 'day-cell day-cell--other-month day-cell--prev-month';
+        cell.title = `Mes anterior: ${prevDay}/${prevMonth + 1}/${prevYear} (Toca para ir y crear)`;
+        if (prevDateKey === todayKey) cell.classList.add('day-cell--today');
+
+        paintCell(cell, prevDay, prevInfo, prevDateKey);
+
+        cell.addEventListener('click', () => {
+            // Navega directamente al mes anterior y abre la casilla para editar/crear
+            state.currentYear = prevYear;
+            state.currentMonth = prevMonth;
+            saveState();
+            triggerRenderAll();
+            openDayModal(prevDateKey);
+        });
+
+        grid.appendChild(cell);
     }
 
+    // 2. Días del mes actual
     for (let day = 1; day <= totalDays; day++) {
         const dateKey = formatDateKey(state.currentYear, state.currentMonth, day);
         const info = state.daysData[dateKey];
@@ -58,7 +82,7 @@ export function renderCalendar() {
             if (!matches) cell.classList.add('day-cell--dimmed');
         }
 
-        paintCell(cell, day, info);
+        paintCell(cell, day, info, dateKey);
         cell.addEventListener('click', () => {
             if (state.isBatchMode) {
                 toggleBatchDate(dateKey, cell);
@@ -67,6 +91,37 @@ export function renderCalendar() {
             }
         });
         grid.appendChild(cell);
+    }
+
+    // 3. Días del mes siguiente (completa la semana en cuadrícula limpia y clickeables para crear)
+    const totalRendered = offset + totalDays;
+    const remainingSlots = (totalRendered % 7 === 0) ? 0 : 7 - (totalRendered % 7);
+    if (remainingSlots > 0) {
+        const nextMonthDate = new Date(state.currentYear, state.currentMonth + 1, 1);
+        const nextYear = nextMonthDate.getFullYear();
+        const nextMonth = nextMonthDate.getMonth();
+
+        for (let nextDay = 1; nextDay <= remainingSlots; nextDay++) {
+            const nextDateKey = formatDateKey(nextYear, nextMonth, nextDay);
+            const nextInfo = state.daysData[nextDateKey];
+            const cell = document.createElement('div');
+            cell.className = 'day-cell day-cell--other-month day-cell--next-month';
+            cell.title = `Mes siguiente: ${nextDay}/${nextMonth + 1}/${nextYear} (Toca para ir y crear)`;
+            if (nextDateKey === todayKey) cell.classList.add('day-cell--today');
+
+            paintCell(cell, nextDay, nextInfo, nextDateKey);
+
+            cell.addEventListener('click', () => {
+                // Navega directamente al mes siguiente y abre la casilla para editar/crear
+                state.currentYear = nextYear;
+                state.currentMonth = nextMonth;
+                saveState();
+                triggerRenderAll();
+                openDayModal(nextDateKey);
+            });
+
+            grid.appendChild(cell);
+        }
     }
 
     renderCalendarSummaryAndUpcoming();
@@ -177,8 +232,9 @@ export function getAdaptedFontSize(customText, requestedSize) {
     return Math.min(base, 11);
 }
 
-export function paintCell(cellEl, dayNumber, info) {
+export function paintCell(cellEl, dayNumber, info, explicitDateKey) {
     cellEl.innerHTML = '';
+    const dKey = explicitDateKey || formatDateKey(state.currentYear, state.currentMonth, dayNumber);
     const shift = (info && state.shifts[info.shiftId]) ? state.shifts[info.shiftId] : state.shifts.NONE;
 
     let bgColor = '';
@@ -215,7 +271,6 @@ export function paintCell(cellEl, dayNumber, info) {
     }
 
     if (state.cycle && state.cycle.enabled && state.cycle.showOnCalendar) {
-        const dKey = formatDateKey(state.currentYear, state.currentMonth, dayNumber);
         const cycleStatus = getDayCycleStatus(dKey);
         if (cycleStatus) {
             const cycleBadge = document.createElement('span');
@@ -239,7 +294,7 @@ export function paintCell(cellEl, dayNumber, info) {
     dayNumSpan.textContent = dayNumber;
     top.appendChild(dayNumSpan);
 
-    if (state.isBatchMode && state.batchSelectedDates.includes(formatDateKey(state.currentYear, state.currentMonth, dayNumber))) {
+    if (state.isBatchMode && state.batchSelectedDates.includes(dKey)) {
         const checkBadge = document.createElement('span');
         checkBadge.className = 'batch-cell-check';
         checkBadge.textContent = '✓';
@@ -374,14 +429,228 @@ function updateAlarmHintText() {
         : `Entras a las ${start}. Elige despertador:`;
 }
 
+export const EMOJI_CATALOG = [
+    // Trabajo & Turnos
+    { emoji: '💼', cat: 'work', name: 'maletin maleta trabajo oficina empleo laboral' },
+    { emoji: '🏢', cat: 'work', name: 'edificio oficina empresa trabajo centro' },
+    { emoji: '🚗', cat: 'work', name: 'coche auto viaje ruta volante' },
+    { emoji: '🚌', cat: 'work', name: 'bus autobus transporte ruta trayecto' },
+    { emoji: '🕒', cat: 'work', name: 'reloj hora turno tiempo puntual horario' },
+    { emoji: '⏰', cat: 'work', name: 'despertador alarma madrugar reloj entrada' },
+    { emoji: '💻', cat: 'work', name: 'portatil ordenador pc teletrabajo programar informatica' },
+    { emoji: '📱', cat: 'work', name: 'movil telefono llamada mensaje whatsapp' },
+    { emoji: '🔧', cat: 'work', name: 'herramienta llave taller mecanico reparar averia' },
+    { emoji: '📦', cat: 'work', name: 'paquete envio entrega mensajero cajas almacen' },
+    { emoji: '🛡️', cat: 'work', name: 'seguridad guardia proteccion escudo' },
+    { emoji: '👷', cat: 'work', name: 'obrero obra construccion operario casco' },
+    { emoji: '👨‍⚕️', cat: 'work', name: 'medico doctor enfermero hospital bata guardia' },
+    { emoji: '👮', cat: 'work', name: 'policia seguridad vigilancia agente patrulla' },
+    { emoji: '⚡', cat: 'work', name: 'rayo electricista energia guardia urgencia voltio' },
+    { emoji: '📄', cat: 'work', name: 'documento contrato papel factura nomina informe tramite' },
+    { emoji: '📞', cat: 'work', name: 'telefono atencion llamada guardia centralita' },
+    { emoji: '🧰', cat: 'work', name: 'caja herramientas taller bricolaje reparacion' },
+    { emoji: '🏪', cat: 'work', name: 'tienda comercio supermercado turno apertura cajero' },
+    { emoji: '🚚', cat: 'work', name: 'camion reparto logistica carga transporte furgon' },
+    { emoji: '💰', cat: 'work', name: 'dinero bolsa sueldo extra cobro propina bote' },
+    { emoji: '💶', cat: 'work', name: 'euro billete pago nomina cash efectivo' },
+
+    // Salud & Citas
+    { emoji: '🏥', cat: 'health', name: 'hospital clinica urgencias centro salud ambulatorio' },
+    { emoji: '💊', cat: 'health', name: 'pastilla medicamento farmacia capsula receta dosis' },
+    { emoji: '🩺', cat: 'health', name: 'fonendo estetoscopio doctor medico cita consulta auscultar' },
+    { emoji: '💉', cat: 'health', name: 'inyeccion vacuna analisis sangre jeringa pinchazo' },
+    { emoji: '🧘', cat: 'health', name: 'yoga meditar relax salud mental estirar pilates zen' },
+    { emoji: '🦷', cat: 'health', name: 'diente dentista muela boca empaste revision' },
+    { emoji: '🩹', cat: 'health', name: 'tirita cura herida fisio golpe venda golpe dolor' },
+    { emoji: '🚑', cat: 'health', name: 'ambulancia emergencia urgencias traslado' },
+    { emoji: '🧼', cat: 'health', name: 'jabon limpieza higiene ducha aseo' },
+    { emoji: '🧬', cat: 'health', name: 'adn analisis test laboratorio muestra' },
+    { emoji: '🩸', cat: 'health', name: 'sangre periodo regla donar gota menstruacion' },
+    { emoji: '🤒', cat: 'health', name: 'enfermo fiebre resfriado baja gripe malo termometro' },
+    { emoji: '👁️', cat: 'health', name: 'ojo vista oculista optica gafas revision optico' },
+    { emoji: '🧠', cat: 'health', name: 'cerebro mente psicologo terapia estres consulta psiquiatra' },
+    { emoji: '🐾', cat: 'health', name: 'veterinario perro gato mascota huella animal peluqueria canina' },
+
+    // Gym & Deporte
+    { emoji: '🏋️', cat: 'sport', name: 'pesas gym gimnasio entreno fitness fuerza musculacion press sentadilla barra' },
+    { emoji: '⚽', cat: 'sport', name: 'futbol partido balon pachanga liga' },
+    { emoji: '🏀', cat: 'sport', name: 'baloncesto basket canasta tiro' },
+    { emoji: '🎾', cat: 'sport', name: 'tenis padel raqueta partido pista peloteo' },
+    { emoji: '🏃', cat: 'sport', name: 'correr running cardio trotar atletismo series zapatillas' },
+    { emoji: '🚴', cat: 'sport', name: 'bici bicicleta ciclismo ruta spinning pedales btt' },
+    { emoji: '🥊', cat: 'sport', name: 'boxeo saco guante combate sparring artes marciales box' },
+    { emoji: '🏊', cat: 'sport', name: 'natacion piscina nadar agua largos estilo' },
+    { emoji: '🧗', cat: 'sport', name: 'escalada rocodromo montana bloque via arnes' },
+    { emoji: '🥋', cat: 'sport', name: 'artes marciales judo karate tatami bjj cinta kimono' },
+    { emoji: '🏆', cat: 'sport', name: 'trofeo copa ganador premio torneo campeonato primer puesto' },
+    { emoji: '🥇', cat: 'sport', name: 'medalla primero oro campeon record podio victoria' },
+    { emoji: '👟', cat: 'sport', name: 'zapatillas deporte running pasos caminata calzado zpas' },
+    { emoji: '🥤', cat: 'sport', name: 'batido proteina shaker agua hidratacion creatina preentreno prote' },
+    { emoji: '🏐', cat: 'sport', name: 'voleibol voley playa balon red remate' },
+    { emoji: '🛹', cat: 'sport', name: 'skate monopatin rampa truco patinar' },
+
+    // Ocio & Fiestas
+    { emoji: '🎂', cat: 'fun', name: 'tarta cumple cumpleanos fiesta pastel celebracion aniversario velas cumple' },
+    { emoji: '🎉', cat: 'fun', name: 'fiesta confeti celebracion evento fin ano cotillon fiesta' },
+    { emoji: '🎁', cat: 'fun', name: 'regalo sorpresa detalle paquete reyes navidad reyes magos cumpleanos' },
+    { emoji: '🎈', cat: 'fun', name: 'globo fiesta cumple decoracion celebracion' },
+    { emoji: '🍻', cat: 'fun', name: 'cervezas canas bar amigos fiesta beber birras brindis cañas copas' },
+    { emoji: '🍺', cat: 'fun', name: 'cerveza jarra birra bar cana' },
+    { emoji: '🍷', cat: 'fun', name: 'vino copa cena bar bodega tinto blanco copeo' },
+    { emoji: '🍸', cat: 'fun', name: 'copa coctel noche fiesta bar salir discoteca pub' },
+    { emoji: '🍹', cat: 'fun', name: 'tropical zumo mojito verano terraza bebida' },
+    { emoji: '🎬', cat: 'fun', name: 'cine pelicula serie estrenos film rodaje sesion entradas' },
+    { emoji: '🎮', cat: 'fun', name: 'videojuegos consola jugar play partida gaming torneo vicio pc switch xbox' },
+    { emoji: '🎵', cat: 'fun', name: 'musica concierto festival cancion disco escuchar banda directos' },
+    { emoji: '🎤', cat: 'fun', name: 'microfono karaoke concierto cantar show voz micro' },
+    { emoji: '🏖️', cat: 'fun', name: 'playa sol vacaciones verano sombrilla arena mar cala solarium' },
+    { emoji: '⛺', cat: 'fun', name: 'camping tienda acampada naturaleza noche vivac campamento' },
+    { emoji: '🎳', cat: 'fun', name: 'bolos bolera plan partida bolos strike' },
+
+    // Viajes & Rutas
+    { emoji: '✈️', cat: 'travel', name: 'avion vuelo viaje vacaciones aeropuerto destino billete escala despegar' },
+    { emoji: '🚆', cat: 'travel', name: 'tren renfe ave cercanias estacion viaje via vagon billete' },
+    { emoji: '🛵', cat: 'travel', name: 'moto scooter paseo viaje carretera moto' },
+    { emoji: '🚢', cat: 'travel', name: 'barco crucero puerto mar travesia ferry transmediterranea' },
+    { emoji: '🏝️', cat: 'travel', name: 'isla vacaciones palmera paraiso caribe canarias baleares resort' },
+    { emoji: '🏨', cat: 'travel', name: 'hotel alojamiento reserva habitacion hostal recepcion' },
+    { emoji: '🧳', cat: 'travel', name: 'maleta equipaje viaje escapada maletero valija' },
+    { emoji: '🗺️', cat: 'travel', name: 'mapa guia turismo ruta destino navegacion gps' },
+    { emoji: '🎫', cat: 'travel', name: 'ticket entrada billete pase concierto evento acceso taquilla' },
+    { emoji: '⛰️', cat: 'travel', name: 'montana senderismo ruta cumbre naturaleza trekking subida pico' },
+
+    // Avisos & Estudio
+    { emoji: '⚠️', cat: 'alert', name: 'aviso alerta peligro atencion advertencia ojo cuidado atencion' },
+    { emoji: '❗', cat: 'alert', name: 'exclamacion urgente importante atencion prioridad destacar alerta' },
+    { emoji: '🚨', cat: 'alert', name: 'sirena emergencia alarma policial urgencia guardia ambulancia' },
+    { emoji: '🔔', cat: 'alert', name: 'campana notificacion recordatorio aviso alerta sonar aviso' },
+    { emoji: '📢', cat: 'alert', name: 'megafono anuncio comunicado noticia difusion altavoz' },
+    { emoji: '📌', cat: 'alert', name: 'chincheta fijado importante recordar pin marcar chincheta' },
+    { emoji: '💡', cat: 'alert', name: 'bombilla idea solucion ocurrencia proyecto inspiracion luz' },
+    { emoji: '🔑', cat: 'alert', name: 'llave clave acceso entrada casa taquilla abrir cerradura' },
+    { emoji: '🔒', cat: 'alert', name: 'candado bloqueo privado clave seguridad cerrojo proteger' },
+    { emoji: '📝', cat: 'alert', name: 'nota apuntes escribir examen tarea lista borrador redactar' },
+    { emoji: '📅', cat: 'alert', name: 'calendario fecha cita evento plazo entrega agenda dia' },
+    { emoji: '📚', cat: 'alert', name: 'libros estudiar examen biblioteca universidad colegio fp temario libros' },
+    { emoji: '📖', cat: 'alert', name: 'libro leer lectura temario tema abrir pagina repaso' },
+    { emoji: '🎓', cat: 'alert', name: 'graduacion titulo carrera fin curso clase birrete diploma graduado' },
+    { emoji: '📊', cat: 'alert', name: 'grafica estadistica informe evaluacion balance ventas datos' },
+
+    // Emociones & Varios
+    { emoji: '⭐', cat: 'feel', name: 'estrella favorito destacado top nota diez brillar estrella' },
+    { emoji: '🌟', cat: 'feel', name: 'estrella brillo especial magico lucir resplandor' },
+    { emoji: '✨', cat: 'feel', name: 'destellos nuevo limpio brillante magia chispa reluciente' },
+    { emoji: '❤️', cat: 'feel', name: 'corazon rojo amor pareja carino pasion querer' },
+    { emoji: '💖', cat: 'feel', name: 'corazon brillo querer amor bonito ilusion enamorado' },
+    { emoji: '🔥', cat: 'feel', name: 'fuego racha top motivacion a tope calor candela hype fuego' },
+    { emoji: '💤', cat: 'feel', name: 'dormir sueno descanso siesta relax zzz cama dormido' },
+    { emoji: '😴', cat: 'feel', name: 'cansado sueno dormir descansar agotado reventado sobando' },
+    { emoji: '😎', cat: 'feel', name: 'gafas sol guay modo vacaciones crack listo jefe gafas' },
+    { emoji: '🥳', cat: 'feel', name: 'celebracion fiesta contento feliz fiesta confeti fieston' },
+    { emoji: '👍', cat: 'feel', name: 'bien ok hecho pulgar aprobado aceptado correcto listo aprobado' },
+    { emoji: '💪', cat: 'feel', name: 'fuerza animo motivacion brazo poder podemos firme biceps' },
+    { emoji: '🎯', cat: 'feel', name: 'diana objetivo meta conseguido foco pleno centro diana' },
+    { emoji: '☀️', cat: 'feel', name: 'sol buen dia manana calor despejado buen tiempo soleado' },
+    { emoji: '🌧️', cat: 'feel', name: 'lluvia tormenta chubasco paraguas mal tiempo agua lloviendo' },
+    { emoji: '❄️', cat: 'feel', name: 'nieve frio helada invierno copo helado' },
+    { emoji: '🍀', cat: 'feel', name: 'trebol suerte loteria fortuna azar trebol 4 hojas fortuna' },
+    { emoji: '👑', cat: 'feel', name: 'corona rey lider victoria premio ganador reina trono' },
+
+    // Comida & Restaurantes
+    { emoji: '🍕', cat: 'food', name: 'pizza cena comida porcion queso restaurante italiano masa' },
+    { emoji: '🍔', cat: 'food', name: 'hamburguesa burger comida rapida cena patatas carne buey' },
+    { emoji: '🍟', cat: 'food', name: 'patatas fritas snack picoteo tapa bar aperitivo' },
+    { emoji: '🍿', cat: 'food', name: 'palomitas cine pelicula sesion sofa maiz ver peli' },
+    { emoji: '☕', cat: 'food', name: 'cafe desayuno cafeina bar pausa descanso merienda cortado' },
+    { emoji: '🍰', cat: 'food', name: 'tarta pastel dulce postre merienda cumple reposteria' },
+    { emoji: '🍫', cat: 'food', name: 'chocolate tableta dulce capricho cacao bombon' },
+    { emoji: '🍣', cat: 'food', name: 'sushi japones pescado cena asiatico maki niguiri' },
+    { emoji: '🌮', cat: 'food', name: 'taco mexicano comida cena quesadilla nacho fajita' },
+    { emoji: '🍦', cat: 'food', name: 'helado verano postre cucurucho tarrina vainilla chocolate' }
+];
+
+let emojiCatalogCategory = 'all';
+let emojiCatalogSearchQuery = '';
+
+export function openEmojiCatalog() {
+    const modal = document.getElementById('emojiCatalogModal');
+    if (!modal) return;
+
+    emojiCatalogCategory = 'all';
+    emojiCatalogSearchQuery = '';
+    const searchInput = document.getElementById('emojiSearchInput');
+    if (searchInput) searchInput.value = '';
+
+    syncEmojiCategoryTabs();
+    renderEmojiCatalogGrid();
+    modal.classList.add('modal--open');
+
+    if (searchInput) {
+        setTimeout(() => searchInput.focus(), 150);
+    }
+}
+
+export function closeEmojiCatalog() {
+    const modal = document.getElementById('emojiCatalogModal');
+    if (modal) modal.classList.remove('modal--open');
+}
+
+function syncEmojiCategoryTabs() {
+    document.querySelectorAll('#emojiCategoryTabs .emoji-tab-btn').forEach(btn => {
+        btn.classList.toggle('emoji-tab-btn--active', btn.dataset.cat === emojiCatalogCategory);
+    });
+}
+
+function renderEmojiCatalogGrid() {
+    const grid = document.getElementById('emojiCatalogGrid');
+    const countEl = document.getElementById('emojiCatalogCount');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const query = (emojiCatalogSearchQuery || '').toLowerCase().trim();
+    const filtered = EMOJI_CATALOG.filter(item => {
+        const matchesCategory = (emojiCatalogCategory === 'all' || item.cat === emojiCatalogCategory);
+        if (!matchesCategory) return false;
+        if (!query) return true;
+        return item.name.includes(query) || item.emoji.includes(query);
+    });
+
+    if (countEl) {
+        countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'icono' : 'iconos'}`;
+    }
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="emoji-empty-msg">No se encontraron iconos para esa búsqueda. Escribe cualquier emoji libremente en el campo de texto.</div>';
+        return;
+    }
+
+    filtered.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'emoji-grid-btn' + (state.modalSelectedSticker === item.emoji ? ' emoji-grid-btn--active' : '');
+        btn.textContent = item.emoji;
+        btn.title = item.name.split(' ')[0] || item.emoji;
+        btn.addEventListener('click', () => {
+            state.modalSelectedSticker = item.emoji;
+            highlightSelectedSticker();
+            updateLivePreview();
+            closeEmojiCatalog();
+        });
+        grid.appendChild(btn);
+    });
+}
+
 export function initStickerSelector() {
     const list = document.getElementById('stickerList');
+    if (!list) return;
     list.innerHTML = '';
+
     STICKERS.forEach(icon => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'sticker-btn';
         btn.textContent = icon === '' ? '—' : icon;
+        btn.title = icon === '' ? 'Sin icono' : `Icono ${icon}`;
         btn.addEventListener('click', () => {
             state.modalSelectedSticker = icon;
             highlightSelectedSticker();
@@ -389,13 +658,84 @@ export function initStickerSelector() {
         });
         list.appendChild(btn);
     });
+
+    // Campo de texto libre para pegar o escribir cualquier emoji
+    const customInput = document.getElementById('customEmojiInput');
+    if (customInput) {
+        customInput.value = state.modalSelectedSticker || '';
+        customInput.addEventListener('input', (e) => {
+            state.modalSelectedSticker = e.target.value.trim();
+            highlightSelectedSticker();
+            updateLivePreview();
+        });
+    }
+
+    // Botón borrar icono
+    const clearCustomBtn = document.getElementById('btnClearCustomSticker');
+    if (clearCustomBtn) {
+        clearCustomBtn.addEventListener('click', () => {
+            state.modalSelectedSticker = '';
+            if (customInput) customInput.value = '';
+            highlightSelectedSticker();
+            updateLivePreview();
+        });
+    }
+
+    // Botón abrir catálogo completo de iconos
+    const openCatalogBtn = document.getElementById('btnOpenEmojiCatalog');
+    if (openCatalogBtn) {
+        openCatalogBtn.addEventListener('click', openEmojiCatalog);
+    }
 }
 
 function highlightSelectedSticker() {
-    const buttons = document.querySelectorAll('#stickerList .sticker-btn');
+    const list = document.getElementById('stickerList');
+    if (!list) return;
+
+    const current = state.modalSelectedSticker || '';
+    const buttons = list.querySelectorAll('.sticker-btn:not(.sticker-btn--extra)');
+
+    let matchedInDefaults = false;
     STICKERS.forEach((icon, idx) => {
-        if (buttons[idx]) buttons[idx].classList.toggle('sticker-btn--active', state.modalSelectedSticker === icon);
+        const isActive = (current === icon);
+        if (isActive) matchedInDefaults = true;
+        if (buttons[idx]) buttons[idx].classList.toggle('sticker-btn--active', isActive);
     });
+
+    // Si el icono seleccionado es uno libre no incluido en la barra rápida, mostrar botón temporal
+    const existingExtra = list.querySelector('.sticker-btn--extra');
+    if (existingExtra) existingExtra.remove();
+
+    if (current && !matchedInDefaults) {
+        const extraBtn = document.createElement('button');
+        extraBtn.type = 'button';
+        extraBtn.className = 'sticker-btn sticker-btn--extra sticker-btn--active';
+        extraBtn.textContent = current;
+        extraBtn.title = `Icono actual: ${current}`;
+        extraBtn.addEventListener('click', () => {
+            state.modalSelectedSticker = current;
+            highlightSelectedSticker();
+            updateLivePreview();
+        });
+        list.appendChild(extraBtn);
+    }
+
+    // Sincronizar input libre
+    const customInput = document.getElementById('customEmojiInput');
+    if (customInput && customInput.value !== current) {
+        customInput.value = current;
+    }
+
+    // Sincronizar badge de icono activo
+    const badge = document.getElementById('activeStickerBadge');
+    if (badge) {
+        if (current) {
+            badge.style.display = 'inline-flex';
+            badge.textContent = `Icono: ${current}`;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
 }
 
 export function initDayQuickPalette() {
@@ -1000,5 +1340,38 @@ export function bindCalendarEvents() {
             triggerRenderAll();
             closeDayModal();
         }
+    });
+
+    // Eventos del modal Catálogo de Iconos
+    const closeEmojiBtn = document.getElementById('btnCloseEmojiCatalog');
+    if (closeEmojiBtn) closeEmojiBtn.addEventListener('click', closeEmojiCatalog);
+
+    const closeEmojiBottomBtn = document.getElementById('btnCloseEmojiCatalogBottom');
+    if (closeEmojiBottomBtn) closeEmojiBottomBtn.addEventListener('click', closeEmojiCatalog);
+
+    const removeEmojiBtn = document.getElementById('btnRemoveStickerFromCatalog');
+    if (removeEmojiBtn) {
+        removeEmojiBtn.addEventListener('click', () => {
+            state.modalSelectedSticker = '';
+            highlightSelectedSticker();
+            updateLivePreview();
+            closeEmojiCatalog();
+        });
+    }
+
+    const emojiSearchInput = document.getElementById('emojiSearchInput');
+    if (emojiSearchInput) {
+        emojiSearchInput.addEventListener('input', (e) => {
+            emojiCatalogSearchQuery = e.target.value;
+            renderEmojiCatalogGrid();
+        });
+    }
+
+    document.querySelectorAll('#emojiCategoryTabs .emoji-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            emojiCatalogCategory = btn.dataset.cat;
+            syncEmojiCategoryTabs();
+            renderEmojiCatalogGrid();
+        });
     });
 }

@@ -79,6 +79,7 @@ export const state = {
     tasks: [],
     taskFilter: 'ALL',
     taskUrgentDraft: false,
+    taskPriorityDraft: 'medium',
     notes: [],
     selectedNoteColor: 'emerald',
     notesSearch: '',
